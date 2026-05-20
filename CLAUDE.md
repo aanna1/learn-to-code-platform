@@ -15,6 +15,8 @@ refactor.
 - Full spec: `docs/Claude Code Prompt.md` (the authoritative brief).
 - Lesson-plan source for later content phases: `curriculum/` (Modules 01–14 =
   fundamentals; Tiers 1–5 = advanced, currently OUT of scope).
+- Curriculum→platform conversion context (read before converting lessons):
+  `docs/curriculum-conversion-context.md`.
 - Repo: https://github.com/aanna1/learn-to-code-platform (private, account `aanna1`).
 
 ## Tech stack
@@ -293,11 +295,28 @@ gone). This was the last planned phase — the Python build is feature-complete.
   static export, the hamburger button + `hidden md:flex` desktop links in exported HTML, and
   that `/dev/ide` is no longer exported.
 
-## Project status: feature-complete
+## Current focus: converting the real curriculum (in progress)
 
-All six phases are done. Possible follow-ups (none planned): real curriculum content beyond
-the 3 seed lessons (from the external lesson plans — see `curriculum/`), a second language to
-exercise the abstraction, and a live browser QA pass of the interactive runtime + nav.
+All six build phases are done and the Python build is feature-complete. The live work now is
+**replacing the 3 seed lessons with the real curriculum** (`curriculum/` Modules 01–14). The
+**user is authoring** the converted lessons; this session's role is gap analysis + review.
+
+Full handoff context: `docs/curriculum-conversion-context.md`. The gap, in brief — the
+curriculum docs are **lectures only** (no graded exercises; the referenced "curriculum doc"
+of exercises does not exist in the repo), **one mega-doc per module** (the platform wants a
+trimmed lecture lesson + several exercise lessons), lead with a duplicate `# Module N` H1
+(the renderer already prints the lesson title), use a **predict-then-reveal `<details>`**
+pattern + raw Markdown that isn't valid MDX (bare `{ } < >` break the build), and assume a
+**laptop environment** — local install, terminal, `python file.py`, a nonexistent "Module 0",
+and especially Module 10 (`pip`/`venv`/third-party `requests`), Module 11 (real-file
+`open()` ×31), Module 14 (terminal `pytest`) — none of which exist in the browser runtime.
+Conversion = re-map into the lesson-bundle tree, translate interactivity to
+`<Runnable>`/`quiz.json`, author the missing exercises/quizzes, re-root env assumptions to
+"press Run." Review checklist when lessons come back: valid MDX, the `test_*` grading
+convention, quiz schema, and browser-context fit.
+
+Other possible follow-ups (not active): a second language to exercise the abstraction; a live
+browser QA pass of the interactive runtime + nav.
 
 ## Known warnings (benign)
 
