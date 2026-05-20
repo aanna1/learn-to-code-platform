@@ -1,0 +1,150 @@
+A quick reference for the Python you'll use most often. Skim it, copy from it, keep it open in another tab while you work through the lessons.
+
+## Variables and types
+
+```python
+name = "Ada"        # str   - text, always in quotes
+age = 9             # int   - whole number
+price = 4.99        # float - decimal number
+is_ready = True     # bool  - True or False
+nothing = None      # None  - the "no value" value
+
+type(age)           # what type is this? -> int
+int("42")           # text to number -> 42
+str(42)             # number to text -> "42"
+float("3.14")       # text to decimal -> 3.14
+```
+
+## Control flow
+
+```python
+if age >= 18:
+    print("adult")
+elif age >= 13:
+    print("teen")
+else:
+    print("child")
+
+# repeat while a condition holds
+count = 0
+while count < 3:
+    print(count)
+    count += 1          # shorthand for count = count + 1
+
+# repeat a fixed number of times
+for i in range(5):      # 0, 1, 2, 3, 4
+    print(i)
+
+# loop over the items of a list or string
+for letter in "hi":
+    print(letter)
+```
+
+## String methods
+
+```python
+s = "Hello, World"
+s.lower()             # "hello, world"
+s.upper()             # "HELLO, WORLD"
+s.strip()             # remove surrounding whitespace
+s.replace("l", "L")   # "HeLLo, WorLd"
+s.split(", ")         # ["Hello", "World"]
+"-".join(["a", "b"])  # "a-b"
+s.startswith("He")    # True
+s.find("World")       # index where it starts -> 7
+len(s)                # number of characters -> 12
+f"Age: {age}"         # f-string: drop a value straight into text
+```
+
+## List operations
+
+```python
+nums = [3, 1, 2]
+nums.append(4)        # add to the end -> [3, 1, 2, 4]
+nums.insert(0, 9)     # insert at index -> [9, 3, 1, 2, 4]
+nums.pop()            # remove & return the last item
+nums.remove(1)        # remove the first matching value
+nums.sort()           # sort in place (smallest first)
+nums[0]               # first item
+nums[-1]              # last item
+nums[1:3]             # a slice: items at index 1 and 2
+3 in nums             # is 3 present? -> True
+len(nums)             # how many items
+```
+
+## Dictionary operations
+
+```python
+person = {"name": "Ada", "age": 9}
+person["name"]            # look up a value -> "Ada"
+person["city"] = "London" # add or update a key
+person.get("email")       # None if the key is missing (no error)
+person.keys()             # all the keys
+person.values()           # all the values
+"age" in person           # is this key present? -> True
+
+for key, value in person.items():
+    print(key, value)
+```
+
+## Common built-in functions
+
+```python
+print("hi")              # display output
+len(x)                   # length of a string, list, or dict
+range(5)                 # the numbers 0..4, usually with a for loop
+input("Name? ")          # read a line the user types (always text)
+int(x) / float(x) / str(x)   # convert between types
+sum([1, 2, 3])           # 6
+min([3, 1, 2])           # 1
+max([3, 1, 2])           # 3
+sorted([3, 1, 2])        # a new sorted list -> [1, 2, 3]
+abs(-4)                  # 4
+round(3.14159, 2)        # 3.14
+```
+
+## Basic file input/output
+
+```python
+# write text to a file (overwrites it)
+with open("notes.txt", "w") as f:
+    f.write("first line\n")
+
+# read the whole file at once
+with open("notes.txt") as f:
+    text = f.read()
+
+# read it one line at a time
+with open("notes.txt") as f:
+    for line in f:
+        print(line.strip())
+```
+
+<Callout type="note">
+In this browser-based platform, files live in a temporary in-memory filesystem that resets
+between runs. It's perfect for practising `open()`, reading, and writing — just know that
+nothing is saved to your real computer.
+</Callout>
+
+## Basic error handling
+
+```python
+try:
+    age = int(input("Age? "))   # may raise ValueError
+    print(100 / age)            # may raise ZeroDivisionError
+except ValueError:
+    print("That wasn't a whole number.")
+except ZeroDivisionError:
+    print("Age can't be zero.")
+finally:
+    print("All done.")          # runs no matter what
+```
+
+You can also signal your own errors when something is wrong:
+
+```python
+def set_age(value):
+    if value < 0:
+        raise ValueError("age must not be negative")
+    return value
+```

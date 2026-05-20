@@ -37,10 +37,12 @@ Phases follow the brief's "Suggested Workflow":
 4. **Seed lessons** (the 3 from the brief) + end-to-end wire-up. ✅ DONE (folded into Phase 3 —
    the renderer/loader are untestable with no content, so the 3 seed lessons were authored
    alongside them as the validation fixture).
-5. **Homepage + course outline + cheat sheet** (polished). ← **NEXT** (a *functional* outline
-   page already exists from Phase 3; Phase 5 is the polished homepage, outline, and the
-   not-yet-built cheat sheet).
+5. **Homepage + course outline + cheat sheet** (polished). ✅ DONE
 6. **Polish**: theme, mobile (hide IDE < 768px), shortcuts overlay, README, deploy docs.
+   ← **NEXT**. Note: the light/dark **theme toggle UI was pulled forward into Phase 5** (the
+   global nav needed it). Remaining Phase 6: mobile nav (hamburger — the nav is currently
+   simple horizontal links), README, static-host deploy docs (COOP/COEP), remove the temp
+   `/dev/ide` route. Mobile IDE-hide (Phase 3) and the shortcuts overlay (Phase 2) are done.
 
 ## Decisions locked in (from kickoff Q&A)
 
@@ -214,15 +216,57 @@ Built the generic content loader, the MDX compile path, both lesson layouts, the
   Runnable's seeded code, the quiz, mark-complete, the exercise prompt, and the mobile
   fallback.
 
-## Next session: Phase 5 (polished homepage, outline, cheat sheet)
+## Phase 5 — COMPLETE (polished homepage, outline, cheat sheet, global nav)
 
-1. Polish the homepage (`src/app/page.tsx`) — hero copy, nav (Home + registry-driven
-   Languages), theme toggle (Phase 6 owns the toggle UI, coordinate).
-2. Polish the course-outline page / `CourseOutlineView` (a functional version exists).
-3. Build the cheat sheet: route `src/app/cheatsheet/[language]/page.tsx` + content
-   `src/content/languages/python/cheatsheet.mdx` (reuse `compileMdx` + `mdxComponents`). The
-   IDE already links to `/cheatsheet/<lang>` (currently a dead link until this lands).
-4. Consider a shared top nav/`SiteHeader`; remove the temp `/dev/ide` route when ready.
+`npm run typecheck` clean; `npm run build` exports 10 routes including the new
+`/cheatsheet/python`. Browser-verified by the user after Phase 3; Phase 5 adds the chrome.
+
+### What exists now (Phase 5)
+
+- **Global nav** — `src/components/nav/SiteHeader.tsx` (server), mounted in the root layout
+  on every page. Registry-driven: brand → `/`, one link per language → `/learn/<id>`, and a
+  "Cheat sheet" link **only while exactly one language is registered** (it's per-language;
+  with several, each course outline links its own — keeps the global header from hardcoding a
+  language). Fixed `h-14` / `3.5rem`, `sticky top-0`.
+- **Theme toggle** — `src/components/nav/ThemeToggle.tsx` (client), in the nav. Uses
+  `useTheme().toggleTheme`. Renders a neutral placeholder until mounted, then sun/moon, to
+  avoid a hydration mismatch (server can't read the saved theme). **This was Phase 6 work,
+  pulled forward** because the nav needed it.
+- **Homepage** — `src/app/page.tsx` rewritten: hero + CTA (to the first registered
+  language's course + its cheat sheet), a 3-step "how it works" strip, and the
+  registry-driven language-card grid. No hardcoded language.
+- **Cheat sheet** — route `src/app/cheatsheet/[language]/page.tsx` (async server,
+  `generateStaticParams` over the registry) + content
+  `src/content/languages/python/cheatsheet.mdx` (the 8 brief sections) + loader
+  `getCheatsheet(languageId)`. Reuses `compileMdx` + `mdxComponents`, wrapped in
+  `LessonLanguageProvider` so any `<Runnable>` in it works.
+- **Outline polish** — `CourseOutlineView` gained a per-language cheat-sheet link and a
+  completion progress bar (`completedCount / totalLessons`, read client-side).
+
+### Phase 5 decisions / facts
+
+- **Layout interaction with the fixed header**: the global header reserves `3.5rem`. The
+  full-height exercise lesson layout was changed from `md:h-screen` to
+  `md:h-[calc(100vh-3.5rem)]` so the IDE fills exactly the space below the header. If the
+  header height ever changes, update that calc.
+- **SSR text split**: interpolated text like `Start with {name}` renders as
+  `Start with <!-- -->Python` in the static HTML (a React text-boundary comment) — that's
+  normal, not a bug; grep with the literal full string will "miss" it.
+- **NOT browser-verified this phase** (no browser here): verified typecheck, static export of
+  all 10 routes, and that exported HTML contains the homepage hero/CTA, the global header +
+  theme toggle on every page, all 8 cheat-sheet sections, and the outline progress bar. The
+  theme toggle's live light/dark switch and nav interactions still want a real browser pass.
+
+## Next session: Phase 6 (final polish + docs)
+
+1. **Mobile nav**: the header is simple horizontal links; the brief wants a hamburger menu
+   under ~768px. Add a collapsible menu (the links are already registry-driven).
+2. **README** + **deploy docs**: how to build/run, and the COOP/COEP header requirement per
+   static host (Vercel via `vercel.json` is done; document GitHub Pages / Netlify / plain
+   static — without isolation, code runs but interactive `input()` yields EOF).
+3. **Remove the temp `/dev/ide` route** (Phase 2 harness) once the real lessons are the
+   demo path.
+4. Final theme/mobile/spacing pass across all pages.
 
 ## Known warnings (benign)
 

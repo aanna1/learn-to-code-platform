@@ -53,6 +53,11 @@ function byOrder<T extends { order: number }>(items: readonly T[]): T[] {
   return [...items].sort((a, b) => a.order - b.order);
 }
 
+/** Raw cheatsheet.mdx for a language (compiled by the cheat-sheet route). */
+export function getCheatsheet(languageId: string): string {
+  return readText(join(contentRoot(languageId), "cheatsheet.mdx"));
+}
+
 /** Read and parse course.json for a language. Modules come back in display order. */
 export function getCourse(languageId: string): Course {
   const course = readJson<Course>(join(contentRoot(languageId), "course.json"));

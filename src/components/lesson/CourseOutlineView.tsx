@@ -37,16 +37,51 @@ export function CourseOutlineView({ languageId, course, modules }: CourseOutline
     return lesson?.title ?? null;
   })();
 
+  const totalLessons = modules.reduce((n, m) => n + m.lessons.length, 0);
+  const completedCount = modules.reduce(
+    (n, m) => n + m.lessons.filter((l) => completed.has(`${m.id}/${l.id}`)).length,
+    0,
+  );
+  const percent = totalLessons === 0 ? 0 : Math.round((completedCount / totalLessons) * 100);
+
   let lessonNumber = 0;
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
-      <Link href="/" className="text-sm text-muted hover:text-text">
-        ← All languages
-      </Link>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{course.displayName}</h1>
+          <p className="mt-2 max-w-prose text-muted">{course.tagline}</p>
+        </div>
+        <Link
+          href={`/cheatsheet/${languageId}`}
+          className="shrink-0 rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-text transition hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          Cheat sheet
+        </Link>
+      </div>
 
-      <h1 className="mt-4 text-3xl font-bold tracking-tight">{course.displayName}</h1>
-      <p className="mt-2 max-w-prose text-muted">{course.tagline}</p>
+      <div className="mt-6">
+        <div className="flex items-center justify-between text-sm text-muted">
+          <span>Your progress</span>
+          <span>
+            {completedCount} of {totalLessons} complete
+          </span>
+        </div>
+        <div
+          className="mt-1.5 h-2 overflow-hidden rounded-full bg-surface-raised"
+          role="progressbar"
+          aria-valuenow={percent}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Course completion"
+        >
+          <div
+            className="h-full rounded-full bg-accent transition-[width] duration-500"
+            style={{ width: `${percent}%` }}
+          />
+        </div>
+      </div>
 
       {lastVisited && continueTitle ? (
         <Link

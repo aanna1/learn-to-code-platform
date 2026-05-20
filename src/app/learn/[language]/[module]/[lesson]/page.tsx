@@ -118,7 +118,7 @@ export default async function LessonPage({ params }: PageProps) {
   const Prompt = await compileMdx(exercise.promptMdxSource);
 
   return (
-    <div className="flex flex-col md:h-screen md:overflow-hidden">
+    <div className="flex flex-col md:h-[calc(100vh-3.5rem)] md:overflow-hidden">
       <header className="shrink-0 border-b border-border px-4 py-2.5">
         <div className="mx-auto flex max-w-6xl items-center gap-4">
           <Link
