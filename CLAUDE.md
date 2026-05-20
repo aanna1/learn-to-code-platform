@@ -32,8 +32,8 @@ Phases follow the brief's "Suggested Workflow":
 1. **Scaffold + language abstraction** ✅ DONE
 2. **IDE in isolation** on a temp `/dev/ide` route — Monaco + xterm + resizable split,
    Run (Pyodide + interactive `input()`), Submit (hidden tests), Ruff linting, friendly
-   errors, hints, reset, autosave, keyboard shortcuts + overlay. ← **NEXT**
-3. **Lesson renderer** (both layouts) + generic content loader + quiz + inline `<Runnable>`.
+   errors, hints, reset, autosave, keyboard shortcuts + overlay. ✅ DONE
+3. **Lesson renderer** (both layouts) + generic content loader + quiz + inline `<Runnable>`. ← **NEXT**
 4. **Seed lessons** (the 3 from the brief) + end-to-end wire-up.
 5. **Homepage + course outline + cheat sheet** (polished).
 6. **Polish**: theme, mobile (hide IDE < 768px), shortcuts overlay, README, deploy docs.
@@ -94,21 +94,71 @@ by the language registry. `npm run build` produces a working static export in `o
 - Pyodide/Monaco/Ruff load **lazily**, only on pages that need them.
 - All localStorage access goes through `src/lib/progress`.
 
-## Next session: start Phase 2 (IDE on `/dev/ide`)
+## Phase 2 — COMPLETE (IDE on `/dev/ide`)
 
-1. Add deps: `@monaco-editor/react`, `xterm` (+ `xterm-addon-fit`), Pyodide loader,
-   `@astral-sh/ruff-wasm-web` (or closest working equivalent).
-2. Implement `python/runtime.ts` for real: load Pyodide from CDN (idempotent), capture
-   stdout/stderr to callbacks, and pause on `input()` — the hard part. The COOP/COEP
-   headers (already configured in `next.config.mjs` for dev and `vercel.json` for prod)
-   support a worker + SharedArrayBuffer approach; use whichever yields the cleanest
-   interactive terminal. Also implement `runTests()` (run user code + tests.py, collect
-   per-case results).
-3. Implement `python/linter.ts` (Ruff → `Diagnostic[]` for the Monaco gutter).
-4. Build IDE components under `src/components/ide/` (editor + terminal + resizable split,
-   Run/Submit, hints, reset-with-confirm, friendly-error callout via `errorExplainer`,
-   keyboard shortcuts + overlay) and mount them on a temporary `src/app/dev/ide/page.tsx`
-   with a hardcoded exercise to validate end-to-end (incl. interactive input).
+Built the full IDE and mounted it on the temp route `/dev/ide` (exported as
+`out/dev/ide.html`). Typecheck + static build are green.
+
+### What exists now (Phase 2)
+
+- **Real Pyodide runtime** — `src/lib/languages/python/`:
+  - `pyodide.worker.ts` — web worker. Loads Pyodide from jsDelivr CDN via `importScripts`,
+    streams stdout/stderr (raw byte writes, so unflushed `input()` prompts show), and
+    implements synchronous `input()` by blocking the worker on `Atomics.wait` over a
+    SharedArrayBuffer until the main thread writes a line. Has a JSON test runner
+    (`test_*` functions; uses each function's docstring as the friendly name) and parses
+    Python errors into `{type, message, traceback}`.
+  - `runtimeProtocol.ts` — shared constants (Pyodide version `0.26.4`, SAB layout, status
+    codes) + worker message types.
+  - `runtime.ts` — main-thread adapter (replaces the Phase 1 shell). Owns the worker +
+    SABs, serializes operations, routes input() to `onInput`, supports cancel (interrupt
+    buffer for CPU-bound loops; cancel status for input waits; worker terminate when not
+    isolated). Browser APIs touched only inside methods, so still server-import-safe.
+  - `linter.ts` — real Ruff adapter (`@astral-sh/ruff-wasm-web`, dynamically imported);
+    maps findings to `Diagnostic[]`.
+- **IDE components** — `src/components/ide/`: `CodeEditor.tsx` (Monaco via
+  `@monaco-editor/react`, diagnostics→markers, themes, Ctrl/Cmd+Enter / +Shift+Enter),
+  `Terminal.tsx` (xterm + fit, line-editing `readLine()` for interactive input),
+  `ResizableSplit.tsx` (draggable + keyboard-accessible separator), `Ide.tsx` (orchestrator:
+  Run/Submit/Stop/Reset/Hints/Solution/Shortcuts + autosave + loading states), plus
+  `ErrorCallout.tsx`, `TestResults.tsx`, `ShortcutsOverlay.tsx`.
+- **UI primitives** — `src/components/ui/`: `Button.tsx` (focus ring, hover/active,
+  loading=disabled), `Spinner.tsx`, `Modal.tsx` (Esc + focus trap + restore focus, portal).
+- **Reusable IDE API**: `<Ide languageId exercise={{starter,solution,tests,hints}} autosave? onAllTestsPassed? />`.
+  It looks the language up from the registry, so callers pass only serializable props —
+  ready to drop into Phase 3 exercise lessons.
+
+### Phase 2 decisions / facts
+
+- **COEP path verified**: jsDelivr serves `access-control-allow-origin: *` AND
+  `cross-origin-resource-policy: cross-origin`, so Pyodide (and Monaco, pinned to
+  `monaco-editor@0.52.2` on jsDelivr) load under our `require-corp` policy. No
+  `credentialless` or self-hosting needed.
+- **Test convention** (Phase 4 seed exercises must follow): `tests.py` defines `test_*()`
+  functions that call the user's code and `assert`; the first docstring line is the shown
+  name. Interactive/demo code in an exercise's starter/solution goes under
+  `if __name__ == "__main__":` — the test runner sets `__name__` to a non-`"__main__"`
+  value so that block is skipped during Submit (avoids `input()` EOF crashes).
+- **NOT browser-verified**: this environment has no browser, so the interactive runtime
+  (actual Pyodide run, SAB-blocked `input()`, Monaco/xterm rendering, Ruff markers) was NOT
+  click-tested. What WAS verified: typecheck, static build, worker chunk emitted, route
+  serves with COOP/COEP headers, and the **Python test-harness logic headlessly via the
+  `pyodide` npm package in Node** (pass/fail/syntax-error/`__main__`-guard all correct).
+  **The user should open `/dev/ide` in a browser to confirm the live IDE behavior.**
+
+## Next session: start Phase 3 (lesson renderer + content loader)
+
+1. Implement the content loader (`src/lib/content/loader.ts`, currently Phase-3 stubs):
+   fs+JSON reads for course.json/module.json; load `lecture.mdx`/`prompt.mdx` + `.py` +
+   quiz.json/hints.json. Decide MDX compile strategy (e.g. `next-mdx-remote` or compiling
+   with `@mdx-js/mdx`) — these run at build time in server components for static export.
+2. Build the lesson renderer (`src/app/learn/[language]/[module]/[lesson]/page.tsx`) with
+   `generateStaticParams` from the registry + content. Two layouts: lecture (MDX + inline
+   `<Runnable>` + end-of-lecture quiz + mark-complete) and exercise (prompt + `<Ide>`).
+3. Build the inline `<Runnable>` MDX component (reuses `language.runtime.run`, no tests),
+   the quiz component (from quiz.json, contributes to completion via `src/lib/progress`),
+   and MDX custom components.
+4. Wire completion + last-visited through `src/lib/progress` (already implemented).
 
 ## Known warnings (benign)
 
@@ -119,7 +169,13 @@ by the language registry. `npm run build` produces a working static export in `o
   They don't ship in the static output. Don't `npm audit fix --force` (breaks majors).
 - The three folders `agent-skills/`, `skills/`, `ui-ux-pro-max-skill/` are unrelated
   Claude Code skill repos that happen to live in this directory — gitignored, not part of
-  this project. Leave them alone.
+  this project. Leave them alone. (They contain useful design/Vercel guidance used while
+  building the UI: `ui-ux-pro-max-skill` has a Python search CLI; `agent-skills` has Vercel
+  React best-practices + deploy skills; `skills` has `frontend-design`.)
+- The IDE needs the page to be **cross-origin isolated** (COOP/COEP) for interactive
+  `input()`, and needs network access to jsDelivr (Pyodide + Monaco). On a host without
+  isolation, code still runs but `input()` yields EOF and Stop falls back to terminating
+  the worker.
 
 ## Commands
 

@@ -10,9 +10,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@astral-sh/ruff-wasm-web": "^0.15.13",
     "@mdx-js/loader": "^3.1.0",
     "@mdx-js/react": "^3.1.0",
+    "@monaco-editor/react": "^4.7.0",
     "@next/mdx": "^14.2.18",
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/xterm": "^5.5.0",
+    "monaco-editor": "^0.52.2",
     "next": "^14.2.18",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
@@ -26,6 +31,7 @@
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.18",
     "postcss": "^8.4.38",
+    "pyodide": "^0.26.4",
     "tailwindcss": "^3.4.4",
     "typescript": "^5.4.5"
   }
