@@ -1,0 +1,385 @@
+# Module 1: First Programs — Print, Comments, Variables, Types
+
+## Why this matters
+
+Everything you'll ever build in Python — calculators, web servers, video games, machine learning models — comes back to two things: storing values, and doing things with those values. Module 1 is where you learn the bare minimum: how to put a value somewhere, give it a name, and show it on the screen.
+
+That sounds small. It is small. But here's the part that surprises new programmers: this small set of moves is roughly 40% of what you'll be doing for the rest of your time in Python. Reading a file? You're storing its contents in a variable. Calling an API? You're storing the response in a variable. Doing math? You're storing the result. The whole language is essentially *make boxes, put stuff in them, do things to the stuff, look at the stuff.*
+
+So we're going to learn the boxes today. We'll also learn how to show what's in them, because a program that computes the right answer but doesn't tell you what it is might as well not have run.
+
+By the end of this lecture, you'll have written code that holds onto a handful of facts about a person and prints out a small summary. It's a tiny program. It's also more or less the shape of every program that ever does anything useful.
+
+## What you'll be able to do by the end
+
+- Call the `print()` function to display text and values on the screen.
+- Use comments to document your code for the humans who will read it later, including future-you.
+- Create variables and assign values to them following Python's naming rules and conventions.
+- Recognize and use Python's four foundational data types: strings, integers, floats, and booleans.
+- Embed variables inside formatted text using f-strings.
+- Read a simple Python program and predict what it will print before running it.
+
+## Prerequisites
+
+You should have a working Python installation, an editor or IDE (VS Code or PyCharm), and have successfully run your first `hello.py` script from Module 0. If "open a terminal, navigate to a folder, and run `python filename.py`" sounds like a foreign sentence, go back to Module 0 — none of this lecture will work until that mechanical bit is solid.
+
+You don't need any prior programming experience. If you've seen variables in algebra class (`x = 5`), you already have one foot in.
+
+## Core concepts
+
+### Starting with `print()`
+
+The simplest thing a Python program can do is print something. We saw this in Module 0:
+
+```python
+print("Hello, world!")
+```
+
+Three pieces are doing real work here. `print` is the *name* of a built-in function — code that Python already has available, ready to use. The parentheses `(` and `)` are how you *call* a function in Python; calling a function means "do the thing this function does." And the stuff inside the parentheses — the *arguments* — is what you're giving the function to work with. `print` takes whatever you hand it and displays it on the screen.
+
+The thing we're handing it here is `"Hello, world!"` — a *string*. A string is just text. Python recognizes it as text because of the quotation marks wrapped around it.
+
+You can use either double quotes or single quotes:
+
+```python
+print("Hello, world!")
+print('Hello, world!')
+```
+
+Both work. They produce identical output. Pick one and use it consistently — Python doesn't care, but a codebase that mixes them at random feels unkempt. Most Python style guides lean toward double quotes; that's what we'll use throughout this curriculum.
+
+There's one situation where the choice matters: when the string itself contains a quote.
+
+```python
+print("She said 'hello'")   # works
+print('She said "hello"')   # works
+print("She said "hello"")   # broken — Python thinks the string ends after "said "
+```
+
+If your string contains a double quote, wrap it in single quotes. Or vice versa. (In Module 3 we'll see a third option: escaping the quote with a backslash.)
+
+You can also call `print` with no arguments to print a blank line:
+
+```python
+print("Above the blank line")
+print()
+print("Below the blank line")
+```
+
+Useful for breaking up output.
+
+### Comments — notes to humans
+
+Python programs are read by Python (the interpreter that runs them) and by humans (you, your collaborators, your future self three months from now who has forgotten how the code works). Most of what you write is for both audiences. Comments are exclusively for the humans — Python ignores them entirely.
+
+```python
+# This is a comment. Python skips this line.
+print("This line actually runs.")  # Comments can also sit at the end of a line.
+```
+
+A `#` and everything after it on that line is invisible to Python. Use comments for:
+
+- Explaining *why* a piece of code exists, when "why" isn't obvious from "what."
+- Marking sections of a longer file.
+- Leaving reminders (`# TODO: handle the case where the file is empty`).
+- Temporarily disabling a line of code without deleting it, while you experiment.
+
+What comments aren't for: restating the obvious.
+
+```python
+# Print the greeting        <- bad comment; the next line obviously prints a greeting
+print("Hello!")
+
+# Default to UTC because users are scattered across time zones   <- good; explains why
+timezone = "UTC"
+```
+
+If you find yourself writing many comments to explain what each line does, that's often a sign the code itself could be clearer.
+
+### Variables — boxes with names
+
+A variable is a labeled container for a value. You make one by writing a name, an equals sign, and a value:
+
+```python
+name = "Ada"
+```
+
+The line above does two things at once. It creates a string `"Ada"`, and it creates a label `name` that points at it. From this point forward in the program, `name` and `"Ada"` are interchangeable — wherever you write `name`, Python looks up what it's pointing at and uses that instead.
+
+```python
+name = "Ada"
+print(name)         # prints: Ada
+print("name")       # prints: name
+```
+
+That second line trips up nearly every new programmer. `name` (no quotes) is a reference to the variable. `"name"` (with quotes) is just the literal four-character string `n`, `a`, `m`, `e`. Python has no way to know you meant the variable when you wrap it in quotes — quotes mean "this is text, not code."
+
+You can reassign a variable to a new value at any time:
+
+```python
+name = "Ada"
+print(name)       # Ada
+name = "Grace"
+print(name)       # Grace
+```
+
+The `=` sign in Python is *assignment*, not equality. It doesn't mean "name equals Ada" in the math sense; it means "make `name` point at the value `'Ada'`." Reading it left-to-right ("name gets Ada") often helps it click.
+
+**Try it:** Predict what each of these prints *before* running it. Then run the code to check.
+
+```python
+city = "Austin"
+state = "Texas"
+print(city)
+print("city")
+print(f"{city}, {state}")
+```
+
+<details>
+<summary>Answer</summary>
+
+```
+Austin
+city
+Austin, Texas
+```
+
+The first prints the value of the variable `city`. The second prints the literal four-character string `"city"`. The third uses an f-string (we'll get to those in a moment) to substitute both variables into formatted text. If you predicted the second line would print "Austin" because of the quotes, that's the most common confusion — quotes mean "literal text," not "use the variable."
+
+</details>
+
+### Naming variables
+
+Python has rules and conventions for variable names. The rules are what Python enforces; the conventions are what other Python programmers expect.
+
+**The rules** (Python will reject anything that violates these):
+
+- Names can contain letters, digits, and underscores.
+- Names cannot start with a digit. `name1` is fine; `1name` is a syntax error.
+- Names are case-sensitive. `name`, `Name`, and `NAME` are three different variables.
+- You cannot use a Python *reserved word* as a name. `if`, `for`, `while`, `class`, `True`, `False`, `None`, `return`, and a few dozen others are off-limits because Python already uses them for something.
+
+**The conventions** (other Python programmers will judge you for violating these):
+
+- Use `snake_case` for variable names: lowercase words separated by underscores. `first_name`, `total_count`, `is_student`.
+- Choose names that describe what the value *is*, not what type it is. `customer` is better than `customer_string`. `age` is better than `age_int`.
+- Avoid single-letter names except in narrow contexts (loop counters like `i`, mathematical variables like `x`). `name` is better than `n`; `total` is better than `t`.
+- If you have to pick between a longer-but-clearer name and a shorter-but-cryptic one, pick longer.
+
+A name's job is to tell the reader what's in the box. The two seconds you save by typing `cn` instead of `customer_name` will be paid back tenfold by the next person — possibly you — who reads the code and has to figure out what `cn` means.
+
+**Try it:** Each of these variable names is invalid. Identify why for each.
+
+```python
+1st_place = "Alice"
+my-name = "Bob"
+class = "history"
+total$ = 100
+```
+
+<details>
+<summary>Answer</summary>
+
+- `1st_place` starts with a digit. Not allowed.
+- `my-name` contains a hyphen, which Python interprets as the subtraction operator. Use `my_name`.
+- `class` is a reserved word. Use `class_name` or `course`.
+- `total$` contains `$`, which isn't a letter, digit, or underscore. Use `total_dollars` or just `total`.
+
+</details>
+
+### The four foundational types
+
+Python has many built-in types, but at the start, four are doing 90% of the work.
+
+**Strings (`str`)** are text. Anything wrapped in quotes is a string.
+
+```python
+greeting = "Hello"
+name = "Ada"
+empty = ""             # an empty string is still a valid string
+mixed = "I'm 25!"      # strings can contain letters, digits, punctuation, anything
+```
+
+**Integers (`int`)** are whole numbers — positive, negative, or zero. No quotes, no decimal point.
+
+```python
+age = 25
+temperature = -10
+count = 0
+big_number = 1_000_000   # underscores can be used as thousands separators for readability
+```
+
+**Floats (`float`)** are numbers with a decimal point.
+
+```python
+height_m = 1.7
+price = 9.99
+pi_approx = 3.14
+```
+
+Even `3.0` is a float, not an integer — the decimal point is what makes it one. `3` and `3.0` are the same number mathematically but different *types* in Python, and that distinction matters in places we'll see in Module 2.
+
+**Booleans (`bool`)** have exactly two possible values: `True` and `False`. Used to represent yes/no, on/off, present/absent. Capitalization matters: it must be `True` with a capital T, not `true` or `TRUE`.
+
+```python
+is_student = True
+has_pet = False
+```
+
+You can check what type a value has with the built-in `type()` function:
+
+```python
+print(type("hello"))   # <class 'str'>
+print(type(25))        # <class 'int'>
+print(type(1.7))       # <class 'float'>
+print(type(True))      # <class 'bool'>
+```
+
+The output looks a bit unfriendly — `<class 'str'>` is more verbose than necessary — but you'll mostly use `type()` for debugging when something isn't behaving the way you expect.
+
+The difference between `"25"` (a string) and `25` (an integer) matters more than you might think. They look identical when printed, but they behave completely differently when you try to do math or comparisons with them. We'll come back to this in the checkpoint and beat it into the ground in Module 2.
+
+### f-strings — putting variables into text
+
+You'll constantly want to mix variables and text:
+
+```python
+name = "Ada"
+age = 25
+```
+
+Now you want to print: *Ada is 25 years old.*
+
+The clunky way to do this is concatenation, which we'll see briefly in Module 3. The clean way — and the way modern Python code does it — is an **f-string**:
+
+```python
+print(f"{name} is {age} years old.")
+```
+
+The `f` before the opening quote tells Python *this is a formatted string*. Inside, anything wrapped in curly braces `{}` is evaluated as code and substituted into the string. Everything outside the curly braces is treated as ordinary text.
+
+```python
+name = "Ada"
+age = 25
+
+print(f"Hello, {name}.")                  # Hello, Ada.
+print(f"You are {age} years old.")        # You are 25 years old.
+print(f"{name} will be {age + 1} next.")  # Ada will be 26 next.
+```
+
+That last line is doing real work inside the curly braces — `age + 1` gets evaluated before being inserted. f-strings can hold any valid Python expression inside the braces, not just variable names.
+
+A subtle point: notice that inside `{}`, you write the variable name *without* quotes. The `f"..."` already establishes that the surrounding text is a string; the curly braces switch back into "code" mode briefly.
+
+```python
+print(f"Hello, {name}")     # correct: substitutes the value of the variable `name`
+print(f"Hello, {'name'}")   # wrong: substitutes the literal string 'name'
+```
+
+Without the `f` prefix, the curly braces aren't special — they're just literal characters:
+
+```python
+print("Hello, {name}")      # prints: Hello, {name}
+```
+
+The `f` is what activates the substitution. Forgetting it is one of the most common beginner errors. If your output has literal curly braces in it, look for a missing `f`.
+
+**Try it:** Spot the bug. This code is supposed to print `Cost: $9.99`. What's wrong?
+
+```python
+price = 9.99
+print("Cost: ${price}")
+```
+
+<details>
+<summary>Answer</summary>
+
+The string is missing its `f` prefix. Without `f`, the curly braces are just literal characters, so this prints `Cost: ${price}`. Fix:
+
+```python
+price = 9.99
+print(f"Cost: ${price}")
+```
+
+The `$` sign sits outside the curly braces — it's just literal text, like any other character. Only the `{price}` part gets substituted.
+
+</details>
+
+## Common pitfalls
+
+**1. Forgetting quotes around a string.**
+
+```python
+name = Ada
+```
+
+Python sees `Ada` (without quotes) and tries to look it up as a variable. There's no variable named `Ada`, so you get `NameError: name 'Ada' is not defined`. The fix is to wrap text in quotes: `name = "Ada"`.
+
+**2. Using `=` when you meant `==`.**
+
+We haven't met `==` yet (it shows up in Module 4), but it's worth flagging now: `=` is assignment and `==` is equality. `name = "Ada"` puts the value in the variable. `name == "Ada"` *asks* whether the variable's value equals `"Ada"` and produces `True` or `False`. Mixing them up is one of the most common bugs in any language, including for experienced programmers.
+
+**3. Mismatched quotes.**
+
+```python
+greeting = "Hello'
+```
+
+Open with double, close with single — Python keeps looking for a matching double quote and either errors or eats lines of your code into the string. Match your quotes.
+
+**4. Forgetting the `f` on an f-string.**
+
+```python
+name = "Ada"
+print("Hello, {name}")    # prints: Hello, {name}
+print(f"Hello, {name}")   # prints: Hello, Ada
+```
+
+If a print statement is outputting literal curly braces, the missing `f` is almost always the cause.
+
+**5. Quoting a variable name inside an f-string.**
+
+```python
+name = "Ada"
+print(f"Hello, '{name}'")   # prints: Hello, 'Ada'   (single quotes around the value)
+print(f"Hello, {'name'}")   # prints: Hello, name    (substitutes the literal string)
+```
+
+The first is fine — you're putting actual quote marks in the output, around the substituted value. The second is a mistake — you've put quotes around the variable name inside the braces, so Python substitutes the literal string `"name"` instead of looking up the variable.
+
+**6. Trying to use a variable before defining it.**
+
+```python
+print(name)
+name = "Ada"
+```
+
+Python runs top to bottom. By the time `print(name)` runs, no variable `name` exists yet. `NameError`. Define before use.
+
+## How this connects
+
+Modules 0 and 1 are the foundation. Variables and types underpin literally everything from this point on:
+
+- **Module 2** will teach you to convert between types — because `input()` always returns a string, and you'll want numbers.
+- **Module 3** treats strings as something you can slice, search, and transform, not just store and print.
+- **Module 4 (conditionals)** is where booleans graduate from "this variable holds `True` or `False`" to "the program makes decisions based on whether things are true or false."
+- **Module 5 (loops)** uses variables that change on each iteration to control how a piece of code repeats.
+- **Module 6 (functions)** is where variables get more sophisticated rules about *which parts of your code can see them*.
+
+If anything in this lecture feels shaky — especially the difference between a variable name and a string — pause and work through the exercises in the curriculum doc before moving on. Module 2 is going to assume all of this is reflexive.
+
+## Recap
+
+- `print(...)` displays whatever you give it on the screen.
+- Comments start with `#` and are ignored by Python; use them to explain *why*, not *what*.
+- Variables are named containers for values. Create them with `name = value`.
+- Variable names use `snake_case`, can't start with a digit, can't contain hyphens or punctuation other than underscores, and can't be reserved words.
+- The four foundational types are strings (text), integers (whole numbers), floats (decimal numbers), and booleans (`True` / `False`).
+- f-strings (prefixed with `f`) let you embed variables and expressions in text using `{...}`.
+- A string `"25"` and an integer `25` look the same when printed but are not the same thing — they behave differently in math, comparisons, and almost every other context.
+
+## Up next
+
+Module 2 takes user input via the `input()` function and tackles the type-conversion problem head-on: how do you take what the user typed (always a string) and turn it into a number you can do math with? It also introduces the arithmetic operators and Python's `math` module. Once you have input, output, variables, types, and arithmetic, Python starts to feel powerful.
+
+Now go work the exercises and mini-project for Module 1 in the curriculum doc. The point of this lecture is to make those doable; the point of doing them is to make this lecture stick.

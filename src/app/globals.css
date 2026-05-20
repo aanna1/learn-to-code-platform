@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Theme tokens. Every color is an "R G B" triple so Tailwind's
+ * rgb(var(--token) / <alpha-value>) pattern can apply opacity. Flipping the
+ * `.dark` class on <html> swaps the whole palette. The full theme toggle UI
+ * lands in Phase 6; these tokens are the source of truth.
+ *
+ * Palette intent (per brief):
+ *   Light — warm parchment bg, deep slate text, sage/teal accent, amber highlight
+ *   Dark  — warm charcoal/navy bg (never pure black), warm off-white text,
+ *           muted teal accent, soft amber highlight
+ */
+:root {
+  --color-bg: 245 241 232;
+  --color-surface: 252 250 245;
+  --color-surface-raised: 255 255 255;
+  --color-border: 224 217 203;
+  --color-text: 41 50 60;
+  --color-muted: 106 114 112;
+  --color-accent: 78 150 138;
+  --color-accent-strong: 54 118 108;
+  --color-highlight: 224 168 83;
+  --color-highlight-strong: 196 138 54;
+  --color-danger: 198 92 76;
+  --color-success: 76 150 104;
+
+  --radius-lg: 1rem;
+  --radius-md: 0.625rem;
+  --radius-sm: 0.375rem;
+
+  --shadow-soft: 0 1px 2px rgb(31 35 45 / 0.04), 0 4px 16px rgb(31 35 45 / 0.06);
+  --shadow-lift: 0 2px 6px rgb(31 35 45 / 0.08), 0 12px 32px rgb(31 35 45 / 0.12);
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Fira Code", monospace;
+}
+
+.dark {
+  --color-bg: 26 30 40;
+  --color-surface: 33 38 50;
+  --color-surface-raised: 42 48 62;
+  --color-border: 56 63 79;
+  --color-text: 237 232 222;
+  --color-muted: 150 156 168;
+  --color-accent: 122 184 172;
+  --color-accent-strong: 150 205 194;
+  --color-highlight: 232 184 110;
+  --color-highlight-strong: 245 200 130;
+  --color-danger: 224 122 105;
+  --color-success: 130 186 128;
+
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.25), 0 4px 16px rgb(0 0 0 / 0.3);
+  --shadow-lift: 0 2px 6px rgb(0 0 0 / 0.35), 0 12px 32px rgb(0 0 0 / 0.45);
+}
+
+@layer base {
+  body {
+    background-color: rgb(var(--color-bg));
+    color: rgb(var(--color-text));
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
