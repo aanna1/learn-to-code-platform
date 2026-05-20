@@ -39,10 +39,12 @@ Phases follow the brief's "Suggested Workflow":
    alongside them as the validation fixture).
 5. **Homepage + course outline + cheat sheet** (polished). ✅ DONE
 6. **Polish**: theme, mobile (hide IDE < 768px), shortcuts overlay, README, deploy docs.
-   ← **NEXT**. Note: the light/dark **theme toggle UI was pulled forward into Phase 5** (the
-   global nav needed it). Remaining Phase 6: mobile nav (hamburger — the nav is currently
-   simple horizontal links), README, static-host deploy docs (COOP/COEP), remove the temp
-   `/dev/ide` route. Mobile IDE-hide (Phase 3) and the shortcuts overlay (Phase 2) are done.
+   ✅ DONE. (Theme toggle landed in Phase 5; mobile IDE-hide in Phase 3; shortcuts overlay in
+   Phase 2. Phase 6 added the mobile hamburger nav, the README + deploy docs, and removed the
+   temp `/dev/ide` route.)
+
+**All six phases are complete.** The app is feature-complete against the brief for the
+Python build.
 
 ## Decisions locked in (from kickoff Q&A)
 
@@ -257,22 +259,51 @@ Built the generic content loader, the MDX compile path, both lesson layouts, the
   theme toggle on every page, all 8 cheat-sheet sections, and the outline progress bar. The
   theme toggle's live light/dark switch and nav interactions still want a real browser pass.
 
-## Next session: Phase 6 (final polish + docs)
+## Phase 6 — COMPLETE (mobile nav, docs, cleanup)
 
-1. **Mobile nav**: the header is simple horizontal links; the brief wants a hamburger menu
-   under ~768px. Add a collapsible menu (the links are already registry-driven).
-2. **README** + **deploy docs**: how to build/run, and the COOP/COEP header requirement per
-   static host (Vercel via `vercel.json` is done; document GitHub Pages / Netlify / plain
-   static — without isolation, code runs but interactive `input()` yields EOF).
-3. **Remove the temp `/dev/ide` route** (Phase 2 harness) once the real lessons are the
-   demo path.
-4. Final theme/mobile/spacing pass across all pages.
+`npm run typecheck` clean; `npm run build` exports 9 routes (the `/dev/ide` harness is
+gone). This was the last planned phase — the Python build is feature-complete.
+
+### What changed (Phase 6)
+
+- **Mobile hamburger nav** — `src/components/nav/MobileNav.tsx` (client island). Below `md`
+  the desktop links in `SiteHeader` are hidden (`hidden md:flex`) and collapse into a
+  hamburger that opens a dropdown panel of the same registry-driven links. Closes on Esc,
+  outside click (a `fixed inset-0` backdrop button), and after navigating. Links are passed
+  in as plain `{href,label}` data so the nav bundle never imports the language modules. The
+  `ThemeToggle` stays visible in the bar at all widths.
+- **README** — rewritten from the Phase 1 stub into full docs: features, stack, commands,
+  structure, the content-authoring contract, how to add a language, and **deploy/COOP-COEP
+  docs per host** (Vercel/local done; Netlify, Cloudflare/nginx, and GitHub Pages — the
+  latter can't set headers so interactive `input()` degrades to EOF; notes the
+  `coi-serviceworker` shim).
+- **Removed** `src/app/dev/` (the Phase 2 IDE harness route). The `<Ide>` component itself
+  stays — it's used by exercise lessons. Nothing imported the deleted page.
+
+### Phase 6 decisions / facts
+
+- **MobileNav stacking**: the dropdown panel is `absolute right-2 top-14` and anchors to the
+  sticky `<header>` (which establishes the positioning/stacking context). Panel `z-50` sits
+  above the `z-40` outside-click backdrop. NOT browser-verified here — the open/close,
+  Esc, and outside-click behavior want a real browser pass.
+- **`.next` cache + removed routes**: after deleting a route, `npm run typecheck` failed on a
+  stale `.next/types/app/dev/ide/page.ts`. Fix is `rm -rf .next` then rebuild (build
+  regenerates the route types). Worth remembering whenever a route is deleted/renamed.
+- **NOT browser-verified this phase** (no browser here): verified typecheck, the 9-route
+  static export, the hamburger button + `hidden md:flex` desktop links in exported HTML, and
+  that `/dev/ide` is no longer exported.
+
+## Project status: feature-complete
+
+All six phases are done. Possible follow-ups (none planned): real curriculum content beyond
+the 3 seed lessons (from the external lesson plans — see `curriculum/`), a second language to
+exercise the abstraction, and a live browser QA pass of the interactive runtime + nav.
 
 ## Known warnings (benign)
 
 - `next build` warns "headers will not work with output: export" — expected; prod headers
   come from `vercel.json`, dev headers from `next.config.mjs`. Other static hosts (e.g.
-  GitHub Pages) need their own header config — to be documented in the Phase 6 README.
+  GitHub Pages) need their own header config — documented in the README's Deployment section.
 - `npm install` reports a few vulnerabilities in build-time transitives (eslint 8, glob).
   They don't ship in the static output. Don't `npm audit fix --force` (breaks majors).
 - The three folders `agent-skills/`, `skills/`, `ui-ux-pro-max-skill/` are unrelated
