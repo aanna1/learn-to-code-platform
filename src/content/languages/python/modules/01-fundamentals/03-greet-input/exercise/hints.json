@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "You only need to change greet_user — the input() and print() lines already work once it returns the right text.",
+    "Use an f-string to build the message: it starts with f before the quote, and the name goes inside curly braces.",
+    "The full line is: return f\"Hi, {name}! Nice to meet you.\""
+  ]
+}

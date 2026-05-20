@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "An f-string lets you drop a variable into text. It starts with an f before the quote: f\"Hello, {name}!\".",
+    "Replace the empty return value with that f-string — keep the comma after Hello and the exclamation mark at the end.",
+    "The whole body is one line: return f\"Hello, {name}!\""
+  ]
+}

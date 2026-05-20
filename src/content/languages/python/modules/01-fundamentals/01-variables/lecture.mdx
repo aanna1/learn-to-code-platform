@@ -1,0 +1,46 @@
+Almost every program does two things: it **stores information**, and it **does something** with that information. The tool for storing information is the *variable*, and it's the first thing worth getting comfortable with.
+
+## What is a variable?
+
+A variable is a **name that points to a value**. You create one with a single equals sign: the name on the left, the value on the right.
+
+```python
+age = 9
+name = "Ada"
+```
+
+Read `=` as *"gets"* rather than *"equals"*: `age` **gets** the value `9`. Once a name points to a value, you can use the name anywhere you'd use the value.
+
+The code below is live — press **Run** to execute it right here in your browser. Try changing the name or the number, then run it again.
+
+<Runnable code={`age = 9
+name = "Ada"
+print(name, "is", age, "years old")`} />
+
+`print(...)` displays things on the screen. When you give it several values separated by commas, it prints them in a row with spaces in between.
+
+## Values have types
+
+Every value has a **type** — what kind of thing it is. Three you'll meet constantly:
+
+- **Strings** — text, written inside quotes: `"Ada"`, `"hello"`, `"123 Main St"`.
+- **Integers** — whole numbers, written with no quotes: `9`, `-4`, `1000`.
+- **Floats** — numbers with a decimal point: `3.14`, `0.5`.
+
+The quotes are what tell Python *"this is text, not a number."* `"9"` is the text nine; `9` is the number nine. They look similar but behave very differently — you can do arithmetic with `9`, but `"9"` is just a character.
+
+<Callout type="tip">
+A variable can be reassigned at any time, and it can even change type. `score = 0` then later `score = "done"` is perfectly legal. The name simply points at whatever value you last gave it.
+</Callout>
+
+## Naming variables
+
+A few rules and a couple of habits:
+
+- Names can use letters, numbers, and underscores, but can't **start** with a number.
+- Names are case-sensitive: `name` and `Name` are two different variables.
+- By convention, use lowercase words joined by underscores: `first_name`, `total_score`.
+
+Good names describe what the value *means*. `x` tells you nothing; `user_age` tells the next reader (often future-you) exactly what's stored there.
+
+Ready to make something happen? In the next lesson you'll write your first **function**.

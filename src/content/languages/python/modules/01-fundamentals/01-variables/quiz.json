@@ -1,0 +1,44 @@
+{
+  "questions": [
+    {
+      "question": "After running `score = 10`, what does the name `score` refer to?",
+      "options": [
+        {
+          "text": "The value 10",
+          "correct": true,
+          "explanation": "Right. `=` makes the name on the left point to the value on the right, so `score` now refers to 10."
+        },
+        {
+          "text": "The letter s",
+          "correct": false,
+          "explanation": "The name is just a label; it doesn't store its own letters as a value."
+        },
+        {
+          "text": "Nothing until you print it",
+          "correct": false,
+          "explanation": "The variable holds 10 immediately after the assignment — printing only displays it, it isn't required to create it."
+        }
+      ]
+    },
+    {
+      "question": "Which of these is a string (text), not a number?",
+      "options": [
+        {
+          "text": "42",
+          "correct": false,
+          "explanation": "With no quotes, `42` is an integer — a number you can do arithmetic with."
+        },
+        {
+          "text": "\"42\"",
+          "correct": true,
+          "explanation": "Correct. The quotes tell Python this is text. `\"42\"` is the characters 4 and 2, not the number 42."
+        },
+        {
+          "text": "3.14",
+          "correct": false,
+          "explanation": "`3.14` has no quotes and a decimal point, so it's a float (a decimal number)."
+        }
+      ]
+    }
+  ]
+}

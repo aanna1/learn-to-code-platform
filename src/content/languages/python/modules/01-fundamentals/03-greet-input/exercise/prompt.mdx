@@ -1,0 +1,20 @@
+Programs get a lot more fun when they **talk back**. The `input()` function pauses your program, waits for the person to type something and press Enter, and hands back whatever they typed — always as a string.
+
+```python
+name = input("What's your name? ")
+print("You typed:", name)
+```
+
+When you press **Run**, the terminal on the right becomes interactive: the prompt appears, and you type your answer right there.
+
+## Your task
+
+Complete `greet_user(name)` so it **returns** the message `"Hi, <name>! Nice to meet you."`.
+
+For example, `greet_user("Ada")` should return `"Hi, Ada! Nice to meet you."`.
+
+The starter code already wires your function up to `input()`: it asks for a name and prints your greeting. So once `greet_user` is right, press **Run** and have an actual conversation with your program. Press **Submit** to check it against the hidden tests.
+
+<Callout type="note">
+The tests check `greet_user` directly with a fixed name, so they never need the keyboard. The `input()` part is just for trying it out live with **Run**.
+</Callout>

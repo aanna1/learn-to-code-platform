@@ -1,0 +1,23 @@
+Time to write your first **function**.
+
+A function is a reusable, named block of code. You give it some input (its *arguments*), it runs, and it hands back a result with `return`. Defining one looks like this:
+
+```python
+def double(number):
+    return number * 2
+```
+
+`def` starts the definition, `double` is the name, `number` is the input, and the indented line is the body. Calling `double(5)` gives back `10`.
+
+## Your task
+
+Complete the `greet` function so that it **returns** the string `"Hello, <name>!"`, with the given name dropped in and an exclamation mark at the end.
+
+For example:
+
+- `greet("Ada")` should return `"Hello, Ada!"`
+- `greet("Sam")` should return `"Hello, Sam!"`
+
+The starter code already prints `greet("Ada")` when you press **Run**, so you can see your result right away. When it looks right, press **Submit** to check it against the hidden tests.
+
+A handy tool here is the **f-string** — put an `f` before the opening quote and you can drop a variable straight into the text inside curly braces: `f"Hi {name}"`.

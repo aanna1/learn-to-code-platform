@@ -1,0 +1,8 @@
+{
+  "language": "python",
+  "displayName": "Python",
+  "tagline": "A friendly first language. Clear to read, quick to run, and used everywhere.",
+  "modules": [
+    { "id": "01-fundamentals", "title": "Fundamentals", "order": 1 }
+  ]
+}

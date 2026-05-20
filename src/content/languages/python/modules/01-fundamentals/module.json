@@ -1,0 +1,10 @@
+{
+  "id": "01-fundamentals",
+  "title": "Fundamentals",
+  "description": "Start from zero: store information in variables, then write and run your first functions.",
+  "lessons": [
+    { "id": "01-variables", "title": "Variables and Values", "type": "lecture", "order": 1 },
+    { "id": "02-greet", "title": "Your First Function", "type": "exercise", "order": 2 },
+    { "id": "03-greet-input", "title": "Talking Back with input()", "type": "exercise", "order": 3 }
+  ]
+}
