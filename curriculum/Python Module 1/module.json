@@ -1,0 +1,38 @@
+{
+  "id": "01-first-programs",
+  "title": "First Programs",
+  "description": "Print, comments, variables, and types — the four building blocks every Python program is made from.",
+  "order": 1,
+  "lessons": [
+    {
+      "id": "lecture",
+      "title": "Print, Comments, Variables & Types",
+      "type": "lecture",
+      "order": 1
+    },
+    {
+      "id": "ex-say-something",
+      "title": "Say Something",
+      "type": "exercise",
+      "order": 2
+    },
+    {
+      "id": "ex-name-tag",
+      "title": "Name Tag",
+      "type": "exercise",
+      "order": 3
+    },
+    {
+      "id": "ex-profile-card",
+      "title": "Profile Card",
+      "type": "exercise",
+      "order": 4
+    },
+    {
+      "id": "ex-type-detective",
+      "title": "Type Detective",
+      "type": "exercise",
+      "order": 5
+    }
+  ]
+}

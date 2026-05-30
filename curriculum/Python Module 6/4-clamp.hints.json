@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Handle the two out-of-range cases first. If value < low, return low. If value > high, return high.",
+    "After the two boundary checks, anything remaining is already in range — just return value.",
+    "A one-liner alternative: return max(low, min(value, high)). min(value, high) caps the top; max(low, ...) lifts the bottom."
+  ]
+}

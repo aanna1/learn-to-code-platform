@@ -1,0 +1,36 @@
+# Formatted Receipt
+
+Raw numbers and labels are hard to read in a column. F-string format specifiers fix that: `{name:<20}` left-aligns `name` in a 20-character field; `{price:>8.2f}` right-aligns a float to 8 characters with 2 decimal places. The lecture showed a receipt — now you'll build one yourself.
+
+## Your task
+
+Write a program that prints a receipt with **exactly** this output (including the separator line):
+
+```
+Item                    Price
+------------------------------
+Coffee                   3.50
+Avocado toast           12.75
+Orange juice             4.00
+------------------------------
+Total                   20.25
+```
+
+## Requirements
+
+- The header and each item line use a **left-aligned item name in a 22-character field** and a **right-aligned price in an 8-character field formatted to 2 decimal places**.
+- The separator is exactly 30 dashes. Use `"-" * 30`, not a hardcoded string of dashes.
+- The total (`20.25`) must be **calculated** as the sum of the three prices, not hardcoded.
+- Use f-strings with format specifiers for every line that contains a name and a price.
+
+## Example output
+
+```
+Item                    Price
+------------------------------
+Coffee                   3.50
+Avocado toast           12.75
+Orange juice             4.00
+------------------------------
+Total                   20.25
+```

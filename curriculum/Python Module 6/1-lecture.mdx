@@ -1,0 +1,311 @@
+## Why this matters
+
+If you worked through Module 5, you probably noticed something annoying. The number-guessing game asked you to track guesses, prompt the user, compare against the target, and print a message. The FizzBuzz checkpoint did three things in five lines. Both worked. Both also lived as one long blob of code at the top level of your file.
+
+Now suppose you want two players to take turns guessing. Or three rounds of FizzBuzz with different ranges. With what you know so far, your only option is copy-paste. Copy the guessing loop. Change a few variable names. Paste it again for player two. Find a bug, fix it in one copy, forget to fix the other. Welcome to the world before functions.
+
+A function is a named, parameterized chunk of code you can call as many times as you want. Write the loop once, give it a name, and from then on you say `guess_round(player_name)` and the whole loop runs. Found a bug? Fix it in one place. Want a third player? Call the function a third time.
+
+You've actually been using functions since Module 1. `print`, `input`, `int`, `len`, `range` — all functions. Someone else wrote them and you've been calling them by name. This module is where you start writing your own.
+
+## What you'll be able to do by the end
+
+- Define a function with `def`, give it parameters, and call it with arguments.
+- Tell the difference between a function that prints and one that returns, and pick the right one.
+- Use default and keyword arguments to make function calls clearer.
+- Recognize when a variable is local to a function versus visible everywhere.
+- Spot a function doing too much, and split it into smaller ones.
+- Read a function call and predict what it does without running the code.
+
+<Callout type="info">
+No installation needed. Every code block on this platform has a **Run** button — press it and your code runs instantly in the browser. You don't need Python on your machine; you don't need a terminal.
+</Callout>
+
+## Core concepts
+
+### The motivation: I keep writing the same thing
+
+Here's the kind of code that hurts. Say you're writing a dice game. You want two players to each roll three dice.
+
+```python
+import random
+
+# Player 1
+r1 = random.randint(1, 6)
+r2 = random.randint(1, 6)
+r3 = random.randint(1, 6)
+print(f"Alice rolled {r1}, {r2}, {r3}")
+alice_total = r1 + r2 + r3
+print(f"Alice's total: {alice_total}")
+
+# Player 2
+r1 = random.randint(1, 6)
+r2 = random.randint(1, 6)
+r3 = random.randint(1, 6)
+print(f"Bob rolled {r1}, {r2}, {r3}")
+bob_total = r1 + r2 + r3
+print(f"Bob's total: {bob_total}")
+```
+
+It works. Look at it. The two blocks are nearly identical, and there are only two players. Add a third and you copy the block again. Decide each player should roll five dice instead of three? Now you have to change it in two places — three. Probably miss one.
+
+The signal that you need a function is this exact feeling: *I have seen this shape of code before in my own file.* When that happens, package the shape up, give it a name, and let your future self call it.
+
+### Defining your first function
+
+A function definition has four parts: the keyword `def`, a name, parentheses, and a colon. Then the body is indented underneath.
+
+```python
+def greet():
+    print("Hello!")
+```
+
+Read that as: *define* a function called `greet`. It takes no inputs (the parentheses are empty). When called, it runs the indented block, which prints `Hello!`.
+
+The function now exists, but it hasn't done anything yet. Defining a function is not running it. Running it is a separate step:
+
+<Runnable code={`def greet():
+    print("Hello!")
+
+greet()`} />
+
+That last line is the *call*. The parentheses are what trigger it. Without them, the function just sits there:
+
+```python
+greet     # not a call — nothing prints
+```
+
+A common beginner experience: you write a function, press **Run**, see no output, and assume something is broken. It usually isn't. You forgot to call it.
+
+**What could go wrong:** Missing the colon at the end of the `def` line. Missing indentation in the body. Or — mostly — forgetting that defining a function doesn't run it.
+
+### Parameters: making the function take input
+
+A function that always says `"Hello!"` is only a little useful. What we want is a function that can greet anyone.
+
+<Runnable code={`def greet(name):
+    print(f"Hello, {name}!")
+
+greet("Ada")
+greet("Grace")`} />
+
+The variable `name` inside the parentheses is a *parameter* — a placeholder. When you call `greet("Ada")`, Python binds `name` to the value `"Ada"` for the duration of that call. Call it again with `"Grace"`, and `name` becomes `"Grace"`.
+
+One vocabulary distinction worth knowing: a **parameter** is the variable in the function definition (`def greet(name):`), and an **argument** is the value passed at the call site (`greet("Ada")`). Same thing at runtime — different word depending on which side of the call you're on.
+
+A function can take more than one parameter. Order matters — the first argument fills the first parameter, the second fills the second. Swap them and you get nonsense, and Python has no idea:
+
+**Predict what this prints before pressing Run:**
+
+<Runnable code={`def describe(animal, sound):
+    print(f"The {animal} goes {sound}")
+
+describe("cow", "moo")
+describe("dog", "woof")
+describe("woof", "dog")`} />
+
+<Callout type="tip">
+The third line prints `The woof goes dog`. Python doesn't know that "woof" is a sound and "dog" is an animal — it plugs in values in order. Argument order is your responsibility.
+</Callout>
+
+### `return` vs `print`: the most important distinction in this module
+
+A function that *prints* shows something on the screen and gives back nothing. A function that *returns* hands a value back to whoever called it, so the caller can do something with it.
+
+```python
+def double_print(x):
+    print(x * 2)
+
+def double_return(x):
+    return x * 2
+```
+
+These look similar. They behave completely differently. Run this and study the output:
+
+<Runnable code={`def double_print(x):
+    print(x * 2)
+
+def double_return(x):
+    return x * 2
+
+result1 = double_print(5)
+print(result1)
+
+result2 = double_return(5)
+print(result2)`} />
+
+<Callout type="tip">
+`double_print(5)` runs and prints `10` as a side effect, but the function itself gives back nothing — no `return` means it hands back `None`. So `result1` is `None`, and the second `print` shows `None`. That's two lines of output.
+
+`double_return(5)` computes `10` and *returns* it — nothing prints from inside the function. The `10` is stored in `result2`, then the outer `print` shows it. One line of output, and `result2` actually holds something useful.
+</Callout>
+
+Why does this matter? Because the point of a function is to be a building block you can compose with other building blocks:
+
+<Runnable code={`def double_print(x):
+    print(x * 2)
+
+def double_return(x):
+    return x * 2
+
+print(double_return(5) + 3)   # works: prints 13
+print(double_print(5) + 3)    # crashes: can't add 3 to None`} />
+
+The second line crashes because `double_print(5)` returns `None`, and Python won't let you add `3` to `None`. The error message — `TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'` — is Python's way of saying *you tried to do math on the result of a function that doesn't return anything*.
+
+If a function exists to *compute a value*, it should `return` that value. If it exists to *cause a side effect* — display output, write to a file — doing the side effect is the whole job and no return is needed. Most functions you write should be in the first category. Print at the top level of your script, not buried inside reusable functions.
+
+### Multiple returns and early exit
+
+A function can have more than one `return`. The first one that runs ends the function — everything after it is skipped.
+
+<Runnable code={`def letter_grade(score):
+    if score >= 90:
+        return "A"
+    if score >= 80:
+        return "B"
+    if score >= 70:
+        return "C"
+    if score >= 60:
+        return "D"
+    return "F"
+
+print(letter_grade(95))
+print(letter_grade(82))
+print(letter_grade(55))`} />
+
+<Callout type="tip">
+Notice there's no `elif`. We don't need one. Once `return "A"` fires, the function is done — nothing below runs. The remaining `if` statements only get evaluated if the earlier ones were false. This pattern is called *early return*, and it's one of the cleanest ways to express a chain of conditions.
+</Callout>
+
+### Default arguments
+
+Sometimes a parameter has a sensible default and you'd like callers to skip it.
+
+<Runnable code={`def greet(name, greeting="Hello"):
+    print(f"{greeting}, {name}!")
+
+greet("Ada")              # Hello, Ada!
+greet("Ada", "Howdy")     # Howdy, Ada!`} />
+
+The `greeting="Hello"` says: *if the caller doesn't pass this argument, use "Hello".* Defaults must come after non-default parameters — putting a defaulted parameter first is a syntax error, because Python can't tell which value fills which slot.
+
+**One trap to file away:** using a mutable object like a list as a default. The default is created *once* when the function is defined, not each time it's called. Every caller who skips the argument shares the same list. We'll come back to this in Module 7 when lists get a proper introduction.
+
+### Keyword arguments at the call site
+
+You can pass arguments by name instead of by position:
+
+<Runnable code={`def greet(greeting, name):
+    print(f"{greeting}, {name}!")
+
+greet(name="Ada", greeting="Hi")
+greet(greeting="Hi", name="Ada")`} />
+
+When you name them, order stops mattering. Keyword arguments earn their keep when a function has several parameters and a reader would otherwise have to remember which is which. Compare these two calls:
+
+```python
+send_email("ada@example.com", "Hello", "Body text", True)
+
+send_email(
+    to="ada@example.com",
+    subject="Hello",
+    body="Body text",
+    urgent=True,
+)
+```
+
+Both are valid Python. The second one tells you what each argument is for.
+
+### Scope: where variables live
+
+A variable created inside a function lives only inside that function. The moment the function returns, the variable disappears.
+
+<Runnable code={`def compute_total(prices):
+    total = sum(prices)
+    tax = total * 0.0825
+    return total + tax
+
+result = compute_total([10, 20, 30])
+print(result)
+# print(total)   # uncomment this to see NameError`} />
+
+`total` and `tax` are *local* to `compute_total`. They don't exist outside it. This is a feature: functions don't accidentally clobber each other's variables. You can use `total` in two different functions and they're completely separate boxes.
+
+A function *can* read variables from outside itself — but reassigning a global from inside a function without an explicit signal is a trap:
+
+<Runnable code={`TAX_RATE = 0.0825
+
+def compute_total(prices):
+    total = sum(prices)
+    return total * (1 + TAX_RATE)   # reading a global is fine
+
+print(compute_total([10, 20, 30]))`} />
+
+Reading a global is fine (all-caps names like `TAX_RATE` signal "this is a constant — set once, never changed"). *Reassigning* a global is where things get messy. If you find yourself wanting to do that, the cleaner pattern is almost always to pass the value as a parameter and return the new one:
+
+```python
+def increment(count):
+    return count + 1
+
+count = 0
+count = increment(count)
+print(count)   # 1
+```
+
+The function takes its input explicitly and returns its output explicitly. No hidden dependencies.
+
+### One function, one job
+
+The last idea is more taste than mechanics. A function should do one thing, and its name should say what.
+
+A function called `process_data` that reads a file, cleans the data, computes statistics, and writes a report is technically valid Python. It's also hard to read, hard to fix, and impossible to reuse. Split it:
+
+```python
+def read_data(path): ...
+def clean(rows): ...
+def summary(rows): ...
+def write_report(stats, path): ...
+```
+
+Each function has a clear name. Each one can be tested separately. When something breaks, the error points at one of them, not at a 200-line monster.
+
+If you can't summarize what a function does in one sentence without using the word "and," it's probably doing too much.
+
+## Common pitfalls
+
+**1. Calling without parentheses.** `greet` is the function object. `greet()` calls it. Forgetting the parens silently does nothing. If your function "doesn't seem to run," check this first.
+
+**2. Confusing `return` with `print`.** A function that only prints can't have its output fed into another function. A function that returns can. When `result = my_function(...)` keeps coming back as `None`, you probably forgot to `return`.
+
+**3. Using a local variable outside the function.** Local variables stop existing when the function returns. If you want a value to escape, `return` it and catch it in the caller.
+
+**4. Reassigning a global without `global`.** `UnboundLocalError` is Python telling you it sees an assignment somewhere in the function body, so it treats that name as local *everywhere* in the function — even on lines before the assignment. The cleanest fix is almost always to refactor away from the global rather than add the `global` keyword.
+
+**5. Mutable default arguments.** `def f(items=[])` reuses the same list across every call that skips `items`. Use `items=None` and create the list inside the function:
+
+```python
+def f(items=None):
+    if items is None:
+        items = []
+    ...
+```
+
+## How this connects
+
+Functions are the first big leap in this curriculum. Variables, conditionals, and loops gave you the raw machinery. Functions give you a way to package it, name it, and call it again. From here, almost every piece of code you write will live inside some function.
+
+A few previews of what's coming:
+
+Module 7 (lists and tuples) is where functions start taking and returning collections. That's the shape of most real-world functions you'll encounter. Module 9 (exceptions) covers what happens when a function fails and how to handle that gracefully at the call site. Module 10 (modules and packages) is functions taken to the next level — the `random.randint` you used above lives in someone else's module. Module 13 (object-oriented programming) introduces methods, which are functions attached to objects; the mechanics are mostly the same. Module 14 (testing) is where small, single-purpose functions really earn their keep — a function that does one thing is a function you can actually test.
+
+## Recap
+
+- A function definition is `def name(parameters):` followed by an indented body. Defining a function does not run it.
+- Call a function with `name(arguments)`. The parentheses trigger execution.
+- `return` hands a value back to the caller. `print` displays something on the screen. They are not interchangeable.
+- A function with no explicit `return` gives back `None`.
+- Default arguments let callers skip parameters that have sensible defaults.
+- Keyword arguments at the call site make code self-documenting when a function takes several parameters.
+- Variables defined inside a function are local — they vanish when the function returns. Functions can read globals but should rarely reassign them.
+- One function, one job. If you can't describe what it does in one sentence, split it.

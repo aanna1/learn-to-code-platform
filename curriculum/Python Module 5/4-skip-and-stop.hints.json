@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Order matters: check for negative first (continue to skip), then check for > 100 (break to stop), then append. Put the checks before result.append(n).",
+    "continue jumps back to the top of the loop for the next value — the append() line below it is never reached for that iteration.",
+    "break exits the loop entirely — not just for that one value, but for all remaining values too. The value that triggered break is not appended.",
+    "If your result includes the value > 100, you're appending before breaking. Move the break check to before result.append(n)."
+  ]
+}

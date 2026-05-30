@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Start by cleaning the input: clean = raw.strip().lower(). Every check and split should happen on this cleaned version, not the original.",
+    "To validate, count the '@' signs: if clean.count('@') != 1: return 'invalid'. This catches both zero and two-or-more cases in one check.",
+    "Split on '@' to get the two parts: username, domain = clean.split('@', 1). Then check that '.' is in domain before going further.",
+    "The TLD is everything after the last dot. domain.split('.') gives a list of parts; domain.split('.')[-1] grabs the last one. Then build the return string with an f-string: f\"username: {username} | domain: {domain} | tld: {tld}\"."
+  ]
+}

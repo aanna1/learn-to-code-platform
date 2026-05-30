@@ -1,0 +1,79 @@
+{
+  "questions": [
+    {
+      "question": "What does this print?\n\nscore = 95\nif score >= 70:\n    print(\"C\")\nelif score >= 80:\n    print(\"B\")\nelif score >= 90:\n    print(\"A\")",
+      "options": [
+        {
+          "text": "C",
+          "correct": true,
+          "explanation": "Correct. An elif chain stops at the first true condition. score >= 70 is true, so Python prints \"C\" and skips the rest of the chain entirely — it never even checks the 80 or 90 branches. To grade correctly, order the conditions from the highest threshold down."
+        },
+        {
+          "text": "A",
+          "correct": false,
+          "explanation": "This would be right if each condition were checked independently, but an elif chain stops at the FIRST match. score >= 70 matches first, so the 90 branch is never reached. Order matters: put the highest threshold first."
+        },
+        {
+          "text": "C, B, and A on three lines",
+          "correct": false,
+          "explanation": "That is what a stack of three independent if statements would do. But elif chains the conditions, so only the first true branch runs and the rest are skipped."
+        },
+        {
+          "text": "Nothing — the conditions are out of order so Python raises an error",
+          "correct": false,
+          "explanation": "Out-of-order conditions are a logic bug, not a syntax error. Python runs the chain happily and prints \"C\". The wrong order produces a wrong answer, not a crash."
+        }
+      ]
+    },
+    {
+      "question": "What does 0 or \"hello\" evaluate to?",
+      "options": [
+        {
+          "text": "\"hello\"",
+          "correct": true,
+          "explanation": "Correct. or returns the first truthy operand. 0 is falsy, so or moves on to \"hello\", which is truthy, and returns it. Note it returns the operand itself, not True."
+        },
+        {
+          "text": "True",
+          "correct": false,
+          "explanation": "A common assumption, but or does not strictly return a boolean. It returns one of the operands — here the first truthy one, \"hello\". (It happens to be truthy, but the value itself is the string.)"
+        },
+        {
+          "text": "0",
+          "correct": false,
+          "explanation": "or returns the first TRUTHY operand, not the first one. 0 is falsy, so or skips it and returns \"hello\". (0 would be the answer for 0 and \"hello\", since and returns the first falsy operand.)"
+        },
+        {
+          "text": "False",
+          "correct": false,
+          "explanation": "or only evaluates to a falsy result if every operand is falsy. Here \"hello\" is truthy, so the expression is \"hello\" — and even an all-falsy or returns the last operand, not necessarily False."
+        }
+      ]
+    },
+    {
+      "question": "Why does the guard `if text and text[0].isdigit():` avoid a crash when text is the empty string?",
+      "options": [
+        {
+          "text": "and short-circuits: text is falsy, so Python never evaluates text[0]",
+          "correct": true,
+          "explanation": "Correct. The empty string is falsy. For and, once the left side is false the whole expression is false, so Python stops and never runs text[0].isdigit() — which would otherwise raise an IndexError on an empty string."
+        },
+        {
+          "text": "isdigit() returns False for an empty string, so the condition is just False",
+          "correct": false,
+          "explanation": "The problem happens before isdigit() is ever called: text[0] on an empty string raises IndexError. The short-circuit is what prevents text[0] from running at all."
+        },
+        {
+          "text": "Python automatically replaces text[0] with an empty string when text is empty",
+          "correct": false,
+          "explanation": "Python does no such substitution. text[0] on an empty string is a real IndexError. The guard works only because and short-circuits and skips the indexing entirely."
+        },
+        {
+          "text": "and evaluates both sides, but ignores the error on the right",
+          "correct": false,
+          "explanation": "and does not swallow errors. It avoids the error by not evaluating the right side at all — once the left operand is falsy, the result is known and the right side is skipped."
+        }
+      ]
+    }
+  ]
+}

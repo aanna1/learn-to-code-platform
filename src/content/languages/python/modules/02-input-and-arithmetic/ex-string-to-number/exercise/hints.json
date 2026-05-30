@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The key question is whether the text contains a decimal point. Python's `in` operator checks for substrings: `\".\" in text` is True when text contains a dot.",
+    "Use an if/else: if the string has a `.`, call `float(text)`; otherwise call `int(text)`.",
+    "Full solution shape:\n\nif \".\" in text:\n    return float(text)\nreturn int(text)"
+  ]
+}

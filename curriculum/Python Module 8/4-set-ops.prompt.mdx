@@ -1,0 +1,38 @@
+# Unique Tags
+
+Blog posts and articles are often tagged with topics. Sets are the natural shape for tags: each tag appears at most once, and you frequently want to know what tags two posts share, what tags only one post has, and so on.
+
+## Your task
+
+Write four functions that work with tag collections.
+
+**`unique_tags(tag_list)`** — given a list of tags that may contain duplicates, return a sorted list of unique tags.
+
+**`shared_tags(tags_a, tags_b)`** — return a sorted list of tags that appear in *both* collections.
+
+**`all_tags(tags_a, tags_b)`** — return a sorted list of *all* tags that appear in either collection (no duplicates).
+
+**`only_in_first(tags_a, tags_b)`** — return a sorted list of tags that appear in `tags_a` but *not* in `tags_b`.
+
+## Examples
+
+```python
+unique_tags(["python", "web", "python", "data", "web"])
+# ["data", "python", "web"]
+
+shared_tags(["python", "web", "data"], ["web", "ml", "python"])
+# ["python", "web"]
+
+all_tags(["python", "web"], ["web", "ml"])
+# ["ml", "python", "web"]
+
+only_in_first(["python", "web", "data"], ["web", "ml"])
+# ["data", "python"]
+```
+
+## Requirements
+
+- All returned lists must be **sorted alphabetically**.
+- Use set operations: `set(a) & set(b)` for intersection, `set(a) | set(b)` for union, `set(a) - set(b)` for difference.
+- Wrap results in `sorted(...)` before returning.
+- Each function should work even when one or both inputs are empty.

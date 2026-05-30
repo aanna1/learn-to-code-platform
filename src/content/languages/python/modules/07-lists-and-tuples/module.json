@@ -1,0 +1,37 @@
+{
+  "id": "07-lists-and-tuples",
+  "title": "Lists & Tuples",
+  "description": "Ordered, mutable collections \u2014 create, slice, mutate, copy safely, unpack tuples, and write your first list comprehensions.",
+  "lessons": [
+    {
+      "id": "lecture",
+      "title": "Lists, Tuples & Comprehensions",
+      "type": "lecture",
+      "order": 1
+    },
+    {
+      "id": "ex-list-slicing",
+      "title": "List Slicing",
+      "type": "exercise",
+      "order": 2
+    },
+    {
+      "id": "ex-roster-manager",
+      "title": "Roster Manager",
+      "type": "exercise",
+      "order": 3
+    },
+    {
+      "id": "ex-grade-stats",
+      "title": "Grade Stats",
+      "type": "exercise",
+      "order": 4
+    },
+    {
+      "id": "ex-word-filter",
+      "title": "Word Filter",
+      "type": "exercise",
+      "order": 5
+    }
+  ]
+}

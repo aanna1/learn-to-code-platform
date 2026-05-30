@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "An f-string starts with f before the opening quote: print(f\"...\"). Without the f, curly braces are treated as literal characters.",
+    "To substitute a variable, put its name inside curly braces: print(f\"Name: {first_name}\"). The value of first_name replaces {first_name} in the output.",
+    "You can put two variables in one f-string with a space between them: print(f\"{first_name} {last_name}\") produces 'Ada Lovelace'.",
+    "For the Bio line, you need three substitutions in one f-string: first_name, last_name, and language. Build the sentence and drop each variable into its correct position with {}."
+  ]
+}

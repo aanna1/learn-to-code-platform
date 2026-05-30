@@ -1,0 +1,29 @@
+# Time Breakdown
+
+`//` and `%` are a natural pair. Floor division tells you how many full units you have; modulo tells you what's left over. Together they split a total into parts — minutes and seconds, hours and minutes, dollars and cents.
+
+## Your task
+
+Complete `format_time(total_seconds)` so that it converts a number of seconds into a formatted time string.
+
+- Minutes are `total_seconds // 60`
+- Leftover seconds are `total_seconds % 60`
+- Return the result as `"M:SS"` — the seconds part is always two digits, padded with a leading zero if needed (so `5` becomes `05`)
+
+## Requirements
+
+- Use `//` and `%` to compute minutes and seconds — do not use division and subtraction.
+- The seconds part must always be two digits. Use the `:02d` format specifier inside an f-string.
+- Return a string, not a tuple or two separate values.
+
+## Examples
+
+```
+format_time(200)   → "3:20"
+format_time(60)    → "1:00"
+format_time(0)     → "0:00"
+format_time(3661)  → "61:01"
+format_time(9)     → "0:09"
+```
+
+Note that minutes are not capped at 60 — `3661` seconds is `61` minutes and `1` second, not `1:01:01`.

@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "String indexing starts at 0. The first character is word[0]; the last is word[-1].",
+    "A slice looks like word[start:stop]. The stop position is not included in the result — so to get 5 characters starting at 0, you write word[0:5] or word[:5].",
+    "To get everything from position 5 to the end, leave the stop blank: word[5:]. To reverse a string, use a step of -1: word[::-1].",
+    "Positions 7 through 10 inclusive means the stop must be 11, because the stop is always exclusive. Try word[7:11]."
+  ]
+}

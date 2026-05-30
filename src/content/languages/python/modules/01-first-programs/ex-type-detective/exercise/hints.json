@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Use type(value) to get the type, then compare it: if type(value) == str: return \"string\".",
+    "You'll need four separate if statements — one per type — each returning the matching label.",
+    "The tricky part: bool is a subtype of int, so type(True) == int is actually True. Put your bool check first, before the int check."
+  ]
+}

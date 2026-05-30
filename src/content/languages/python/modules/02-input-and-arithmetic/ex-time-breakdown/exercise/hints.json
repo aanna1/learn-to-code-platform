@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Two operators do the heavy lifting: `//` gives you whole minutes (`total_seconds // 60`), and `%` gives you the leftover seconds (`total_seconds % 60`).",
+    "To pad single-digit seconds with a leading zero, use `:02d` inside your f-string: `f\"{minutes}:{seconds:02d}\"`.",
+    "Full solution:\n\nminutes = total_seconds // 60\nseconds = total_seconds % 60\nreturn f\"{minutes}:{seconds:02d}\""
+  ]
+}

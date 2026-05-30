@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Set up an accumulator before the loop: total = 0. Inside the loop, add each number: total += n.",
+    "range(start, stop) stops BEFORE stop. To include stop in your sum, write range(start, stop + 1).",
+    "Don't return inside the loop — that exits after just the first number. The return total line goes after the loop ends.",
+    "Verify: sum_range(1, 4) should be 1+2+3+4 = 10. If you get 6, your range is stopping one too early."
+  ]
+}

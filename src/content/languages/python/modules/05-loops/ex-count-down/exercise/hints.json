@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "A while loop needs three parts: set up n before the loop, write a condition (n >= 1), and change n inside the loop body (n -= 1).",
+    "Print n before decrementing it. If you write n -= 1 first, you'll print the wrong values.",
+    "After the loop body runs, Python re-checks the condition. When n reaches 0, the condition n >= 1 is false and the loop stops.",
+    "If your function prints nothing, the while condition might be false from the start. Check that n starts at a positive value and your condition is n >= 1."
+  ]
+}

@@ -1,0 +1,47 @@
+# Receipt
+
+Real programs chain together everything in this module: multiply numbers, compute a percentage, format the results for display. A receipt is a clean example — three lines, each one a formatted float.
+
+## Your task
+
+Complete `format_receipt(price, quantity, tax_rate)` so that it returns a three-line string:
+
+```
+Subtotal: {subtotal}
+Tax: {tax}
+Total: {total}
+```
+
+Where:
+
+- `subtotal = price * quantity`
+- `tax = subtotal * tax_rate`
+- `total = subtotal + tax`
+- All three values formatted to exactly 2 decimal places
+
+## Requirements
+
+- Use `:.2f` inside f-strings to format each value — do not use `round()`.
+- Return a single string with the three lines joined by `\n` (a newline character).
+- Do not print anything — return the string.
+
+## Examples
+
+```
+format_receipt(10.0, 3, 0.1)
+→ "Subtotal: 30.00\nTax: 3.00\nTotal: 33.00"
+
+format_receipt(5.0, 4, 0.0)
+→ "Subtotal: 20.00\nTax: 0.00\nTotal: 20.00"
+
+format_receipt(1.0, 1, 0.5)
+→ "Subtotal: 1.00\nTax: 0.50\nTotal: 1.50"
+```
+
+When printed, `format_receipt(10.0, 3, 0.1)` looks like:
+
+```
+Subtotal: 30.00
+Tax: 3.00
+Total: 33.00
+```

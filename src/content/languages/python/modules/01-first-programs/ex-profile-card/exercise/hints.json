@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "An f-string starts with f before the opening quote: print(f\"...\"). Without the f, the curly braces are treated as literal characters.",
+    "Put a variable inside curly braces to substitute its value: print(f\"Age: {age}\") prints Age: 36.",
+    "You can put two variables in one f-string with a space between them: f\"Name: {first_name} {last_name}\". The Bio line uses three variables the same way."
+  ]
+}

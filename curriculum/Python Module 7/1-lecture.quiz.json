@@ -1,0 +1,79 @@
+{
+  "questions": [
+    {
+      "question": "What does this code print?\n\nnumbers = [3, 1, 4, 1, 5]\nsorted_numbers = numbers.sort()\nprint(sorted_numbers)",
+      "options": [
+        {
+          "text": "None",
+          "correct": true,
+          "explanation": "Correct. .sort() sorts the list in place and returns None — it doesn't give you back a new list. If you want a sorted copy, use sorted(numbers) instead. That returns a new list and leaves the original untouched."
+        },
+        {
+          "text": "[1, 1, 3, 4, 5]",
+          "correct": false,
+          "explanation": "This is what numbers looks like after the sort, but sorted_numbers doesn't hold the list — it holds None. .sort() is a mutating method that returns None, not the sorted result. Use sorted(numbers) if you want to capture the sorted version in a variable."
+        },
+        {
+          "text": "[3, 1, 4, 1, 5]",
+          "correct": false,
+          "explanation": ".sort() does mutate the list, so numbers is now sorted — but sorted_numbers holds the return value of .sort(), which is None. The original order only shows up in numbers before the sort runs."
+        },
+        {
+          "text": "SortError",
+          "correct": false,
+          "explanation": "There's no SortError in Python. .sort() is a valid list method — it just returns None instead of the sorted list, which is the actual surprise here."
+        }
+      ]
+    },
+    {
+      "question": "After this code runs, what does print(a) output?\n\na = [1, 2, 3]\nb = a\nb.append(4)",
+      "options": [
+        {
+          "text": "[1, 2, 3]",
+          "correct": false,
+          "explanation": "b = a does not copy the list — it gives the same list a second name. Mutating through b is the same as mutating through a, because there's only one list. To get an independent copy, use b = a.copy() or b = a[:]."
+        },
+        {
+          "text": "[1, 2, 3, 4]",
+          "correct": true,
+          "explanation": "Correct. b = a doesn't create a new list; it just makes b another name for the same list. So b.append(4) modifies the one list that both a and b point at. This is the aliasing trap — two names, one list."
+        },
+        {
+          "text": "[4, 1, 2, 3]",
+          "correct": false,
+          "explanation": ".append adds to the end of the list, not the beginning. But the bigger issue here is aliasing: a and b both point at the same list, so any change through b shows up in a."
+        },
+        {
+          "text": "NameError",
+          "correct": false,
+          "explanation": "Both a and b are defined, so no NameError. The tricky part is that b = a makes both names refer to the same list — not two separate lists."
+        }
+      ]
+    },
+    {
+      "question": "Which line correctly creates a 3x3 grid where each row is independent (so changing one cell doesn't affect other rows)?",
+      "options": [
+        {
+          "text": "grid = [[0] * 3] * 3",
+          "correct": false,
+          "explanation": "This creates three references to the same inner list. Changing grid[0][0] would also change grid[1][0] and grid[2][0], because all three rows point at the same list object."
+        },
+        {
+          "text": "grid = [[0] * 3 for _ in range(3)]",
+          "correct": true,
+          "explanation": "Correct. The list comprehension runs [0] * 3 once per iteration, creating a separate list object each time. That gives you three truly independent rows."
+        },
+        {
+          "text": "grid = list([[0] * 3] * 3)",
+          "correct": false,
+          "explanation": "Wrapping in list() creates a new outer list, but the inner lists are still the same object repeated three times. The aliasing problem isn't fixed."
+        },
+        {
+          "text": "grid = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]",
+          "correct": false,
+          "explanation": "This actually works for a fixed 3x3 grid — each inner list is a separate literal. But for larger or dynamic grids it doesn't scale. The comprehension form is the idiomatic, general-purpose solution."
+        }
+      ]
+    }
+  ]
+}

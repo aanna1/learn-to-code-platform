@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Assign a value like this: first_name = \"Ada\". The name goes on the left, the value (in quotes) on the right.",
+    "To print a variable, pass it to print() without quotes: print(first_name). With quotes — print(\"first_name\") — prints the literal word, not its value.",
+    "If a test says a variable is empty, you probably left the original empty string. Replace the \"\" with a real value."
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "A list comprehension has the form [expression for item in iterable if condition]. Here: [word.lower() for word in words if len(word) > min_length].",
+    "The condition is len(word) > min_length — strictly greater than, not greater-than-or-equal. A word of exactly min_length characters gets excluded.",
+    "Wrap the whole comprehension in sorted(...) to get the alphabetical order: sorted([word.lower() for word in words if len(word) > min_length]).",
+    "If no words pass the filter, the comprehension produces an empty list []. sorted([]) is also [], so you don't need a special case."
+  ]
+}

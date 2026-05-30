@@ -1,0 +1,79 @@
+{
+  "questions": [
+    {
+      "question": "What does this code print?\n\nn = input(\"Enter a number: \")\nprint(n + 5)",
+      "options": [
+        {
+          "text": "Whatever the user typed, plus 5",
+          "correct": false,
+          "explanation": "That's what you'd want — but input() always returns a string, and Python can't add an integer to a string. You'll get a TypeError instead."
+        },
+        {
+          "text": "TypeError",
+          "correct": true,
+          "explanation": "Correct. input() always returns a string, no matter what the user types. The + operator can't combine a string and an integer, so Python raises a TypeError. Fix it with n = int(input(\"Enter a number: \")) to convert the string to an integer first."
+        },
+        {
+          "text": "5",
+          "correct": false,
+          "explanation": "Python doesn't silently ignore n — it tries to add it to 5. But since n is a string, the addition fails with a TypeError. You need int(input(...)) to convert first."
+        },
+        {
+          "text": "The user's input as a number",
+          "correct": false,
+          "explanation": "input() never returns a number — it always returns a string, even if the user typed digits. You have to convert it yourself with int() or float()."
+        }
+      ]
+    },
+    {
+      "question": "What does `7 // 2` evaluate to?",
+      "options": [
+        {
+          "text": "3.5",
+          "correct": false,
+          "explanation": "3.5 is the result of true division: 7 / 2. The double slash // is floor division — it drops the decimal and returns only the integer part."
+        },
+        {
+          "text": "3",
+          "correct": true,
+          "explanation": "Correct. // is floor division: it divides and then drops everything after the decimal point. 7 divided by 2 is 3.5, and floor division keeps only the 3."
+        },
+        {
+          "text": "1",
+          "correct": false,
+          "explanation": "1 is the remainder after dividing 7 by 2 — that's what the % (modulo) operator gives you. Floor division (//) gives the quotient, not the remainder."
+        },
+        {
+          "text": "4",
+          "correct": false,
+          "explanation": "4 would be the result of rounding 3.5 up. Floor division always rounds toward zero — it doesn't round up, it drops the decimal entirely."
+        }
+      ]
+    },
+    {
+      "question": "Which of these will raise a ValueError?",
+      "options": [
+        {
+          "text": "int(\" 42 \")",
+          "correct": false,
+          "explanation": "This actually works. int() strips leading and trailing whitespace before converting, so int(\" 42 \") returns 42."
+        },
+        {
+          "text": "float(\"3\")",
+          "correct": false,
+          "explanation": "float() accepts any integer-shaped string and converts it to a float. float(\"3\") returns 3.0 — no error."
+        },
+        {
+          "text": "int(\"3.14\")",
+          "correct": true,
+          "explanation": "Correct. int() only accepts integer-shaped strings — no decimal points allowed. \"3.14\" looks like a float, not an integer, so int() raises a ValueError. If you need an integer from a decimal string, go through float first: int(float(\"3.14\")) gives you 3."
+        },
+        {
+          "text": "str(100)",
+          "correct": false,
+          "explanation": "str() converts any value to its string representation. str(100) returns the string \"100\" — there's nothing that can go wrong here."
+        }
+      ]
+    }
+  ]
+}

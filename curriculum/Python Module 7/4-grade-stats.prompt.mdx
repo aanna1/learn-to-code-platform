@@ -1,0 +1,33 @@
+# Grade Stats
+
+Iterating over a list lets you compute summaries. Python's built-in `min()`, `max()`, `sum()`, and `len()` each take a list and return a single value. Combining them gives you a concise stats function, and a tuple is the natural way to hand back all three results in one return.
+
+## Your task
+
+Write a function `grade_stats(grades)` that takes a non-empty list of numeric grades and returns a tuple of three values:
+
+```
+(lowest, highest, average)
+```
+
+where `average` is rounded to two decimal places.
+
+## Examples
+
+```python
+grade_stats([85, 92, 78, 95, 88])
+# (78, 95, 87.6)
+
+grade_stats([100])
+# (100, 100, 100.0)
+
+grade_stats([70, 80])
+# (70, 80, 75.0)
+```
+
+## Requirements
+
+- Use `min()`, `max()`, `sum()`, and `len()` — no manual loops needed.
+- Round the average to two decimal places using `round(value, 2)`.
+- Return a tuple in the order `(lowest, highest, average)`.
+- You can assume `grades` is always a non-empty list of numbers.

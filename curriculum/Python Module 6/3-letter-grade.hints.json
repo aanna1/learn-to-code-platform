@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Start by checking the highest threshold first: if score >= 90: return \"A\". Once that return fires, the function is done.",
+    "You don't need elif — plain if works because each branch ends with return. The next if only runs if the previous one was false.",
+    "After four if-return pairs, add a bare return \"F\" at the end to catch everything below 60."
+  ]
+}

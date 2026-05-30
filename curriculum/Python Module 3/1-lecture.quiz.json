@@ -1,0 +1,79 @@
+{
+  "questions": [
+    {
+      "question": "What does this print?\n\nname = \"  Ada  \"\nname.strip()\nprint(name)",
+      "options": [
+        {
+          "text": "\"Ada\"",
+          "correct": false,
+          "explanation": "Close, but .strip() returned a new string that we never captured. The original name variable was never updated, so it still holds \"  Ada  \" with the spaces."
+        },
+        {
+          "text": "\"  Ada  \"",
+          "correct": true,
+          "explanation": "Correct. Strings are immutable — .strip() returns a new string but leaves the original alone. To keep the result, you have to assign it back: name = name.strip()."
+        },
+        {
+          "text": "Nothing — strip() modifies the string silently",
+          "correct": false,
+          "explanation": ".strip() does produce a result, but since we didn't assign it, that result was discarded. The original string is printed unchanged."
+        },
+        {
+          "text": "A TypeError, because strip() can't be called on a string with spaces",
+          "correct": false,
+          "explanation": ".strip() is designed specifically to remove whitespace. It works fine on strings with spaces — it just returns a new string instead of modifying the original."
+        }
+      ]
+    },
+    {
+      "question": "What does word[0:4] return when word = \"Python\"?",
+      "options": [
+        {
+          "text": "\"Pytho\"",
+          "correct": false,
+          "explanation": "\"Pytho\" would be word[0:5] — five characters. The stop index is exclusive, so [0:4] covers positions 0, 1, 2, 3 only."
+        },
+        {
+          "text": "\"Python\"",
+          "correct": false,
+          "explanation": "\"Python\" is the whole string — six characters. [0:4] stops before position 4, giving only four characters."
+        },
+        {
+          "text": "\"Pyth\"",
+          "correct": true,
+          "explanation": "Correct. The stop value is exclusive — [0:4] includes positions 0, 1, 2, 3 but not 4. To get N characters starting at position start, the stop is start + N."
+        },
+        {
+          "text": "\"ytho\"",
+          "correct": false,
+          "explanation": "\"ytho\" would be word[1:5]. The slice [0:4] starts at position 0 (the \"P\"), not position 1."
+        }
+      ]
+    },
+    {
+      "question": "Which tool is the best fit for each job?\n\nA) Mixing one variable into a sentence\nB) Joining a list of words with a comma separator\nC) Concatenating two string literals",
+      "options": [
+        {
+          "text": "A) f-string, B) .join(), C) +",
+          "correct": true,
+          "explanation": "Correct. f-strings are the readable default when embedding variables in text. .join() handles sequences of pieces with a consistent separator cleanly. + is fine for two literal strings, but requires str() for non-strings and gets messy fast beyond two pieces."
+        },
+        {
+          "text": "A) +, B) f-string, C) .join()",
+          "correct": false,
+          "explanation": "+ works for A but requires str() if age is a number, making it fragile. f-strings handle variable embedding more cleanly. And .join() takes a list, not individual arguments — it's not the right tool for a single sentence."
+        },
+        {
+          "text": "A) .join(), B) +, C) f-string",
+          "correct": false,
+          "explanation": ".join() takes a list of strings — it's not designed for embedding one variable in a sentence. This matches each tool to the wrong job."
+        },
+        {
+          "text": "They're interchangeable — use whichever you prefer",
+          "correct": false,
+          "explanation": "They overlap a little, but each has a clear home. + breaks when you mix strings and numbers. .join() needs a list, not a template. f-strings don't work well when you're building output from a dynamic list of pieces."
+        }
+      ]
+    }
+  ]
+}

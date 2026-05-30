@@ -1,0 +1,13 @@
+{
+  "id": "05-loops",
+  "title": "Loops",
+  "description": "Repeat actions with while and for loops, control iteration with break and continue, and understand range's half-open intervals.",
+  "order": 5,
+  "lessons": [
+    { "id": "lecture",         "title": "while, for, range, break & continue", "type": "lecture",  "order": 1 },
+    { "id": "ex-count-down",   "title": "Count Down",                           "type": "exercise", "order": 2 },
+    { "id": "ex-sum-of-range", "title": "Sum of a Range",                       "type": "exercise", "order": 3 },
+    { "id": "ex-skip-and-stop","title": "Skip and Stop",                        "type": "exercise", "order": 4 },
+    { "id": "ex-fizzbuzz",     "title": "FizzBuzz",                             "type": "exercise", "order": 5 }
+  ]
+}

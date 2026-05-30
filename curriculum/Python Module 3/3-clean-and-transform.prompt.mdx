@@ -1,0 +1,34 @@
+# Clean and Transform
+
+Real user input is messy: extra whitespace, inconsistent casing, underscores where spaces should be. The string methods you learned — `.strip()`, `.lower()`, `.replace()`, `.split()`, `.join()` — exist precisely to fix this. The key insight is that they chain: each method returns a new string, so you can call the next one directly on the result.
+
+## Your task
+
+Write a function `normalize(text)` that cleans up a messy string and returns the result. The function must:
+
+1. Strip leading and trailing whitespace.
+2. Replace every underscore (`_`) with a space.
+3. Lowercase everything.
+4. Collapse any runs of multiple spaces into a single space.
+
+For step 4, think about what `.split()` does with no argument — and what you can do with the resulting list.
+
+## Requirements
+
+- Define a function named `normalize` that takes one argument, `text`.
+- It must return the cleaned string (not print it).
+- `normalize("  Ada_Lovelace  ")` returns `"ada lovelace"`.
+- `normalize("HELLO___WORLD")` returns `"hello world"`.
+- `normalize("  too   many   spaces  ")` returns `"too many spaces"`.
+- `normalize("already clean")` returns `"already clean"`.
+
+## Example output
+
+Calling the function with the test cases above produces:
+
+```
+ada lovelace
+hello world
+too many spaces
+already clean
+```

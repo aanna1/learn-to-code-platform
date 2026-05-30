@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Start by calling text.lower().split() to get a list of lowercase words. The .lower() step is what makes the count case-insensitive.",
+    "To count without crashing on the first word, use: counts[word] = counts.get(word, 0) + 1. The .get(word, 0) part returns 0 the first time a word is seen, so the addition always has something to work with.",
+    "Loop over the word list with a for loop, update counts inside the loop, then return counts after the loop ends.",
+    "For an empty string, text.lower().split() returns an empty list [], so the loop body never runs and counts stays {}. No special case needed."
+  ]
+}

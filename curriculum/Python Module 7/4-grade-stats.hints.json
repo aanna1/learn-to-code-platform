@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Python has built-ins for this: min(grades) gives the smallest value, max(grades) gives the largest, sum(grades) gives the total.",
+    "The average is sum(grades) / len(grades). Wrap it in round(..., 2) to get exactly two decimal places.",
+    "To return multiple values as a tuple, separate them with commas: return (lowest, highest, average). The parentheses are optional but make it clear.",
+    "The caller can unpack the tuple like this: low, high, avg = grade_stats(grades). That's tuple unpacking — each variable gets one element."
+  ]
+}

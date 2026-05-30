@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Start by copying the roster: result = roster.copy(). If you skip this step, your changes will affect the caller's original list.",
+    "To add each name, loop over to_add and call result.append(name) each time.",
+    "Before removing a name, check it's actually there: if name in result: result.remove(name). Calling .remove() on a missing value raises ValueError.",
+    "Return sorted(result) — not result.sort(). The .sort() method returns None, not the sorted list."
+  ]
+}

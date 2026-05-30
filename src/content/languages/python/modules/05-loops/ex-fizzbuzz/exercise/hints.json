@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Check divisibility by both 3 and 5 first. If you check by 3 alone first, 15 becomes 'Fizz' instead of 'FizzBuzz'.",
+    "The modulo operator % gives the remainder after division. n % 3 == 0 means n divides evenly by 3 with no remainder.",
+    "For numbers that aren't Fizz or Buzz, convert the integer to a string: str(i). The list must contain strings throughout.",
+    "Make sure your range includes n itself. range(1, n) stops before n; range(1, n + 1) includes it."
+  ]
+}

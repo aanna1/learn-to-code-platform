@@ -1,8 +1,47 @@
 {
-  "language": "python",
-  "displayName": "Python",
-  "tagline": "A friendly first language. Clear to read, quick to run, and used everywhere.",
-  "modules": [
-    { "id": "01-fundamentals", "title": "Fundamentals", "order": 1 }
-  ]
+    "language": "python",
+    "displayName": "Python",
+    "tagline": "A friendly first language. Clear to read, quick to run, and used everywhere.",
+    "modules": [
+        {
+            "id": "01-first-programs",
+            "title": "First Programs",
+            "order": 1
+        },
+        {
+            "id": "02-input-and-arithmetic",
+            "title": "Input & Arithmetic",
+            "order": 2
+        },
+        {
+            "id": "03-strings-in-depth",
+            "title": "Strings in Depth",
+            "order": 3
+        },
+        {
+            "id": "04-conditionals",
+            "title": "Conditionals",
+            "order": 4
+        },
+        {
+            "id": "05-loops",
+            "title": "Loops",
+            "order": 5
+        },
+        {
+            "id": "06-functions",
+            "title": "Functions",
+            "order": 6
+        },
+        {
+            "id": "07-lists-and-tuples",
+            "title": "Lists & Tuples",
+            "order": 7
+        },
+        {
+            "id": "08-dicts-and-sets",
+            "title": "Dictionaries & Sets",
+            "order": 8
+        }
+    ]
 }

@@ -1,0 +1,37 @@
+{
+  "id": "03-strings-in-depth",
+  "title": "Strings in Depth",
+  "description": "Master Python strings: index and slice sequences, apply the core string methods, and format output with f-string specifiers.",
+  "lessons": [
+    {
+      "id": "lecture",
+      "title": "Indexing, Slicing, Methods & Formatting",
+      "type": "lecture",
+      "order": 1
+    },
+    {
+      "id": "ex-slice-it",
+      "title": "Slice It",
+      "type": "exercise",
+      "order": 2
+    },
+    {
+      "id": "ex-clean-and-transform",
+      "title": "Clean and Transform",
+      "type": "exercise",
+      "order": 3
+    },
+    {
+      "id": "ex-formatted-receipt",
+      "title": "Formatted Receipt",
+      "type": "exercise",
+      "order": 4
+    },
+    {
+      "id": "ex-email-parser",
+      "title": "Email Parser",
+      "type": "exercise",
+      "order": 5
+    }
+  ]
+}

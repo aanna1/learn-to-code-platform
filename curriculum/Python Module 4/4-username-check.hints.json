@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Build this as an if/elif/else chain. Each rule is one branch, and you return the message right inside that branch so the function stops at the first failure.",
+    "For the empty check, use truthiness: an empty string is falsy, so 'if not name:' means 'if there's no name.' Put this branch first.",
+    "Length: 'elif len(name) < 3:'. Use < 3 (not <= 3) so a 3-character name is allowed. Space: 'elif \" \" in name:' — the in operator checks for a substring.",
+    "Order is everything here. Empty must come before length (an empty string is also too short), and the valid message goes in the final else. The tests check that the FIRST matching rule wins."
+  ]
+}

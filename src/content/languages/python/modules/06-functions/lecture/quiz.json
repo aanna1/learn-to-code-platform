@@ -1,0 +1,79 @@
+{
+  "questions": [
+    {
+      "question": "What does this code print?\n\ndef greet():\n    print(\"Hello!\")\n\ngreet",
+      "options": [
+        {
+          "text": "Hello!",
+          "correct": false,
+          "explanation": "That's what greet() (with parentheses) would print. Without the parentheses, you're just referencing the function object — nothing runs. The missing () is one of the most common beginner slip-ups."
+        },
+        {
+          "text": "Nothing — no output is produced.",
+          "correct": true,
+          "explanation": "Correct. Writing greet without parentheses just refers to the function object. It doesn't call it. To run the function and see Hello!, you need greet()."
+        },
+        {
+          "text": "greet",
+          "correct": false,
+          "explanation": "greet without quotes is a reference to the function, not a string. Python doesn't print variable names on their own — and even if it did, it wouldn't print Hello!."
+        },
+        {
+          "text": "SyntaxError",
+          "correct": false,
+          "explanation": "This is valid Python — it just doesn't do what you might expect. Writing a name on its own line is legal; it simply evaluates the expression and discards the result."
+        }
+      ]
+    },
+    {
+      "question": "What does this code print?\n\ndef add(a, b):\n    print(a + b)\n\nresult = add(3, 4)\nprint(result)",
+      "options": [
+        {
+          "text": "7",
+          "correct": false,
+          "explanation": "7 does appear — but it's printed from inside add(), not stored in result. Since add() has no return statement, result ends up as None, so a second value also prints."
+        },
+        {
+          "text": "7\nNone",
+          "correct": true,
+          "explanation": "Correct. add(3, 4) prints 7 as a side effect, then returns None (no return statement). That None is assigned to result, and the final print(result) displays it."
+        },
+        {
+          "text": "None",
+          "correct": false,
+          "explanation": "None does print — but not alone. The print(a + b) inside add() also fires and shows 7 before None appears."
+        },
+        {
+          "text": "TypeError",
+          "correct": false,
+          "explanation": "No error here — the code runs fine. The surprise is in what it prints: 7 from inside the function, then None because add() never returns anything."
+        }
+      ]
+    },
+    {
+      "question": "A variable defined inside a function — what happens to it after the function returns?",
+      "options": [
+        {
+          "text": "It stays in memory and can be used later in the script.",
+          "correct": false,
+          "explanation": "Local variables don't persist. Once the function returns, they're gone. If you try to use them outside the function, you'll get a NameError."
+        },
+        {
+          "text": "It becomes a global variable automatically.",
+          "correct": false,
+          "explanation": "Python doesn't promote local variables to global scope on its own. For a value to be accessible outside the function, you have to explicitly return it."
+        },
+        {
+          "text": "It no longer exists — it was local to that function call.",
+          "correct": true,
+          "explanation": "Correct. Local variables live only for the duration of that function call. When the function returns, they're gone. To get a value out, return it and have the caller catch it."
+        },
+        {
+          "text": "It raises an error the next time the function is called.",
+          "correct": false,
+          "explanation": "No error — each call to a function gets its own fresh set of local variables. The previous call's locals are simply gone; they don't interfere with the next call."
+        }
+      ]
+    }
+  ]
+}

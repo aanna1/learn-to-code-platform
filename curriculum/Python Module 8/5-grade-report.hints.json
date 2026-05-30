@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "passing_students: a list comprehension can filter and extract names in one line: [s['name'] for s in students if s['score'] >= threshold]. Wrap that in sorted() and return it.",
+    "class_average: first collect all scores with [s['score'] for s in students], then compute sum(scores) / len(scores). Wrap the result in round(..., 2) before returning.",
+    "top_student: start with best = students[0]. Then loop over students — if s['score'] > best['score'], replace best with s. After the loop, return best['name'].",
+    "Each student is a dictionary, so access fields with s['name'] and s['score'] — not s.name or s[0]."
+  ]
+}

@@ -1,0 +1,339 @@
+## Why this matters
+
+Every program you've written so far runs the same way every time. Top to bottom, line by line, no decisions. You take input, you do math, you print a result. Run the program twice with the same input and you get the same output, identical down to the byte.
+
+That's a useful kind of program, but it's not most of them. Most programs need to do *different things in different situations*. An ATM checks whether your balance covers the withdrawal. A login form checks whether the password matches. A game checks whether the player guessed too high or too low. A traffic light decides whether to turn green, yellow, or red. None of those can be written as a straight line of instructions. They need to *branch*.
+
+Conditionals are how you write branches. They're the part of programming where the language stops being a fancy calculator and starts being something that can make decisions. After this module, your programs can react to what they see — not just *that* the user typed something, but *what* they typed.
+
+Without conditionals, your programs can't validate input, can't check for errors, can't react to different inputs differently. You can't write a single useful application without them. This isn't optional knowledge.
+
+## What you'll be able to do by the end
+
+- Use the comparison operators `==`, `!=`, `<`, `>`, `<=`, `>=` and explain why `=` and `==` are different.
+- Write `if`, `elif`, and `else` statements with correctly indented blocks.
+- Combine conditions with `and`, `or`, and `not`, and predict the result of short-circuit evaluation.
+- Identify which Python values are *truthy* and which are *falsy*, and use that to write shorter conditions.
+- Use the `in` operator to check membership in a string.
+- Decide when chained `elif` is clearer than nested `if`, and vice versa.
+
+<Callout type="info">
+No installation needed. Every code block on this platform has a **Run** button — press it and your code executes instantly in the browser. You don't need Python on your machine, and you don't need a terminal.
+</Callout>
+
+## Core concepts
+
+### Comparison operators produce booleans
+
+A *comparison operator* is a symbol that asks a yes/no question about two values. Python has six:
+
+| Operator | Question | Example | Result |
+|---|---|---|---|
+| `==` | Are these equal? | `5 == 5` | `True` |
+| `!=` | Are these not equal? | `5 != 6` | `True` |
+| `<` | Is the left smaller? | `5 < 6` | `True` |
+| `>` | Is the left bigger? | `5 > 6` | `False` |
+| `<=` | Smaller or equal? | `5 <= 5` | `True` |
+| `>=` | Bigger or equal? | `6 >= 5` | `True` |
+
+Every comparison produces a *boolean* — `True` or `False`. That's it. There's no in-between answer.
+
+<Runnable code={`age = 20
+print(age >= 18)    # True
+print(age == 21)    # False
+print(age < 13)     # False`} />
+
+You can compare strings too, with a couple of gotchas. Equality checks character by character, case-sensitively:
+
+<Runnable code={`print("hello" == "hello")    # True
+print("hello" == "Hello")    # False — case matters
+print("hello" == " hello")   # False — whitespace matters`} />
+
+If you need case-insensitive comparison, lowercase both sides first (Module 3): `s1.lower() == s2.lower()`. If you need to ignore whitespace, `.strip()` both sides.
+
+Order comparisons on strings sort alphabetically — sort of. They use the underlying character codes, which means uppercase letters come before lowercase ones:
+
+```python
+print("apple" < "banana")    # True — alphabetical
+print("Z" < "a")             # True — uppercase Z has a lower code than lowercase a
+```
+
+You won't lean on string `<` and `>` often. Just know they exist and behave a little strangely with mixed case.
+
+### Assignment vs. equality — the one mistake everybody makes
+
+Here's the bug you'll write at least three times before it sticks. A single `=` is *assignment*. A double `==` is *equality*. They're completely different things, but they look almost identical, so they get mixed up constantly.
+
+```python
+age = 18      # assignment: put 18 into the variable age
+age == 18     # comparison: is age equal to 18? returns True or False
+```
+
+In an `if` statement, you want a comparison. Watch what happens if you reach for a single `=` by reflex:
+
+```python
+age = 17
+if age = 18:           # SyntaxError
+    print("adult")
+```
+
+Python catches it for you. The interpreter rejects this with `SyntaxError: invalid syntax` because a single `=` doesn't produce a value `if` can use. That's friendlier than you might guess — in languages like C, the equivalent is legal, silently assigns 18, and runs the block every single time. Python won't let you do that. The error message is your friend.
+
+Read a single `=` aloud as "gets" and a double `==` as "equals." So `age = 18` is "age *gets* 18," and `age == 18` is "*does* age equal 18?"
+
+### if statements
+
+The simplest conditional is `if`, which runs a block of code only when a condition is true:
+
+<Runnable code={`age = 20
+if age >= 18:
+    print("You can vote.")
+print("Done.")`} />
+
+Three pieces matter. The `if` keyword. The *condition* — anything that produces a boolean (or that Python can interpret as one — more on truthiness shortly). And the *colon* at the end of the line, which says "the block below is what to run conditionally."
+
+Then comes the *block* itself — the indented code beneath. Python uses indentation to mark which lines belong to the `if`. Four spaces is the convention, and your editor probably adds them automatically when you hit Enter after a line ending in a colon. The indentation isn't decoration. It's how Python knows where the block starts and ends:
+
+<Runnable code={`age = 20
+if age >= 18:
+    print("You can vote.")
+    print("You can also vote in primaries.")
+print("Done.")`} />
+
+That last `print("Done.")` is back at the original indentation level, so Python knows it's outside the `if`. Whether `age` is 17 or 71, that line runs.
+
+Indentation has to be consistent. Mix tabs and spaces, or use four spaces on one line and three on the next, and Python rejects the file with an `IndentationError`. Most editors handle this for you — pick "spaces" or "tabs" in your settings and let the editor stay consistent. If you ever hit an `IndentationError` you can't spot, your editor might be mixing tabs and spaces invisibly. Most editors have a "show whitespace" toggle.
+
+### else for the other path
+
+`else` covers the case where the `if` condition is false:
+
+<Runnable code={`age = 16
+if age >= 18:
+    print("You can vote.")
+else:
+    print("Not yet — but soon.")`} />
+
+Notice the `else:` sits at the same indentation as `if`. The block under it is the "what to do if the condition was false." Exactly one of the two blocks runs. Never both, never neither.
+
+### elif for multiple paths
+
+What if you have more than two cases? You might think to write a stack of independent `if` statements:
+
+<Runnable code={`score = 95
+if score >= 90:
+    print("A")
+if score >= 80:
+    print("B")
+if score >= 70:
+    print("C")`} />
+
+Run that and you get `A`, `B`, and `C`, all three. That's not what we want. Each `if` is independent — they all check their own conditions, and any that are true run. A score of 95 is above 90, *and* above 80, *and* above 70, so all three blocks fire.
+
+The fix is `elif`, short for "else if." It chains conditions so only the first true one runs:
+
+<Runnable code={`score = 95
+if score >= 90:
+    print("A")
+elif score >= 80:
+    print("B")
+elif score >= 70:
+    print("C")
+else:
+    print("Below C")`} />
+
+Now a score of 95 prints just `A`. Python checks `if score >= 90`, finds it true, runs that block, and skips the rest of the chain. The other conditions never even get evaluated.
+
+Order matters in an `elif` chain. If you flip it so `score >= 70` comes first, a score of 95 prints `C` — the first true condition wins, and we never check the others. When you use `elif` for a range of values, go from most-specific (narrowest) to least-specific (widest), or equivalently from highest threshold to lowest.
+
+Because `elif` chains in order, you don't have to write upper bounds. By the time `elif score >= 80` runs, we already know `score >= 90` was false, so we know `score < 90` without writing it. That's one of the small everyday pleasures of `elif`.
+
+The structure as a whole: one `if`, zero or more `elif`s, an optional `else` at the end. The `else` is the catch-all. If you skip it and nothing matches, nothing happens — no error, just silence.
+
+<Runnable code={`# Compare these two. Same conditions, different behavior.
+x = 5
+
+# Independent ifs — every true one runs
+if x > 0:
+    print("A: positive")
+if x > 3:
+    print("A: more than 3")
+
+# elif chain — stops at the first match
+if x > 0:
+    print("B: positive")
+elif x > 3:
+    print("B: more than 3")`} />
+
+<Callout type="tip">
+The independent `if`s print both "positive" and "more than 3" — each is checked on its own. The `elif` chain prints only "positive," because once the first condition matches, the rest of the chain is skipped. This is the single most important difference to internalize this module.
+</Callout>
+
+### Logical operators: and, or, not
+
+Often you want to combine conditions. Python has three logical operators:
+
+<Runnable code={`is_weekend = False
+print(not is_weekend)        # True
+print(True and False)        # False
+print(True or False)         # True
+print(False or False)        # False`} />
+
+`and` is true only when *both* sides are true. `or` is true when *at least one* side is true. `not` flips a boolean.
+
+You can chain them. Precedence: `not` first, then `and`, then `or`. If the order isn't obvious, add parentheses:
+
+```python
+# These are equivalent — parentheses just make the intent clearer
+if (age >= 18 and has_id) or is_member:
+    print("Allowed in.")
+
+if age >= 18 and has_id or is_member:
+    print("Allowed in.")
+```
+
+Both work. The first is easier to read. Add parentheses whenever you'd otherwise have to pause and work out what's going on. Future you will be grateful.
+
+#### Short-circuit evaluation
+
+`and` and `or` have a subtle feature called *short-circuiting*. They evaluate left to right and stop the moment they know the answer.
+
+For `and`, if the left side is false, the right side is irrelevant — the whole expression is false, and Python doesn't evaluate the right side at all. For `or`, if the left side is true, the right side is irrelevant, and Python skips it.
+
+This matters in two ways. Performance: if the right side is expensive, `and`/`or` can save the work. More important for now, short-circuiting lets you guard against errors. Say `input()` might return an empty string and you want to check its first character:
+
+```python
+text = input("Type something: ")
+if text[0].isdigit():
+    print("starts with a digit")
+```
+
+If the user hits Enter without typing anything, `text` is empty, `text[0]` is an `IndexError`, and the program crashes. Guard it with `and`:
+
+<Runnable code={`text = ""
+if text and text[0].isdigit():
+    print("starts with a digit")
+else:
+    print("nothing to check")`} />
+
+If `text` is empty (an empty string is falsy), the `and` short-circuits, `text[0].isdigit()` never runs, and there's no crash. This pattern shows up constantly.
+
+#### A subtle thing or does
+
+In Python, `and` and `or` don't strictly return `True` or `False`. They return one of the *operands*.
+
+<Runnable code={`print(0 or "hello")       # hello
+print("a" or "b")         # a
+print(0 or 0 or "found")  # found
+print(0 and "hello")      # 0
+print("a" and "b")        # b`} />
+
+The rule: `or` returns the first truthy operand, or the last operand if all were falsy. `and` returns the first falsy operand, or the last operand if all were truthy. So `0 or "hello"` is `"hello"` because `0` is falsy, so `or` moves on, finds `"hello"`, and returns it.
+
+You'll mostly see this used as a default-value trick: `name = input("Name: ") or "Anonymous"`. If the user types something, that's truthy and `or` returns it. If they leave it blank, the empty string is falsy, `or` moves on, and you get `"Anonymous"`. Compact and idiomatic once you're used to it.
+
+### Truthy and falsy values
+
+Inside an `if`, Python doesn't strictly require a boolean. It accepts anything and converts it using a fixed set of rules. The values that count as false — *falsy* — are `False`, `None`, zero of any numeric type (`0`, `0.0`), and empty sequences (`""`, `[]`, the empty tuple, the empty dict). Everything else is *truthy*.
+
+<Runnable code={`name = "Ada"
+if name:
+    print("Hello, " + name)
+else:
+    print("You didn't enter a name.")`} />
+
+Writing `if name:` is shorthand for `if name != "":`. The empty string is falsy; any non-empty string is truthy. Reading it aloud as "if there's a name" makes the intent clear. The same idea applies to numbers — `0` is falsy, every other number (including negatives) is truthy.
+
+One trap: `if name:` and `if name is not None:` are *not* the same. The first treats the empty string as falsy and skips the block. The second only skips when `name` is literally `None`. If you're distinguishing "not set yet" from "set to an empty value," you need `is None` / `is not None`, not plain truthiness.
+
+### Chained comparisons
+
+Python lets you chain comparisons in a way that looks mathematical:
+
+<Runnable code={`age = 25
+if 18 <= age < 65:
+    print("working age")`} />
+
+`18 <= age < 65` means the same as `18 <= age and age < 65`, but it reads more naturally and you only write `age` once. It chains as long as you like: `if 0 <= score <= 100:`. This is one of the few places where Python is unusually expressive — most other languages don't allow it.
+
+### Nested conditionals
+
+You can put an `if` inside another `if`:
+
+```python
+if age >= 18:
+    if has_id:
+        print("Welcome.")
+    else:
+        print("Come back with ID.")
+else:
+    print("Too young.")
+```
+
+Sometimes nesting is what you want. Sometimes it's clearer to combine with `and`:
+
+```python
+if age >= 18 and has_id:
+    print("Welcome.")
+elif age >= 18 and not has_id:
+    print("Come back with ID.")
+else:
+    print("Too young.")
+```
+
+A rule of thumb: if each branch needs different follow-up actions, nest. If you can flatten it with `and`/`or`, flatten. Deeply nested conditionals get hard to read fast.
+
+### The in operator
+
+`in` checks whether one thing is contained inside another. For strings, it checks for a substring:
+
+<Runnable code={`sentence = "the quick brown fox"
+print("fox" in sentence)        # True
+print("zebra" in sentence)      # False
+print("Quick" in sentence)      # False — case-sensitive`} />
+
+`in` is the right tool whenever your question is "does this contain that?" You can negate it with `not in`:
+
+```python
+if "@" not in email:
+    print("That doesn't look like an email.")
+```
+
+It works on lists, tuples, and sets too — same syntax, same intuition. We'll see those properly in Module 7. For now, just know the pattern carries forward.
+
+## Common pitfalls
+
+**1. Using a single `=` instead of `==`.** A single `=` assigns; a double `==` compares. Python catches the bare case as a syntax error, but the mistake can hide inside more complex code. Read `=` as "gets" and `==` as "equals" until it's automatic.
+
+**2. Comparing strings to numbers.** `input()` always returns a string, so `if age >= 18:` raises a `TypeError` when `age` is `"17"`. Convert first: `age = int(input("Age: "))`. Same trap as Module 2, new outfit.
+
+**3. Forgetting that an `elif` chain stops at the first match.** Put `score >= 70` before `score >= 90` and a score of 95 prints `C`, not `A`. The first matching condition wins, so order matters. Reverse it (highest threshold first), or use independent `if`s if every condition really does need its own check.
+
+**4. Mixing tabs and spaces, or inconsistent indentation.** Pick spaces (4 of them, per Python convention), set your editor to do it automatically, and stop thinking about it. If you paste code from the internet and get an `IndentationError`, suspect tabs.
+
+**5. Treating `0` or the empty string like `None`.** Both `0` and `""` are falsy, so `if count:` skips the block when `count` is `0`. If `0` is a valid value you need to distinguish from "no value set," use `is None` explicitly.
+
+**6. Writing redundant `== True` and `== False`.** If `is_admin` is already a boolean, `if is_admin == True:` adds nothing — write `if is_admin:`. To negate, write `if not is_admin:`. If you find yourself reaching for `== True`, the variable name probably already reads as a yes/no question (`is_admin`, `has_pet`, `was_paid`), and the `==` is just noise.
+
+## How this connects
+
+Module 1 gave you variables; Module 2 gave you input; Module 3 gave you string operations. Module 4 is where they finally cooperate. Now you can take input, check what it is, and do different things depending on what you saw. That's the shape of every interactive program.
+
+Module 5 (loops) is conditionals' twin — a `while` loop is essentially an `if` that runs over and over until its condition becomes false, and comparisons, logical operators, and truthiness all carry over identically. Module 6 (functions) lets you bundle a chain of conditionals into a named, reusable test like `is_valid_email(text)`. Module 9 (exceptions) gives you a second way to handle "what if something goes wrong." Module 12 (regex) is what you reach for when your `if "X" in text` conditions get too complicated for exact-match thinking.
+
+If anything here feels shaky — especially `elif` order and short-circuit evaluation — slow down and work through the exercises before moving on. Conditionals show up in every module from here.
+
+## Recap
+
+- Comparison operators (`==`, `!=`, `<`, `>`, `<=`, `>=`) produce booleans. A single `=` assigns; a double `==` compares.
+- `if` runs a block when a condition is true. `else` covers the other case. `elif` chains more conditions, stopping at the first match.
+- Python uses indentation (4 spaces by convention) to define which lines belong to a block, and it must be consistent.
+- `and`, `or`, `not` combine booleans. `and`/`or` short-circuit: they stop evaluating once the answer is known.
+- `or` returns the first truthy operand; `and` returns the first falsy one. Neither strictly returns `True`/`False`.
+- Truthy values include any non-zero number and any non-empty string. Falsy values are `False`, `None`, `0`, `0.0`, `""`, and empty sequences.
+- Chained comparisons like `18 <= age < 65` are legal and clearer than the `and` version.
+- `in` tests membership: `"fox" in sentence`, and `not in` negates it.
+
+## Up next
+
+Module 5 introduces loops — `for` and `while` — which run a block of code repeatedly. Combined with conditionals, loops are where programs really start doing serious work.

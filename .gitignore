@@ -36,3 +36,7 @@ yarn-error.log*
 /agent-skills/
 /skills/
 /ui-ux-pro-max-skill/
+
+# Python cache
+__pycache__/
+*.pyc

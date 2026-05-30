@@ -1,0 +1,13 @@
+{
+  "id": "06-functions",
+  "title": "Functions",
+  "description": "Define reusable named blocks of code with parameters, return values, scope rules, and the single-responsibility principle.",
+  "order": 6,
+  "lessons": [
+    { "id": "lecture",          "title": "def, Parameters, return & Scope",  "type": "lecture",  "order": 1 },
+    { "id": "ex-is-even",       "title": "Is Even",                          "type": "exercise", "order": 2 },
+    { "id": "ex-letter-grade",  "title": "Letter Grade",                     "type": "exercise", "order": 3 },
+    { "id": "ex-clamp",         "title": "Clamp",                            "type": "exercise", "order": 4 },
+    { "id": "ex-dice-game",     "title": "Dice Game",                        "type": "exercise", "order": 5 }
+  ]
+}

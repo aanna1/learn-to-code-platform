@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Do the validity check first and return 'invalid' early if it fails — that way the rest of your code can assume the sides are a real triangle.",
+    "Two things make a triangle valid: every side is positive (a > 0 and b > 0 and c > 0), and each pair of sides sums to more than the third. The invalid test is the opposite: a <= 0 or b <= 0 or c <= 0, or a + b <= c or a + c <= b or b + c <= a.",
+    "The inequality must be strict. If a + b == c exactly, the 'triangle' is a flat line, so that counts as invalid — use <= in the invalid check.",
+    "Order the classification chain carefully: check a == b == c (equilateral) FIRST, then a == b or b == c or a == c (isosceles), else scalene. If you check the two-equal case first, every equilateral triangle would wrongly match it."
+  ]
+}

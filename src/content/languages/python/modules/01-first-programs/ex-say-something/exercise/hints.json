@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Call print() once for each line, inside the main() function where the TODO comments are.",
+    "The text goes inside the parentheses, wrapped in quotes: print(\"Hello, world!\")",
+    "Watch the apostrophe in \"Let's go!\" — wrap that string in double quotes so the apostrophe doesn't end it: print(\"Let's go!\")"
+  ]
+}

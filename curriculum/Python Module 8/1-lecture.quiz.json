@@ -1,0 +1,79 @@
+{
+  "questions": [
+    {
+      "question": "What does `d.get(\"city\", \"unknown\")` return when the key `\"city\"` is not in the dictionary `d`?",
+      "options": [
+        {
+          "text": "\"unknown\"",
+          "correct": true,
+          "explanation": "`.get(key, default)` returns the default when the key is missing — no crash, no `None`, just the value you specified."
+        },
+        {
+          "text": "Raises `KeyError`",
+          "correct": false,
+          "explanation": "That's what `d[\"city\"]` does. `.get()` exists precisely to avoid that crash."
+        },
+        {
+          "text": "`None`",
+          "correct": false,
+          "explanation": "`None` is what `.get(key)` returns with no default argument. When you pass a second argument, that value is returned instead."
+        },
+        {
+          "text": "An empty string",
+          "correct": false,
+          "explanation": "`.get()` doesn't invent a default — it uses the one you give it, or `None` if you don't give one."
+        }
+      ]
+    },
+    {
+      "question": "What does `for x in d:` loop over when `d` is a dictionary?",
+      "options": [
+        {
+          "text": "The keys only",
+          "correct": true,
+          "explanation": "Plain iteration over a dictionary gives you keys. For key-value pairs, use `for k, v in d.items()`. For values only, use `d.values()`."
+        },
+        {
+          "text": "The values only",
+          "correct": false,
+          "explanation": "Values-only iteration uses `for v in d.values()`. Plain `for x in d` gives keys."
+        },
+        {
+          "text": "`(key, value)` tuples",
+          "correct": false,
+          "explanation": "Tuple pairs come from `for k, v in d.items()`. Plain `for x in d` only yields keys."
+        },
+        {
+          "text": "Both keys and values as separate items",
+          "correct": false,
+          "explanation": "Plain `for x in d` yields one item per iteration — the key. Use `.items()` to get both key and value together."
+        }
+      ]
+    },
+    {
+      "question": "Which of the following creates an empty set?",
+      "options": [
+        {
+          "text": "`set()`",
+          "correct": true,
+          "explanation": "`{}` was claimed by dictionaries, so an empty set must be written as `set()`. Once you put anything inside the braces — like `{1}` — it becomes a set literal."
+        },
+        {
+          "text": "`{}`",
+          "correct": false,
+          "explanation": "`{}` creates an empty *dictionary*, not a set. This is one of the most Python-specific surprises in the language."
+        },
+        {
+          "text": "`[]`",
+          "correct": false,
+          "explanation": "`[]` is an empty list. Sets use curly braces (or `set()`) — but `{}` alone is a dict."
+        },
+        {
+          "text": "`set{}`",
+          "correct": false,
+          "explanation": "That's not valid Python syntax. The correct empty set is `set()`, called like a function."
+        }
+      ]
+    }
+  ]
+}

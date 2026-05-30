@@ -1,0 +1,31 @@
+The module opened with a dice example where two near-identical blocks of code did the same job for different players. Now you'll fix that by building three small functions that each do one thing — and wiring them together.
+
+## Your task
+
+Build a mini dice game using three functions that compose cleanly.
+
+**`roll_die()`** — rolls a single six-sided die and returns the result (an integer from 1 to 6).
+
+**`roll_n(n)`** — rolls `n` dice and returns the total. It should call `roll_die()` internally — not duplicate its logic.
+
+**`play_round(player_name, num_dice)`** — plays one round for a player: rolls `num_dice` dice, prints the result in the format below, and returns the total.
+
+```
+play_round("Alice", 3)
+# prints: Alice rolled 3 dice and got 14
+# returns: 14  (the actual total, which varies each run)
+```
+
+Then write a `main()` function that runs two rounds — one for `"Alice"` with 3 dice and one for `"Bob"` with 3 dice — and prints which player won (or "It's a tie!" if the totals are equal).
+
+## Requirements
+
+- `roll_die()` uses `random.randint(1, 6)` to generate each die roll.
+- `roll_n(n)` uses a loop and calls `roll_die()` on each iteration. Do not call `random.randint` directly in `roll_n`.
+- `play_round` prints exactly: `{player_name} rolled {num_dice} dice and got {total}` — matching capitalization, spacing, and wording.
+- `main()` prints the winner in the format: `Alice wins!`, `Bob wins!`, or `It's a tie!`.
+- All game logic lives inside `main()` — the three helper functions don't print anything other than what's specified.
+
+<Callout type="tip">
+Press **Run** a few times — the totals will be different each run because `random.randint` gives a new result every call. That randomness is the whole point. The tests mock out the randomness so they can check your structure reliably.
+</Callout>

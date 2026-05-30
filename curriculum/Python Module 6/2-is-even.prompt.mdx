@@ -1,0 +1,22 @@
+The `%` operator gives you the remainder after division. `10 % 2` is `0`. `7 % 2` is `1`. That one fact is enough to check whether any number is even.
+
+## Your task
+
+Write a function `is_even(n)` that returns `True` if `n` is even and `False` otherwise.
+
+```
+is_even(4)   → True
+is_even(7)   → False
+is_even(0)   → True
+is_even(-3)  → False
+```
+
+<Callout type="tip">
+You don't need an `if` statement. The expression `n % 2 == 0` already evaluates to `True` or `False` — you can return it directly.
+</Callout>
+
+## Requirements
+
+- Write a function named `is_even` that takes one parameter `n`.
+- Return a `bool` — not a string like `"True"`, and not a print statement.
+- Works correctly for positive numbers, negative numbers, and zero.

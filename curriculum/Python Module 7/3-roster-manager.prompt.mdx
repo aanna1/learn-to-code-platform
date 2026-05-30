@@ -1,0 +1,37 @@
+# Roster Manager
+
+Lists grow and shrink. `.append` adds one item to the end. `.remove` takes out the first item that matches a value. The `in` operator checks membership before you try to remove, so you don't crash on a missing name.
+
+## Your task
+
+Write a function `manage_roster(roster, to_add, to_remove)` that:
+
+1. Adds every name in `to_add` to the roster (in order, using `.append`).
+2. Removes every name in `to_remove` from the roster — but only if the name is currently in the roster (skip names that aren't there).
+3. Returns the final roster sorted alphabetically.
+
+The function must not modify the original `roster` list.
+
+## Examples
+
+```python
+manage_roster(
+    ["Ada", "Grace", "Linus"],
+    to_add=["Guido", "Margaret"],
+    to_remove=["Linus", "Nobody"]
+)
+# ["Ada", "Grace", "Guido", "Margaret"]
+
+manage_roster([], to_add=["Alice", "Bob"], to_remove=[])
+# ["Alice", "Bob"]
+
+manage_roster(["Alice", "Bob"], to_add=[], to_remove=["Alice"])
+# ["Bob"]
+```
+
+## Requirements
+
+- Work on a copy of `roster` so the caller's list is unchanged.
+- Use `.append` to add names (one at a time, in the order they appear in `to_add`).
+- Skip any name in `to_remove` that isn't in the current roster.
+- Return the result sorted alphabetically using `sorted()`.

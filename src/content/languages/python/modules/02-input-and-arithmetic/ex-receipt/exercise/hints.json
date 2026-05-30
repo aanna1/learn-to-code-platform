@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Compute the three values first: `subtotal = price * quantity`, `tax = subtotal * tax_rate`, `total = subtotal + tax`.",
+    "Format each with `:.2f` inside an f-string: `f\"{subtotal:.2f}\"` gives you `'30.00'`. Build each line separately if that's clearer.",
+    "Join the three lines with `\\n`: `return f\"Subtotal: {subtotal:.2f}\\nTax: {tax:.2f}\\nTotal: {total:.2f}\"`"
+  ]
+}

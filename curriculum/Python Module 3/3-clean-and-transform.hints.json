@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "String methods return new strings — chain them: text.strip().lower() calls strip first, then lower on the result.",
+    "Use .replace('_', ' ') to swap underscores for spaces. Remember to capture or chain the return value, not just call it.",
+    "To collapse multiple spaces into one: .split() with no argument splits on any whitespace and ignores runs of it, giving you a clean list of words. Then ' '.join(that_list) stitches them back together.",
+    "The full chain is: ' '.join(text.strip().replace('_', ' ').lower().split()) — each method feeds its result straight into the next."
+  ]
+}

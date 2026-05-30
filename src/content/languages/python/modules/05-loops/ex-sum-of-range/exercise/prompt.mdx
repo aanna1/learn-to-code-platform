@@ -1,0 +1,25 @@
+# Sum of a Range
+
+`range()` generates integer sequences; a `for` loop hands you each value in turn. Together they're the standard tool for accumulating a running total over numbers — but `range`'s exclusive upper bound means you have to think carefully about where to stop.
+
+## Your task
+
+Write a function `sum_range(start, stop)` that returns the **sum of all integers from `start` through `stop`, inclusive**, using a `for` loop.
+
+## Requirements
+
+- Use a `for` loop with `range()`.
+- Both `start` and `stop` are included in the sum.
+- Return the total — don't print it.
+
+## Example
+
+```python
+print(sum_range(1, 5))    # 1 + 2 + 3 + 4 + 5 = 15
+print(sum_range(3, 3))    # just 3 = 3
+print(sum_range(1, 100))  # 5050
+```
+
+## Hint
+
+`range(start, stop)` stops *before* `stop`. To include `stop` in your sum, you'll need to adjust your `range()` call.

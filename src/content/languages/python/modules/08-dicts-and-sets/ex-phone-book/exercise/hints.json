@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "add_contact is just two lines: book[name] = number, then return book. The bracket assignment both creates a new key and updates an existing one.",
+    "lookup should use book.get(name) — not book[name]. The .get() method returns None automatically when the key is missing, so you don't need an if-statement.",
+    "remove_contact should use book.pop(name, None). The second argument (None) makes it silent when the name isn't in the book. Without it, .pop() raises KeyError just like del would.",
+    "all_names should return sorted(book.keys()). This gives you a fresh sorted list; iterating book.keys() directly would not be sorted."
+  ]
+}

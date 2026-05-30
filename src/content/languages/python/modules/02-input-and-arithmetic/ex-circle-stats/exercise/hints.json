@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Make sure `import math` is at the top of your file. Then `math.pi` gives you the value of pi, and `math.pi * radius ** 2` computes the area.",
+    "Wrap each result in `round(value, 2)` to get 2 decimal places: `area = round(math.pi * radius ** 2, 2)`.",
+    "Return both values as a tuple: `return (area, circumference)`. The parentheses make it a tuple — order matters, area first."
+  ]
+}

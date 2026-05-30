@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "List indices start at 0, so the first element is items[0]. Negative indices count from the end: items[-1] is always the last element, no matter how long the list is.",
+    "To return two values as a tuple, wrap them in parentheses: return (items[0], items[-1]).",
+    "A slice like items[1:-1] gives you everything from the second element up to (but not including) the last element. That's the middle of the list.",
+    "If the list has exactly three elements, items[1:-1] returns a one-element list — just the single middle item. That's expected."
+  ]
+}

@@ -1,0 +1,26 @@
+# FizzBuzz
+
+FizzBuzz is one of the most famous programming exercises — used in interviews as a quick check that a candidate can actually write code. The rules are simple; getting the order of checks right is the part that trips people up.
+
+## Your task
+
+Write a function `fizzbuzz(n)` that returns a **list of strings** for the integers 1 through `n` (inclusive), following these rules:
+
+- Divisible by both 3 and 5: add `"FizzBuzz"`.
+- Divisible by 3 only: add `"Fizz"`.
+- Divisible by 5 only: add `"Buzz"`.
+- Otherwise: add the number as a string (`"1"`, `"2"`, `"4"`, etc.).
+
+## Requirements
+
+- Return a list — don't print the values.
+- Check the combined case (divisible by both 3 and 5) **first**.
+- Use `%` (modulo) to test divisibility: `n % 3 == 0` means `n` divides evenly by 3.
+- Convert plain numbers to strings with `str(i)`.
+
+## Example
+
+```python
+print(fizzbuzz(15))
+# ['1', '2', 'Fizz', '4', 'Buzz', 'Fizz', '7', '8', 'Fizz', 'Buzz', '11', 'Fizz', '13', '14', 'FizzBuzz']
+```

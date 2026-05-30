@@ -1,0 +1,31 @@
+Early return is one of the cleanest ways to express a chain of conditions. Instead of stacking `elif` branches, you return as soon as you know the answer — and every line below that return is simply skipped.
+
+## Your task
+
+Write a function `letter_grade(score)` that takes a numeric score and returns the corresponding letter grade as a string.
+
+```
+90 and above  → "A"
+80–89         → "B"
+70–79         → "C"
+60–69         → "D"
+below 60      → "F"
+```
+
+```
+letter_grade(95)  → "A"
+letter_grade(82)  → "B"
+letter_grade(70)  → "C"
+letter_grade(60)  → "D"
+letter_grade(55)  → "F"
+```
+
+<Callout type="tip">
+You don't need `elif`. Each `if` can end with a `return` — once a return fires, the rest of the function is skipped. Check the highest threshold first and work your way down.
+</Callout>
+
+## Requirements
+
+- Function named `letter_grade` that takes one parameter `score`.
+- Returns a string: `"A"`, `"B"`, `"C"`, `"D"`, or `"F"` — not printed, returned.
+- A score of exactly 90 is an A, exactly 80 is a B, and so on (the boundary belongs to the higher grade).

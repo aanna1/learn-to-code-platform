@@ -1,0 +1,29 @@
+# Letter Grade
+
+A score comes in as a number from 0 to 100, and you need to turn it into a letter grade. This is the classic job for an `elif` chain — and the classic place beginners get the order wrong.
+
+## Your task
+
+Write a function `letter_grade(score)` that returns the letter grade for a numeric `score`:
+
+- 90 and above: `"A"`
+- 80 to 89: `"B"`
+- 70 to 79: `"C"`
+- 60 to 69: `"D"`
+- below 60: `"F"`
+
+## Requirements
+
+- Define a function named `letter_grade` that takes one argument, `score`.
+- It must **return** the grade as a string (not print it).
+- Use a single `if`/`elif`/`else` chain. Think carefully about the order — a score of 95 should give `"A"`, not whatever the first condition you write happens to match.
+- A boundary score lands in the higher grade: `90` is an `"A"`, `80` is a `"B"`.
+
+## Example
+
+```python
+print(letter_grade(95))   # A
+print(letter_grade(82))   # B
+print(letter_grade(60))   # D
+print(letter_grade(45))   # F
+```

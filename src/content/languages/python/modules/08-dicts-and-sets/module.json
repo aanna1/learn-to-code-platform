@@ -1,0 +1,37 @@
+{
+  "id": "08-dicts-and-sets",
+  "title": "Dictionaries & Sets",
+  "description": "Look up values by name, count things safely with .get(), iterate with .items(), deduplicate with sets, and navigate the list-of-dicts pattern that shapes all real-world data.",
+  "lessons": [
+    {
+      "id": "lecture",
+      "title": "Dictionaries & Sets",
+      "type": "lecture",
+      "order": 1
+    },
+    {
+      "id": "ex-word-counter",
+      "title": "Word Counter",
+      "type": "exercise",
+      "order": 2
+    },
+    {
+      "id": "ex-phone-book",
+      "title": "Phone Book",
+      "type": "exercise",
+      "order": 3
+    },
+    {
+      "id": "ex-set-ops",
+      "title": "Unique Tags",
+      "type": "exercise",
+      "order": 4
+    },
+    {
+      "id": "ex-grade-report",
+      "title": "Grade Report",
+      "type": "exercise",
+      "order": 5
+    }
+  ]
+}

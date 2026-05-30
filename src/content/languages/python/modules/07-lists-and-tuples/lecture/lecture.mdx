@@ -1,0 +1,484 @@
+## Why this matters
+
+So far, every variable you've made holds one thing. One name, one age, one score. That works for tiny programs. It falls apart the moment you have thirty students, or a hundred prices, or a thousand log lines.
+
+Try it without lists. You want to track four people's names:
+
+```python
+name_1 = "Ada"
+name_2 = "Grace"
+name_3 = "Linus"
+name_4 = "Guido"
+```
+
+Now print all of them. Four lines of `print`. Now sort them. Now search for a name the user typed. By the time you have ten students you have forty-something lines of repetitive code, and adding an eleventh student means editing the program. That's not a program. That's a manuscript.
+
+A *list* lets you say *here are four names* in one variable, and from then on you operate on the group with a single loop. Same code handles four students or four thousand. Lists are how almost every real program keeps track of multiple things: rows in a database, items in a shopping cart, tasks in a queue, frames in a video, characters in a game.
+
+This module is also where you start to feel a particular kind of Python weirdness: the difference between *the value* and *the name that points at the value*. Two names can point at the same list. Change the list through one name, the other name sees the change too. This trips up every new Python programmer at least once, and we're going to walk straight into the trap so you can recognize it later.
+
+## What you'll be able to do by the end
+
+- Create a list, index into it, slice it, and iterate over it.
+- Add and remove items using the right method for the job.
+- Tell which list operations mutate the list and which return a new value.
+- Recognize and avoid the alias trap (`b = a` versus `b = a.copy()`).
+- Build a 2D list (a grid) without the multiplication footgun.
+- Use tuples for fixed-shape data and explain why immutability matters.
+- Read a list comprehension well enough to use one when it's the cleanest option.
+
+<Callout type="info">
+No installation needed. Every code block on this platform has a **Run** button — press it and your code executes instantly in the browser. You don't need Python on your machine; you don't need a terminal.
+</Callout>
+
+## Core concepts
+
+### Creating a list
+
+A list is written with square brackets and comma-separated values.
+
+```python
+students = ["Ada", "Grace", "Linus", "Guido"]
+primes = [2, 3, 5, 7, 11, 13]
+empty = []
+mixed = ["Ada", 25, True, 1.7]
+```
+
+That last one (`mixed`) is legal Python but usually a sign your data is shaped wrong. Real lists in practice hold one kind of thing: a list of strings, a list of numbers, a list of dictionaries (Module 8 will show you those). When you find yourself mixing types, you usually want a dictionary or a class instead.
+
+The built-in `len` function tells you how many items are in a list:
+
+<Runnable code={`students = ["Ada", "Grace", "Linus", "Guido"]
+print(len(students))   # 4`} />
+
+### Indexing: same as strings
+
+Lists are indexed from zero, just like strings.
+
+<Runnable code={`students = ["Ada", "Grace", "Linus", "Guido"]
+print(students[0])    # Ada
+print(students[1])    # Grace
+print(students[-1])   # Guido (last item)
+print(students[-2])   # Linus (second to last)`} />
+
+Now a question: what does this print?
+
+```python
+students = ["Ada", "Grace", "Linus", "Guido"]
+print(students[4])
+```
+
+If you said "Guido," you got bitten by the off-by-one. The list has four items at positions 0, 1, 2, and 3. There is no position 4. Python raises `IndexError: list index out of range`.
+
+This is the most common runtime error you'll hit when working with lists. The fix is almost always to use `len(students) - 1` for the last index, or `students[-1]`, which sidesteps the question entirely.
+
+### Slicing returns a new list
+
+Slicing uses the same `start:stop:step` syntax as strings, and `stop` is exclusive.
+
+<Runnable code={`students = ["Ada", "Grace", "Linus", "Guido"]
+print(students[1:3])    # ['Grace', 'Linus']
+print(students[:2])     # ['Ada', 'Grace']
+print(students[2:])     # ['Linus', 'Guido']
+print(students[::-1])   # reversed`} />
+
+An important property: slicing returns a *new* list. The original is untouched.
+
+<Runnable code={`students = ["Ada", "Grace", "Linus", "Guido"]
+first_two = students[:2]
+first_two.append("Margaret")
+print(first_two)    # ['Ada', 'Grace', 'Margaret']
+print(students)     # ['Ada', 'Grace', 'Linus', 'Guido']  (unchanged)`} />
+
+Hold onto that fact. We'll come back to it.
+
+### Adding to a list
+
+The most common way to grow a list is `.append`, which adds one item to the end.
+
+<Runnable code={`students = ["Ada", "Grace"]
+students.append("Linus")
+print(students)   # ['Ada', 'Grace', 'Linus']`} />
+
+`.insert(i, x)` inserts `x` at position `i`, shifting everything after it down.
+
+<Runnable code={`students = ["Ada", "Grace", "Linus"]
+students.insert(1, "Margaret")
+print(students)   # ['Ada', 'Margaret', 'Grace', 'Linus']`} />
+
+What if you want to add multiple items at once? Here's where new programmers reach for `.append` and get a surprise.
+
+**Predict before you run.** What does this print?
+
+<Runnable code={`students = ["Ada", "Grace"]
+students.append(["Linus", "Guido"])
+print(students)`} />
+
+<Callout type="tip">
+The output is `['Ada', 'Grace', ['Linus', 'Guido']]`. `.append` adds *one item*. You gave it a list, so it added the list as a single nested item. Almost certainly not what you wanted. To add the *contents* of another list, use `.extend` or `+` concatenation:
+
+```python
+students = ["Ada", "Grace"]
+students.extend(["Linus", "Guido"])
+print(students)   # ['Ada', 'Grace', 'Linus', 'Guido']
+```
+
+`.extend` modifies in place. `+` builds a new list and rebinds the name. In a loop adding one item at a time, `.append` is the right tool. To merge two existing lists, use `.extend` or `+`.
+</Callout>
+
+### Removing from a list
+
+A few options, each with a different intent.
+
+`.remove(value)` removes the first item equal to `value`.
+
+<Runnable code={`students = ["Ada", "Grace", "Ada", "Linus"]
+students.remove("Ada")
+print(students)   # ['Grace', 'Ada', 'Linus'] — only the first Ada`} />
+
+Notice only the first `"Ada"` was removed. To remove all of them, you'd need a loop, or better, a list comprehension (coming up shortly).
+
+`.pop()` removes and *returns* the last item. `.pop(i)` removes and returns the item at index `i`.
+
+<Runnable code={`students = ["Ada", "Grace", "Linus"]
+last = students.pop()
+print(last)        # Linus
+print(students)    # ['Ada', 'Grace']`} />
+
+`del students[i]` deletes by index without returning anything.
+
+```python
+students = ["Ada", "Grace", "Linus"]
+del students[0]
+print(students)    # ['Grace', 'Linus']
+```
+
+Pick between them by intent. If you need the value you're removing, use `.pop`. If you don't care, `del` or `.remove` is fine.
+
+### The "returns None" trap
+
+This is one of the most common surprises in Python. Predict what this prints.
+
+<Runnable code={`numbers = [3, 1, 4, 1, 5, 9, 2, 6]
+sorted_numbers = numbers.sort()
+print(sorted_numbers)`} />
+
+<Callout type="tip">
+It prints `None`. `.sort()` is a *mutating* method — it sorts the list in place and returns `None` (Python's way of saying "I did something; there's no value to give back").
+
+Two fixes. Sort in place and use the original variable:
+
+```python
+numbers = [3, 1, 4, 1, 5, 9, 2, 6]
+numbers.sort()
+print(numbers)   # [1, 1, 2, 3, 4, 5, 6, 9]
+```
+
+Or use the built-in `sorted()`, which returns a new sorted list and leaves the original alone:
+
+```python
+numbers = [3, 1, 4, 1, 5, 9, 2, 6]
+sorted_numbers = sorted(numbers)
+print(sorted_numbers)   # [1, 1, 2, 3, 4, 5, 6, 9]
+print(numbers)          # [3, 1, 4, 1, 5, 9, 2, 6]  (unchanged)
+```
+
+Bake this rule in: **methods that mutate a list usually return `None`.** That covers `.sort()`, `.reverse()`, `.append()`, `.extend()`, `.insert()`, and `.remove()`. The non-mutating versions — `sorted()`, `reversed()`, slicing, `+` — give you back a new list. The next time you write `x = some_list.method()` and `x` mysteriously holds `None`, this is why.
+</Callout>
+
+**Predict before you run.** Without running the code, what does each line print?
+
+<Runnable code={`nums = [5, 2, 8, 1]
+a = nums.sort()
+b = sorted(nums)
+print(a)
+print(b)
+print(nums)`} />
+
+<Callout type="tip">
+`a` is `None` — `.sort()` mutated `nums` in place and returned nothing. `sorted(nums)` then ran on the already-sorted list, so `b` is `[1, 2, 5, 8]`. `nums` itself is also `[1, 2, 5, 8]` because the first call mutated it. Order matters when one operation mutates.
+</Callout>
+
+### Iterating
+
+The whole point of a list is to do something to each item. The `for` loop is the obvious tool.
+
+<Runnable code={`students = ["Ada", "Grace", "Linus"]
+for student in students:
+    print(f"Hello, {student}!")`} />
+
+When you need the index alongside the item, the tempting approach is `range(len(...))`. That works, but Python has a cleaner tool: `enumerate`.
+
+<Runnable code={`students = ["Ada", "Grace", "Linus"]
+for i, student in enumerate(students):
+    print(f"{i}: {student}")`} />
+
+`enumerate` produces `(index, value)` pairs as you loop. Same output, no `len`, no `[i]` lookup. Small thing, but reading idiomatic Python is part of writing it.
+
+### One thing you should not do: mutate while iterating
+
+This produces wrong answers without an error message — the worst kind of bug.
+
+<Runnable code={`numbers = [1, 2, 2, 3, 4]
+for n in numbers:
+    if n % 2 == 0:
+        numbers.remove(n)
+print(numbers)`} />
+
+<Callout type="tip">
+The output is `[1, 2, 3]` — a `2` survived. The `for` loop walks by an internal index counter. After removing the first `2` at position 1, everything shifts left: the second `2` slides into position 1, but the counter moves to position 2 and silently skips it.
+
+Two safe options. Iterate over a copy:
+
+```python
+for n in numbers[:]:       # slice creates a copy
+    if n % 2 == 0:
+        numbers.remove(n)
+```
+
+Or, better, build a new list with a comprehension:
+
+```python
+numbers = [n for n in numbers if n % 2 != 0]
+```
+</Callout>
+
+### Membership with `in`
+
+To check whether a value is in a list, use `in`:
+
+<Runnable code={`students = ["Ada", "Grace", "Linus"]
+if "Ada" in students:
+    print("Found Ada")
+if "Guido" not in students:
+    print("Guido is not here")`} />
+
+`in` reads like English and is a clear win over writing a manual search loop.
+
+### Concatenation and repetition
+
+Stick two lists together with `+`, and repeat a list with `*`:
+
+<Runnable code={`print([1, 2] + [3, 4])    # [1, 2, 3, 4]
+print([0] * 5)            # [0, 0, 0, 0, 0]`} />
+
+Repetition is useful for initializing a fixed-size list. It's also the setup for the next pitfall.
+
+### The 2D list footgun
+
+A 2D list is a list of lists. People use them for game boards, grids, spreadsheets — anything two-dimensional.
+
+The temptation is to build one like this:
+
+```python
+board = [[" "] * 3] * 3
+```
+
+Looks elegant. Three rows, each of three spaces. Now mark a move:
+
+<Runnable code={`board = [[" "] * 3] * 3
+board[0][0] = "X"
+for row in board:
+    print(row)`} />
+
+<Callout type="tip">
+Three X's from one assignment. `[" "] * 3` creates one inner list. Then `[that_list] * 3` creates an outer list with *three references to the same inner list*. Modifying `board[0][0]` modifies the only inner list there is, and all three rows see it.
+
+The fix: create a fresh inner list each time using a list comprehension:
+
+```python
+board = [[" "] * 3 for _ in range(3)]
+board[0][0] = "X"
+for row in board:
+    print(row)
+```
+
+Each iteration of the comprehension creates a *separate* `[" "] * 3`. The single underscore `_` is a Python convention for "I'm not going to use this loop variable."
+</Callout>
+
+### Aliasing: the `b = a` trap
+
+Here it is head-on.
+
+**Predict before you run.** What does this print?
+
+<Runnable code={`a = [1, 2, 3]
+b = a
+b.append(4)
+print(a)
+print(b)`} />
+
+<Callout type="tip">
+Both print `[1, 2, 3, 4]`. `b = a` does not copy the list — it gives the same list a second name. From that line on, `a` and `b` are two names for one list. Mutating through `b` is the same as mutating through `a`, because there's only one list.
+
+The fix is to make an actual copy:
+
+```python
+a = [1, 2, 3]
+b = a.copy()
+b.append(4)
+print(a)   # [1, 2, 3]
+print(b)   # [1, 2, 3, 4]
+```
+
+`a.copy()`, `a[:]`, and `list(a)` all build a new list with the same contents. Use any of them.
+</Callout>
+
+Functions get bitten by this constantly:
+
+<Runnable code={`def add_zero(items):
+    items.append(0)
+    return items
+
+original = [1, 2, 3]
+result = add_zero(original)
+print(result)      # [1, 2, 3, 0]
+print(original)    # also [1, 2, 3, 0] — the function mutated the caller's list!`} />
+
+The function looks like it builds and returns a new list. It doesn't. It mutates the caller's list, then returns the same list under a new name. A safer pattern: build a new list and return it.
+
+```python
+def add_zero(items):
+    items = items + [0]    # creates a new list
+    return items
+```
+
+If you remember one thing from this module besides "lists exist," remember this: **two names can point at the same list, and mutating through one shows up in the other.**
+
+### Tuples: like lists, but frozen
+
+A tuple is an ordered sequence of values, like a list, except you can't change it after it's created.
+
+<Runnable code={`point = (3, 4)
+print(point[0])     # 3
+print(point[1])     # 4
+# point[0] = 5     # would raise TypeError — tuples don't support item assignment`} />
+
+That looks like a feature loss. Why would you want a thing you can't change? Three reasons.
+
+The first is safety. A tuple you pass to a function comes back unchanged — you can rule out the aliasing trap entirely. If a function needs a fixed-shape pair of numbers, take a tuple and you've eliminated a whole class of bug before you've written a single test.
+
+The second is expressiveness. A tuple says "these values belong together as one thing." A list says "this is a collection that might grow or shrink." A `(latitude, longitude)` pair is a tuple. A list of points is a list. Using the right one signals intent to anyone who reads the code later.
+
+Third, tuples can be dictionary keys and set members; lists can't. Module 8 explains why.
+
+One syntactic catch: to create a one-element tuple, you need a trailing comma.
+
+<Runnable code={`x = (5)     # not a tuple — just the integer 5 in parentheses
+y = (5,)    # tuple with one element
+print(type(x))   # <class 'int'>
+print(type(y))   # <class 'tuple'>`} />
+
+The parentheses don't make it a tuple. The comma does.
+
+### Unpacking
+
+Tuples (and lists) can be split into individual variables in one line.
+
+<Runnable code={`point = (3, 4)
+x, y = point
+print(x)    # 3
+print(y)    # 4`} />
+
+The shapes have to match: a 2-tuple on the right, two names on the left. Mismatch and you get a `ValueError`.
+
+Unpacking is everywhere in Python. The `enumerate` example earlier used it — `for i, student in enumerate(students)` unpacks each `(index, value)` pair per iteration. Functions that return multiple values use the same trick:
+
+<Runnable code={`def stats(numbers):
+    return min(numbers), max(numbers), sum(numbers) / len(numbers)
+
+low, high, avg = stats([5, 2, 8, 3, 9])
+print(f"min={low}, max={high}, avg={avg:.1f}")`} />
+
+A function can only return one object. When you write `return a, b, c`, Python wraps those values into a tuple. The caller unpacks it back into three names. Multiple return values are unpacking in disguise.
+
+### List comprehensions
+
+You've seen the syntax a few times in this module. Let's name it.
+
+A list comprehension builds a list by transforming each item of an iterable, optionally filtering.
+
+<Runnable code={`# squares of 0 through 9
+squares = [x ** 2 for x in range(10)]
+print(squares)
+
+# only the positives from a list
+numbers = [-3, 5, -1, 0, 8, -2]
+positives = [n for n in numbers if n > 0]
+print(positives)`} />
+
+Read left to right: `[expression for variable in iterable if condition]`. The `if` part is optional. The result is a new list.
+
+Comprehensions are the idiomatic Python answer to "I have a list, I want to make a new list out of it." Almost any time you find yourself writing:
+
+```python
+result = []
+for x in items:
+    if some_condition(x):
+        result.append(transform(x))
+```
+
+A comprehension says the same thing in one line:
+
+```python
+result = [transform(x) for x in items if some_condition(x)]
+```
+
+Don't go overboard. A short comprehension is a delight. A comprehension that spans three lines with two filters and a nested loop is harder to read than the explicit loop it replaces. If you'd struggle to explain it out loud, write the loop.
+
+**Try it.** Rewrite this loop as a list comprehension, then press Run to verify:
+
+<Runnable code={`words = ["hello", "WORLD", "Python", "RULES"]
+lowered = []
+for w in words:
+    if len(w) >= 5:
+        lowered.append(w.lower())
+print(lowered)
+
+# Now rewrite as a comprehension:
+# lowered = [...]`} />
+
+<Callout type="tip">
+The one-liner: `lowered = [w.lower() for w in words if len(w) >= 5]`. Same result. Once you can read these fluently, you'll write them constantly.
+</Callout>
+
+## Common pitfalls
+
+**Off-by-one with indexing.** A list of length `n` has valid indices `0` through `n-1`. `students[len(students)]` is always an `IndexError`. Use `students[-1]` for the last item.
+
+**`.sort()` returns `None`.** And so do `.append`, `.reverse`, `.extend`, `.insert`, `.remove`. If you wrote `x = lst.sort()` and `x` is `None`, that's why. Use `sorted(lst)` if you want a new list back.
+
+**Modifying a list while iterating over it.** This produces wrong answers, not errors. Iterate over a copy (`for x in lst[:]`) or build a new list with a comprehension.
+
+**The `[[...] * n] * m` 2D-list bug.** This creates `m` references to the same inner list. Use `[[...] * n for _ in range(m)]` for a true 2D grid.
+
+**Aliasing two variables to the same list.** `b = a` does not copy. Use `b = a.copy()`, `b = a[:]`, or `b = list(a)`. Same applies when passing a list to a function.
+
+**One-element tuple missing the comma.** `(5)` is the integer 5. `(5,)` is a one-element tuple. The comma is what makes it a tuple, not the parentheses.
+
+## How this connects
+
+Lists are the workhorse data structure of Python, and from this point on they'll show up in every module:
+
+- **Module 8 (dictionaries and sets)** introduces collections indexed by keys instead of positions. You'll see lists of dictionaries constantly — that's the shape JSON data takes.
+- **Module 9 (exceptions)** is where you'll handle `IndexError` and `ValueError` from list operations with bad input, without crashing your program.
+- **Module 11 (files and CSV)** treats each row of a file as a list. Reading a CSV gives you a list of lists.
+- **Module 14 (testing)** is where the aliasing rules come back to bite you in tests that pass once and fail on the second run, because a setup function mutated a list the next test wasn't expecting to be different.
+
+If the alias trap or the 2D-list trap still feels mysterious, slow down and work through the exercises before moving on. Module 8 assumes lists are second nature.
+
+## Recap
+
+- A list is an ordered, mutable collection of values, written with square brackets.
+- Indexing and slicing on lists work the same way as on strings. Indices are zero-based.
+- Mutating methods — `.sort`, `.reverse`, `.append`, `.extend`, `.insert`, `.remove` — modify the list in place and return `None`. Non-mutating alternatives — `sorted`, `reversed`, slicing, `+` — return a new list.
+- Iterate with `for`. Use `enumerate` when you need the index too.
+- `[[" "] * n] * m` creates aliased inner lists. Use `[[" "] * n for _ in range(m)]` for a true 2D grid.
+- `b = a` does not copy a list. Use `a.copy()`, `a[:]`, or `list(a)` for an independent copy.
+- Tuples are immutable sequences. Use them for fixed-shape data, for safety, and as dictionary keys.
+- Unpacking splits a tuple or list into separate variables in one statement. Multiple return values from a function are a tuple in disguise.
+- List comprehensions are a compact, idiomatic way to build a list from another iterable.
+
+## Up next
+
+Module 8 introduces dictionaries (key-value storage) and sets (unordered, unique collections). Dictionaries are how you store data looked up by name instead of position, and they're the most common data structure in real Python code outside of lists themselves.

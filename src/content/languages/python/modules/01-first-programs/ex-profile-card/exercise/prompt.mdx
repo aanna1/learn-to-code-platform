@@ -1,0 +1,26 @@
+A bare list of values isn't very readable. f-strings let you weave variables into sentences so the output actually communicates something.
+
+## Your task
+
+Four variables are provided inside `main()` — do **not** change their values. Use f-strings and `print()` to produce this exact output:
+
+```
+Name: Ada Lovelace
+Age: 36
+Language: Python
+Bio: Ada Lovelace has been coding in Python for years.
+```
+
+Write your `print()` calls where the TODO comments are. Press **Run** to see your card, then **Submit** to check it.
+
+## Requirements
+
+- Do not change the values of `first_name`, `last_name`, `age`, or `language`.
+- Use f-strings to build each line — put an `f` before the opening quote and drop variables in with `{}`.
+- The `Name:` line combines `first_name` and `last_name` with a space between them.
+- The `Bio:` line must reference `first_name`, `last_name`, and `language` in a single f-string.
+- The output must match the four lines above exactly, including the labels and spacing.
+
+<Callout type="tip">
+The `Name:` line needs two variables in one f-string: `f"Name: {first_name} {last_name}"`. The label `Name:` and the space between the names are just ordinary text inside the string.
+</Callout>

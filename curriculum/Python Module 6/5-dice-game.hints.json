@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Start with roll_die(): it just needs one line — return random.randint(1, 6).",
+    "For roll_n(n): use a loop with range(n), call roll_die() each iteration, and accumulate a running total to return at the end.",
+    "play_round calls roll_n(num_dice), prints the result using an f-string, then returns the total — three lines inside the function.",
+    "In main(), store the return value of each play_round call, then compare the two totals with if/elif/else to print the winner."
+  ]
+}

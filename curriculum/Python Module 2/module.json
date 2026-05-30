@@ -1,0 +1,13 @@
+{
+  "id": "02-input-and-arithmetic",
+  "title": "Input & Arithmetic",
+  "description": "Take input from users, convert types, and compute with Python's full set of arithmetic operators.",
+  "order": 2,
+  "lessons": [
+    { "id": "lecture", "title": "Input, Types & Arithmetic", "type": "lecture", "order": 1 },
+    { "id": "ex-string-to-number", "title": "String to Number", "type": "exercise", "order": 2 },
+    { "id": "ex-time-breakdown", "title": "Time Breakdown", "type": "exercise", "order": 3 },
+    { "id": "ex-circle-stats", "title": "Circle Stats", "type": "exercise", "order": 4 },
+    { "id": "ex-receipt", "title": "Receipt", "type": "exercise", "order": 5 }
+  ]
+}

@@ -1,0 +1,27 @@
+# Circle Stats
+
+The `math` module gives you `math.pi` — a much better approximation than `3.14`. Put it together with the `**` operator and `round()` and you can compute clean geometric results.
+
+## Your task
+
+Complete `circle_stats(radius)` so that it returns a tuple `(area, circumference)` for a circle with the given radius.
+
+- Area: `math.pi * radius ** 2`
+- Circumference: `2 * math.pi * radius`
+- Both values rounded to 2 decimal places using `round()`
+
+## Requirements
+
+- Import `math` at the top of the file.
+- Use `math.pi` — not `3.14` or any other approximation.
+- Return a tuple `(area, circumference)` — two values, in that order.
+- Round both to 2 decimal places with `round(value, 2)`.
+
+## Examples
+
+```
+circle_stats(5)    → (78.54, 31.42)
+circle_stats(1)    → (3.14, 6.28)
+circle_stats(0)    → (0.0, 0.0)
+circle_stats(2.5)  → (19.63, 15.71)
+```

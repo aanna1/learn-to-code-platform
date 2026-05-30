@@ -1,0 +1,79 @@
+{
+  "questions": [
+    {
+      "question": "What does this code print?\n\nname = \"Ada\"\nprint(\"name\")",
+      "options": [
+        {
+          "text": "Ada",
+          "correct": false,
+          "explanation": "Close — but the quotes around name change everything. Quotes tell Python this is literal text, not a variable lookup. To print the variable's value, write print(name) without quotes."
+        },
+        {
+          "text": "name",
+          "correct": true,
+          "explanation": "Correct. The quotes make \"name\" a string literal — the four characters n, a, m, e. Python never looks up the variable. To use the variable, write print(name) with no quotes."
+        },
+        {
+          "text": "\"name\"",
+          "correct": false,
+          "explanation": "print() doesn't include the surrounding quotes in its output. The output is just the characters inside them: name."
+        },
+        {
+          "text": "NameError",
+          "correct": false,
+          "explanation": "A NameError would fire if you wrote print(name) and name wasn't defined. But \"name\" in quotes is a string literal — Python doesn't need to look up any variable."
+        }
+      ]
+    },
+    {
+      "question": "This code is supposed to print Hello, Ada but it prints Hello, {name} instead. What's wrong?\n\nname = \"Ada\"\nprint(\"Hello, {name}\")",
+      "options": [
+        {
+          "text": "The variable name should be in single quotes inside the braces.",
+          "correct": false,
+          "explanation": "Adding quotes inside the braces — like {'name'} — would substitute the literal string 'name', not the variable's value. That still wouldn't give you Hello, Ada."
+        },
+        {
+          "text": "The string is missing the f prefix.",
+          "correct": true,
+          "explanation": "Correct. Without f, the curly braces are just literal characters — Python treats the whole thing as plain text. The fix is print(f\"Hello, {name}\"). The f activates variable substitution."
+        },
+        {
+          "text": "print() can't mix text and variables.",
+          "correct": false,
+          "explanation": "It can — that's exactly what f-strings are for. The problem here is that the f prefix is missing, so Python doesn't know to substitute the variable."
+        },
+        {
+          "text": "name needs to be defined before the print() call.",
+          "correct": false,
+          "explanation": "name is defined before the print() call — that's not the issue. The problem is the missing f prefix on the string."
+        }
+      ]
+    },
+    {
+      "question": "Which of these variable names will cause a Python error?",
+      "options": [
+        {
+          "text": "first_name",
+          "correct": false,
+          "explanation": "This is valid and idiomatic. snake_case with letters and underscores is exactly the Python convention for variable names."
+        },
+        {
+          "text": "name1",
+          "correct": false,
+          "explanation": "Valid. A digit is fine anywhere in a name except the first character. name1, score2, player3 are all legal."
+        },
+        {
+          "text": "2nd_place",
+          "correct": true,
+          "explanation": "Correct — this is invalid. Variable names can't start with a digit. Python would see 2 and expect a number, then hit nd_place and be confused. Use second_place or place_2 instead."
+        },
+        {
+          "text": "is_active",
+          "correct": false,
+          "explanation": "Valid and idiomatic. The is_ prefix is a common Python convention for boolean variables (is_active, is_student, has_permission)."
+        }
+      ]
+    }
+  ]
+}

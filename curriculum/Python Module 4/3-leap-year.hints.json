@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Test divisibility with the % operator: year % 4 == 0 is True when year divides evenly by 4. Each of these comparisons gives you a boolean to combine.",
+    "Three facts matter: divisible by 4, divisible by 100, divisible by 400. Build a boolean from each, then combine them with and / or / not.",
+    "The tricky part is the century rule. A year passes if it's divisible by 4 AND (not divisible by 100 OR divisible by 400). The parentheses matter — group the 100/400 part together.",
+    "Full expression: return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0). Test it against 1900 (False) and 2000 (True) — those are the two cases that catch most mistakes."
+  ]
+}

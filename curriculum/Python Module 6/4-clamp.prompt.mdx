@@ -1,0 +1,20 @@
+Clamping means keeping a value inside a range. If a value is already in range, leave it alone. If it's too low, bring it up to the floor. If it's too high, bring it down to the ceiling. It's a pattern that shows up everywhere — game physics, UI sliders, audio volume controls.
+
+## Your task
+
+Write a function `clamp(value, low, high)` that returns `value` if it falls between `low` and `high` (inclusive), otherwise returns the nearest boundary.
+
+```
+clamp(7, 0, 10)    → 7    (in range, unchanged)
+clamp(-3, 0, 10)   → 0    (too low, return low)
+clamp(15, 0, 10)   → 10   (too high, return high)
+clamp(0, 0, 10)    → 0    (on the boundary, still in range)
+clamp(10, 0, 10)   → 10   (on the boundary, still in range)
+```
+
+## Requirements
+
+- Function named `clamp` that takes three parameters: `value`, `low`, `high`.
+- Returns a number — not a string, not a print statement.
+- Boundaries are inclusive: a value equal to `low` or `high` is considered in range.
+- You can use multiple `if` statements with early returns, or the built-in `min`/`max` — either approach is fine.

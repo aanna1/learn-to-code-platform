@@ -1,0 +1,34 @@
+# Word Counter
+
+The `.get(word, 0) + 1` pattern is at the heart of every frequency count in Python. Here you'll use it to build a real word counter.
+
+## Your task
+
+Write a function `word_count(text)` that returns a dictionary mapping each word in `text` to the number of times it appears.
+
+- Treat the input as space-separated words (use `.split()`).
+- Count **case-insensitively** — `"The"` and `"the"` are the same word.
+- Return a dictionary where every key is lowercase.
+
+## Examples
+
+```python
+word_count("the quick brown fox")
+# {'the': 1, 'quick': 1, 'brown': 1, 'fox': 1}
+
+word_count("the quick brown fox the lazy fox")
+# {'the': 2, 'quick': 1, 'brown': 1, 'fox': 2, 'lazy': 1}
+
+word_count("Hello hello HELLO")
+# {'hello': 3}
+
+word_count("")
+# {}
+```
+
+## Requirements
+
+- Use `.lower()` to normalise the text before splitting.
+- Use `counts.get(word, 0) + 1` to update each count — don't use `+= 1` on a fresh key.
+- Return an empty dict `{}` for an empty string.
+- The order of keys in the returned dict does not matter.

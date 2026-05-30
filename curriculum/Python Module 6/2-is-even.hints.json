@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The % operator gives the remainder after division. n % 2 is 0 for even numbers and 1 for odd ones.",
+    "The expression n % 2 == 0 already produces True or False — you can return it directly without an if statement.",
+    "Your function should look like: def is_even(n): return n % 2 == 0"
+  ]
+}

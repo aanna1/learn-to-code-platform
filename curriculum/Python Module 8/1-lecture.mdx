@@ -1,0 +1,346 @@
+## Why this matters
+
+Lists got you a long way. Any time you had a bunch of similar things in a row (students, prices, log lines), a list was the right shape. But lists put values *in order*, and order is often the wrong way to find things.
+
+Say you're tracking people's ages. With lists, you'd do this:
+
+```python
+names = ["Ada", "Grace", "Linus", "Guido"]
+ages  = [25, 30, 40, 35]
+```
+
+Two lists. The implicit promise is that `ages[i]` is the age of `names[i]`. Now suppose you want Grace's age:
+
+```python
+i   = names.index("Grace")
+age = ages[i]
+```
+
+That works, but it's already fragile. Sort `names` alphabetically without sorting `ages` to match, and every age is now attached to the wrong person, and Python has no way to notice. Add a new person and forget to add their age, same problem. The fix is a data structure that lets you look up values *by name* instead of by position. That's a dictionary:
+
+```python
+ages = {"Ada": 25, "Grace": 30, "Linus": 40, "Guido": 35}
+print(ages["Grace"])   # 30
+```
+
+One variable. One source of truth. No way for names and ages to drift apart.
+
+Dictionaries are also the shape of basically all structured data you'll encounter outside Python. JSON, the format used by almost every web API, is dictionaries (and lists of dictionaries) all the way down. Once you've learned dictionaries, you've learned the shape of the world's data.
+
+Sets, the other half of this module, answer a smaller but constant problem: "give me the unique values" and "is this value in the collection, fast."
+
+## What you'll be able to do by the end
+
+- Create a dictionary, read from it, write to it, and delete from it.
+- Use `.get()` to read a key safely without crashing on missing data.
+- Iterate over a dictionary's keys, values, or both at once.
+- Build a word-frequency counter or any other "count things by category" pattern.
+- Recognize the JSON-shaped layout of lists of dictionaries and nested dictionaries.
+- Use a set for deduplication and fast membership tests.
+- Explain why a list can't be a dictionary key but a tuple can.
+
+<Callout type="info">
+No installation needed. Every code block on this platform has a **Run** button — press it and your code executes instantly in the browser. You don't need Python on your machine; you don't need a terminal.
+</Callout>
+
+## Core concepts
+
+### Creating a dictionary
+
+A dictionary is written with curly braces, and each entry is a `key: value` pair separated by commas.
+
+```python
+person = {"name": "Ada", "age": 25, "is_student": False}
+empty  = {}
+```
+
+Keys are usually strings, but they can also be numbers, tuples, or a few other things we'll get to. Values can be anything: strings, numbers, lists, other dictionaries.
+
+You read a value by putting its key in square brackets:
+
+<Runnable code={`person = {"name": "Ada", "age": 25}
+print(person["name"])   # Ada
+print(person["age"])    # 25`} />
+
+That syntax looks a lot like list indexing. The difference is that you're indexing by a meaningful key (a name) instead of by position.
+
+You write to a key the same way:
+
+<Runnable code={`person = {"name": "Ada", "age": 25}
+person["age"] = 26              # update existing key
+person["is_student"] = False    # add new key
+print(person)`} />
+
+The same syntax adds a key if it doesn't exist and updates it if it does. That's convenient, but worth knowing: there's no warning when you accidentally create a new key via a typo.
+
+### KeyError: the first thing that bites you
+
+Try to read a key that doesn't exist:
+
+<Runnable code={`person = {"name": "Ada", "age": 25}
+print(person["address"])`} />
+
+<Callout type="tip">
+You'll see `KeyError: 'address'`. Python refuses to guess. If you ask for a key that isn't there, the program crashes. This is one of the most common errors when working with dictionaries, especially when data comes from user input, a file, or an API.
+</Callout>
+
+Two ways to handle it. The first is to check before reading:
+
+<Runnable code={`person = {"name": "Ada", "age": 25}
+if "address" in person:
+    print(person["address"])
+else:
+    print("(no address on file)")`} />
+
+`in` on a dictionary checks whether a key exists, and it checks keys, not values.
+
+The second way is cleaner for "give me this or a default" situations: the `.get()` method.
+
+<Runnable code={`person = {"name": "Ada", "age": 25}
+print(person.get("address"))                # None
+print(person.get("address", "unknown"))     # unknown`} />
+
+`.get(key)` returns `None` when the key is missing. `.get(key, default)` lets you specify what to return instead. Use `.get()` when a missing key is an expected absence. Use `d[key]` when the key absolutely should be there and a missing one means a bug; in that case a crash is appropriate.
+
+### The classic: counting things
+
+Given a sentence, count how many times each word appears. The natural first attempt:
+
+```python
+sentence = "the quick brown fox the lazy fox"
+counts = {}
+for word in sentence.split():
+    counts[word] += 1
+```
+
+The very first iteration crashes with `KeyError: 'the'`. Because `counts[word] += 1` is shorthand for `counts[word] = counts[word] + 1`, and on the first iteration, `counts["the"]` doesn't exist yet. You're reading a key that hasn't been written yet, then adding one to it.
+
+The fix is `.get()` with a default of zero:
+
+<Runnable code={`sentence = "the quick brown fox the lazy fox"
+counts = {}
+for word in sentence.split():
+    counts[word] = counts.get(word, 0) + 1
+print(counts)`} />
+
+`counts.get(word, 0)` returns the current count if we've seen the word, or zero if we haven't. Add one and store it back. This "look up with a default, modify, store back" pattern comes up constantly: counting words, tallying votes, grouping items by category. Memorize it.
+
+**What does this print?** Think it through before running:
+
+<Runnable code={`votes = {"yes": 3, "no": 1}
+votes["yes"] += 1
+votes["maybe"] = votes.get("maybe", 0) + 1
+print(votes)`} />
+
+<Callout type="tip">
+Output: `{'yes': 4, 'no': 1, 'maybe': 1}`. The first update works because `"yes"` already exists. The second uses `.get("maybe", 0)` because `"maybe"` doesn't exist yet. Writing `votes["maybe"] += 1` instead would crash with a `KeyError`.
+</Callout>
+
+### Removing keys
+
+Two ways to remove a key:
+
+<Runnable code={`person = {"name": "Ada", "age": 25, "city": "London"}
+del person["age"]
+print(person)   # {'name': 'Ada', 'city': 'London'}`} />
+
+`del` removes by key and raises `KeyError` if the key doesn't exist.
+
+<Runnable code={`person = {"name": "Ada", "city": "London"}
+city = person.pop("city")
+print(city)     # London
+print(person)   # {'name': 'Ada'}`} />
+
+`.pop(key)` removes the key and *returns* its value, which is useful when you want to both delete and use the value. Pass a second argument to make the missing case silent:
+
+```python
+person.pop("city", None)   # does nothing if "city" isn't there
+```
+
+### Iterating over a dictionary
+
+**What does this print?**
+
+<Runnable code={`person = {"name": "Ada", "age": 25, "city": "London"}
+for x in person:
+    print(x)`} />
+
+<Callout type="tip">
+Just the keys: `name`, `age`, `city`. When you iterate over a dictionary with `for x in d`, Python loops over keys only. The values aren't part of the loop variable.
+</Callout>
+
+Three views you can iterate:
+
+<Runnable code={`person = {"name": "Ada", "age": 25, "city": "London"}
+
+for key in person.keys():     # keys only (same as plain "for key in person")
+    print(key)
+
+print("---")
+
+for value in person.values(): # values only
+    print(value)
+
+print("---")
+
+for key, value in person.items():  # both at once — usually what you want
+    print(f"{key}: {value}")`} />
+
+`.items()` produces `(key, value)` pairs, and the `key, value` on the left of `for` is tuple unpacking from Module 7. Whenever you find yourself writing `for k in d: ... d[k] ...`, switch to `for k, v in d.items()` instead (it's shorter and faster).
+
+### `.update()` and merging
+
+<Runnable code={`defaults = {"theme": "dark", "font_size": 12, "autosave": True}
+user_settings = {"font_size": 14, "language": "en"}
+defaults.update(user_settings)
+print(defaults)`} />
+
+`defaults` absorbs every key from `user_settings`. New keys are added; existing keys are overwritten. Note that `defaults` is mutated in place. For a new dict that leaves both originals untouched, use the `|` operator (Python 3.9+):
+
+```python
+merged = defaults | user_settings
+```
+
+### Lists of dictionaries: the JSON shape
+
+Most real-world data is a list of dictionaries. Each dictionary is one record; the list is the collection.
+
+<Runnable code={`todos = [
+    {"title": "Buy milk",   "done": False, "priority": 2},
+    {"title": "Fix server", "done": True,  "priority": 1},
+    {"title": "Write tests","done": False, "priority": 1},
+]
+
+for task in todos:
+    status = "[x]" if task["done"] else "[ ]"
+    print(f"{status} {task['title']}")`} />
+
+That shape is what an API typically returns. Filtering down to incomplete tasks is a list comprehension where the test reaches into each dictionary:
+
+<Runnable code={`todos = [
+    {"title": "Buy milk",   "done": False},
+    {"title": "Fix server", "done": True},
+    {"title": "Write tests","done": False},
+]
+incomplete = [t for t in todos if not t["done"]]
+for t in incomplete:
+    print(t["title"])`} />
+
+### Nested dictionaries
+
+Values can be dictionaries too:
+
+<Runnable code={`users = {
+    "ada":   {"age": 25, "city": "London"},
+    "grace": {"age": 30, "city": "NYC"},
+}
+print(users["ada"]["city"])   # London
+users["ada"]["age"] = 26
+print(users["ada"])`} />
+
+The double-bracket lookup is "get the dict at key `'ada'`, then get `'city'` from that." If either key is missing, you get a `KeyError`. Chained `.get()` calls keep things safe for optional fields:
+
+```python
+city = users.get("margaret", {}).get("city", "unknown")
+```
+
+If `"margaret"` doesn't exist, treat her record as an empty dict and look up `"city"` in that, giving you `"unknown"`.
+
+### Why can't a list be a dictionary key?
+
+<Runnable code={`d = {[1, 2]: "first"}`} />
+
+<Callout type="tip">
+`TypeError: unhashable type: 'list'`. Dictionary keys must be *hashable*: Python computes a stable numeric fingerprint (a hash) from the key and uses it to find values quickly. Lists can change after creation, so their hash would shift too, breaking lookups. Python avoids the problem by refusing to let you use mutable objects as keys.
+
+Tuples don't have this issue because they're immutable: `(1, 2)` is `(1, 2)` forever, so its hash is stable.
+</Callout>
+
+Tuple keys come up often in real code: pairs of coordinates, a date plus a category, any compound lookup.
+
+<Runnable code={`locations = {
+    (0, 0): "origin",
+    (1, 0): "east of origin",
+    (0, 1): "north of origin",
+}
+print(locations[(1, 0)])`} />
+
+### Sets: when you only care about uniqueness
+
+A set holds each value at most once and doesn't preserve insertion order:
+
+<Runnable code={`seen = {1, 2, 3, 2, 1}
+print(seen)   # {1, 2, 3}`} />
+
+The most common use is deduplicating a list in one line:
+
+<Runnable code={`names = ["Alice", "Bob", "Alice", "Charlie", "Bob"]
+unique = list(set(names))
+print(unique)`} />
+
+`set(names)` drops duplicates; `list(...)` converts it back. One catch: a set doesn't preserve order, so the result may come out in a different order than the input. If order matters, use the explicit loop instead.
+
+The other reason to reach for a set is fast membership testing. `x in some_list` scans every element. `x in some_set` uses hashing and is effectively instant regardless of size.
+
+One syntax trap worth flagging:
+
+```python
+not_a_set = {}     # empty DICTIONARY
+real_set  = set()  # empty set
+```
+
+`{}` was claimed by dictionaries first. An empty set is always `set()`.
+
+### Set operations
+
+<Runnable code={`a = {1, 2, 3, 4}
+b = {3, 4, 5, 6}
+
+print(a | b)   # union: everything in either set
+print(a & b)   # intersection: in both
+print(a - b)   # difference: in a but not b
+print(a ^ b)   # symmetric difference: in one but not both`} />
+
+These come up more than you'd expect. "Tags shared between two posts" is `tags_a & tags_b`. "All visitors today" is `morning | afternoon`. "Users who clicked X but not Y" is `clicked_x - clicked_y`. Whenever you reach for a nested loop to compute one of these, a set operation can say the same thing in a single line.
+
+### Dict and set comprehensions
+
+The list comprehension syntax from Module 7 extends to dictionaries and sets:
+
+<Runnable code={`# dict comprehension — key: value inside the braces
+squares = {n: n ** 2 for n in range(5)}
+print(squares)
+
+# set comprehension — single expression, deduplication baked in
+words = ["Alice", "bob", "ALICE", "Bob"]
+unique_lower = {w.lower() for w in words}
+print(unique_lower)`} />
+
+The `key: value` form signals a dict comprehension; a single expression signals a set comprehension.
+
+## Common pitfalls
+
+1. **`KeyError` on a missing read.** `d[key]` crashes if the key isn't there. Use `d.get(key)` or `d.get(key, default)` when a missing key is expected, or `if key in d:` when you need to branch.
+
+2. **`counts[word] += 1` on a fresh key.** That expands to `counts[word] = counts[word] + 1`, and the read on the right crashes before the write happens. Use `counts[word] = counts.get(word, 0) + 1`.
+
+3. **`for x in d` only loops over keys.** For both key and value, use `.items()`. For values only, use `.values()`. Writing `for k in d: ... d[k] ...` is a cue to switch to `.items()`.
+
+4. **Using a list as a key.** `TypeError: unhashable type: 'list'`. Convert to a tuple first: `d[tuple(my_list)] = ...`.
+
+5. **`{}` for an empty set.** It's an empty dictionary. The empty set is `set()`.
+
+6. **Mutating a dictionary while iterating over it.** Python raises `RuntimeError: dictionary changed size during iteration`. Iterate over `list(d.keys())` as a snapshot instead, or build a new dictionary with a comprehension.
+
+## Recap
+
+- A dictionary maps keys to values. Read with `d[key]`, write with `d[key] = value`.
+- `d[key]` raises `KeyError` on a missing key. `d.get(key, default)` returns the default instead.
+- `counts[word] = counts.get(word, 0) + 1` is the canonical counting pattern.
+- `for k in d` iterates keys only. Use `.items()` for `(key, value)` pairs, `.values()` for values.
+- `.update(other)` merges another dict in, overwriting existing keys. `a | b` does the same without mutating.
+- Keys must be hashable. Strings, numbers, tuples, and booleans work. Lists, sets, and dicts don't.
+- Lists of dictionaries are the shape of JSON and most real data.
+- A set holds each value at most once. `set(my_list)` deduplicates in one step; `x in some_set` is fast.
+- Set operations: `|` union, `&` intersection, `-` difference, `^` symmetric difference.
+- Empty dict is `{}`. Empty set is `set()`.

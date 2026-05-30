@@ -1,0 +1,26 @@
+# Skip and Stop
+
+`break` exits a loop immediately — no more iterations, done. `continue` skips the rest of the current iteration and jumps to the next value. Together they let you control exactly which items a loop processes and when it stops.
+
+## Your task
+
+Write a function `filter_numbers(numbers)` that processes a list of integers and returns a new list by these rules:
+
+1. **Skip** any negative value — don't include it in the result (use `continue`).
+2. **Stop** as soon as you encounter a value **greater than 100** — don't include it or anything after it (use `break`).
+3. Include every other value.
+
+## Requirements
+
+- Use a `for` loop over the input list.
+- Use `continue` to skip negatives.
+- Use `break` to stop at values over 100.
+- Return the collected values as a list.
+
+## Example
+
+```python
+print(filter_numbers([3, -1, 7, -4, 200, 9]))
+# [3, 7]
+# -1 and -4 are negative (skipped), 200 is > 100 (stop here), 9 never reached
+```

@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "unique_tags: convert the list to a set with set(tag_list) — this drops duplicates automatically. Then wrap it in sorted() to get a sorted list: return sorted(set(tag_list)).",
+    "shared_tags uses the intersection operator &. Convert both inputs to sets first: set(tags_a) & set(tags_b) gives you only the tags that appear in both. Wrap in sorted().",
+    "all_tags uses the union operator |. set(tags_a) | set(tags_b) gives you every tag from either collection, with no duplicates. Wrap in sorted().",
+    "only_in_first uses the difference operator -. set(tags_a) - set(tags_b) gives you tags that are in tags_a but not in tags_b. Order matters: a - b is not the same as b - a."
+  ]
+}

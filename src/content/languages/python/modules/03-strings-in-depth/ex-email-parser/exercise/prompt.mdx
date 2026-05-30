@@ -1,0 +1,45 @@
+# Email Parser
+
+The lecture's worked example cleaned an email address and split it on `@`. Here you'll go further: validate the input, extract the parts, and pull out the top-level domain too. Every skill from this module shows up — strip, lower, count, split, indexing, and f-strings.
+
+## Your task
+
+Write a function `parse_email(raw)` that takes a raw email string and returns a formatted summary, or `"invalid"` if the input isn't a valid email address.
+
+A valid email for this exercise has **exactly one `@`** and at least one `.` in the domain. Anything else is invalid.
+
+For a valid email, return a string in this exact format:
+
+```
+username: <username> | domain: <domain> | tld: <tld>
+```
+
+Where:
+- `<username>` is everything before the `@`, stripped and lowercased.
+- `<domain>` is everything after the `@`, stripped and lowercased.
+- `<tld>` is the part of the domain after the last `.` (e.g. `"com"`, `"org"`).
+
+## Requirements
+
+- Strip whitespace and lowercase before doing anything else.
+- Use `.count("@")` to check that there is exactly one `@`. Return `"invalid"` if not.
+- Use `.split("@", 1)` to separate username and domain.
+- Extract the TLD by splitting the domain on `"."` and taking the last element.
+- Return `"invalid"` if the domain contains no `.` (so there is no TLD).
+- Return the formatted string (do not print inside the function).
+
+## Example output
+
+```python
+parse_email("  Ada.Lovelace@Example.COM  ")
+# "username: ada.lovelace | domain: example.com | tld: com"
+
+parse_email("user@subdomain.example.org")
+# "username: user | domain: subdomain.example.org | tld: org"
+
+parse_email("notanemail")
+# "invalid"
+
+parse_email("two@@ats.com")
+# "invalid"
+```

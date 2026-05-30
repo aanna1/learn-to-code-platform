@@ -1,0 +1,32 @@
+# Leap Year
+
+The rule for leap years is famous for being slightly more complicated than people expect. Most think "every four years." That's close, but not quite right, and the exceptions are exactly the kind of thing logical operators are built for.
+
+## The rule
+
+A year is a leap year if:
+
+- it is divisible by 4, **and**
+- it is **not** divisible by 100, **unless** it is also divisible by 400.
+
+Put another way: divisible by 4 makes it a leap year, but years divisible by 100 are skipped — except years divisible by 400, which are leap years after all. So 2000 was a leap year, but 1900 was not.
+
+## Your task
+
+Write a function `is_leap_year(year)` that returns `True` if `year` is a leap year and `False` otherwise.
+
+## Requirements
+
+- Define a function named `is_leap_year` that takes one argument, `year`.
+- It must **return** a boolean (`True` or `False`), not print anything.
+- Use the divisibility operator `%`. A number is divisible by `n` when `year % n == 0`.
+- Combine the conditions with `and`, `or`, and `not`. You can do the whole thing in one return statement, or with an `if`/`elif` chain — your choice.
+
+## Example
+
+```python
+print(is_leap_year(2024))   # True  — divisible by 4, not by 100
+print(is_leap_year(1900))   # False — divisible by 100 but not 400
+print(is_leap_year(2000))   # True  — divisible by 400
+print(is_leap_year(2023))   # False — not divisible by 4
+```

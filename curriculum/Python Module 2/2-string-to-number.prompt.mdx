@@ -1,0 +1,27 @@
+# String to Number
+
+Every time your program calls `input()`, you get a string back — no exceptions. Before you can do math with it, you need to pick the right conversion: `int()` or `float()`?
+
+## Your task
+
+Complete `parse_number(text)` so that it:
+
+- Returns an `int` if `text` has no decimal point (e.g. `"42"`, `"-7"`, `"0"`)
+- Returns a `float` if `text` has a decimal point (e.g. `"3.14"`, `"-2.5"`, `"0.0"`)
+
+You can assume the input is always a valid numeric string — no words, no empty strings.
+
+## Requirements
+
+- Use `int()` and `float()` for the conversion.
+- The return type must match: `parse_number("42")` must return the integer `42`, not the float `42.0`.
+- Check for the decimal point before converting.
+
+## Examples
+
+```
+parse_number("42")    → 42    (int)
+parse_number("3.14")  → 3.14  (float)
+parse_number("-7")    → -7    (int)
+parse_number("0.0")   → 0.0   (float)
+```

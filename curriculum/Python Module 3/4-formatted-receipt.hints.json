@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Inside an f-string, put the format spec after a colon: f\"{name:<22}\" left-aligns name in a 22-character field. f\"{price:>8.2f}\" right-aligns price in 8 characters with 2 decimal places.",
+    "Both columns go in the same f-string on one line: f\"{name:<22}{price:>8.2f}\". The field widths (22 + 8 = 30) should match your separator length.",
+    "For the separator, use \"-\" * 30 — that's the string \"-\" repeated 30 times. Don't count and type 30 dashes by hand.",
+    "The total must be computed: total = coffee + avocado_toast + orange_juice. Then use the same f-string format for the total line as for the item lines."
+  ]
+}

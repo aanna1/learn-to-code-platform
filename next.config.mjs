@@ -13,11 +13,23 @@ const crossOriginIsolationHeaders = [
   { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
 ];
 
+// GitHub Pages serves this site under https://<user>.github.io/<repo>/, so all
+// assets and routes need to be prefixed. Toggle off by setting GITHUB_PAGES=""
+// in the environment (e.g. for Vercel or local dev), and on (default for the
+// Pages workflow) by leaving it unset/truthy.
+const basePath = process.env.GITHUB_PAGES === "false" ? "" : "/learn-to-code-platform";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export",
   reactStrictMode: true,
   pageExtensions: ["ts", "tsx", "js", "jsx", "md", "mdx"],
+  basePath,
+  assetPrefix: basePath || undefined,
+  // Surface the basePath to client code (e.g. the coi-serviceworker <script src>).
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
+  },
   images: {
     // next/image optimization is unavailable in static export
     unoptimized: true,

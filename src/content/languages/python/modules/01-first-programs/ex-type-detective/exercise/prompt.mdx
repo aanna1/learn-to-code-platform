@@ -1,0 +1,30 @@
+Python's four foundational types look different but behave very differently. A number inside quotes isn't a number — it's text that happens to contain digits. This exercise trains you to tell them apart.
+
+## Your task
+
+Complete the function `identify_type(value)` so that it **returns** a string naming the type of `value`:
+
+- If `value` is a string (`str`), return `"string"`.
+- If `value` is a whole number (`int`), return `"integer"`.
+- If `value` is a decimal number (`float`), return `"float"`.
+- If `value` is `True` or `False` (`bool`), return `"boolean"`.
+
+## Requirements
+
+- Return the labels exactly as shown above: lowercase, and the returned value itself has no extra quotes.
+- Use `type(value)` and compare it to `str`, `int`, `float`, and `bool` — one `if` per type.
+- The function must handle all four types.
+
+## Example
+
+```python
+identify_type("hello")   # returns "string"
+identify_type(42)        # returns "integer"
+identify_type(3.14)      # returns "float"
+identify_type(True)      # returns "boolean"
+identify_type("99")      # returns "string"  — it's in quotes, so it's text
+```
+
+<Callout type="warning">
+`True` and `False` are booleans, but in Python `bool` is a subtype of `int` — so `type(True) == int` would sneak through as true if you checked `int` first. Check for `bool` **before** you check for `int`, or `True` will wrongly come back as `"integer"`.
+</Callout>

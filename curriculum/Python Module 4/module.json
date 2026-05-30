@@ -1,0 +1,13 @@
+{
+  "id": "04-conditionals",
+  "title": "Conditionals",
+  "description": "Make programs branch: comparison and logical operators, if/elif/else, truthiness, chained comparisons, and the in operator.",
+  "order": 4,
+  "lessons": [
+    { "id": "lecture",                "title": "Comparisons, if/elif/else, Logic & Truthiness", "type": "lecture",  "order": 1 },
+    { "id": "ex-letter-grade",        "title": "Letter Grade",         "type": "exercise", "order": 2 },
+    { "id": "ex-leap-year",           "title": "Leap Year",            "type": "exercise", "order": 3 },
+    { "id": "ex-username-check",      "title": "Username Check",       "type": "exercise", "order": 4 },
+    { "id": "ex-triangle-classifier", "title": "Triangle Classifier",  "type": "exercise", "order": 5 }
+  ]
+}

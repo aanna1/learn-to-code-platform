@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { CodeEditor } from "@/components/ide/CodeEditor";
 import { Terminal, type TerminalHandle } from "@/components/ide/Terminal";
 import { ResizableSplit } from "@/components/ide/ResizableSplit";
@@ -242,12 +243,12 @@ export function Ide({ languageId, exercise, autosave, onAllTestsPassed }: IdePro
           >
             ⌨
           </Button>
-          <a
+          <Link
             href={`/cheatsheet/${languageId}`}
             className="rounded-md px-3 py-1.5 text-sm text-muted transition hover:bg-surface-raised hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             Cheat sheet
-          </a>
+          </Link>
         </div>
       </div>
 

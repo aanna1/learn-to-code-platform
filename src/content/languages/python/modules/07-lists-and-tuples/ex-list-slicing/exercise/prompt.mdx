@@ -1,0 +1,34 @@
+# List Slicing
+
+Lists are indexed from zero. Negative indices count from the end. Slicing with `start:stop` gives you a piece of the list — and `stop` is exclusive, just like with strings.
+
+## Your task
+
+Write two functions.
+
+**`first_and_last(items)`** — takes a list and returns a tuple containing its first and last elements.
+
+**`middle(items)`** — takes a list of at least three items and returns everything except the first and last elements (as a list).
+
+## Examples
+
+```python
+first_and_last(["Ada", "Grace", "Linus", "Guido"])
+# ("Ada", "Guido")
+
+first_and_last([42])
+# (42, 42)
+
+middle(["Ada", "Grace", "Linus", "Guido"])
+# ["Grace", "Linus"]
+
+middle([1, 2, 3])
+# [2]
+```
+
+## Requirements
+
+- `first_and_last` must work for a list of any length, including a single-element list.
+- `middle` can assume the list has at least three elements.
+- Use indexing or slicing — no loops needed.
+- Return a **tuple** from `first_and_last` and a **list** from `middle`.

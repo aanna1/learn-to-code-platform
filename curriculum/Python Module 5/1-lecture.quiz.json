@@ -1,0 +1,79 @@
+{
+  "questions": [
+    {
+      "question": "What does range(3, 8) produce?",
+      "options": [
+        {
+          "text": "3, 4, 5, 6, 7",
+          "correct": true,
+          "explanation": "range(start, stop) includes start and stops before stop, so range(3, 8) gives 3, 4, 5, 6, 7 — five values, not six."
+        },
+        {
+          "text": "3, 4, 5, 6, 7, 8",
+          "correct": false,
+          "explanation": "The stop value is exclusive — 8 is not included. To include 8, you'd write range(3, 9)."
+        },
+        {
+          "text": "0, 1, 2, 3, 4, 5, 6, 7",
+          "correct": false,
+          "explanation": "range(3, 8) starts at 3, not 0. range(8) (one argument) starts at 0."
+        },
+        {
+          "text": "4, 5, 6, 7",
+          "correct": false,
+          "explanation": "The start value is inclusive — 3 is included. Only the stop (8) is excluded."
+        }
+      ]
+    },
+    {
+      "question": "What is the difference between break and continue?",
+      "options": [
+        {
+          "text": "break exits the loop entirely; continue skips to the next iteration",
+          "correct": true,
+          "explanation": "break jumps past the loop; continue jumps back to the top for the next value. They look similar but do very different things."
+        },
+        {
+          "text": "continue exits the loop entirely; break skips to the next iteration",
+          "correct": false,
+          "explanation": "These are swapped. break ends the loop; continue just skips the rest of the current iteration and moves on."
+        },
+        {
+          "text": "break only works in while loops; continue only works in for loops",
+          "correct": false,
+          "explanation": "Both break and continue work in both while and for loops."
+        },
+        {
+          "text": "They do the same thing",
+          "correct": false,
+          "explanation": "They do very different things. break ends the loop immediately; continue skips the rest of the current iteration only."
+        }
+      ]
+    },
+    {
+      "question": "When does the else clause of a for loop run?",
+      "options": [
+        {
+          "text": "Only when the loop finishes without hitting break",
+          "correct": true,
+          "explanation": "Loop else means 'no break happened.' It's the cleanest way to handle the 'searched and didn't find it' pattern."
+        },
+        {
+          "text": "After every single iteration of the loop",
+          "correct": false,
+          "explanation": "That's not how loop else works — it runs once, after the loop, but only if break was never hit."
+        },
+        {
+          "text": "When the loop body raises an exception",
+          "correct": false,
+          "explanation": "Exceptions don't trigger loop else. An unhandled exception would propagate up, skipping the else."
+        },
+        {
+          "text": "When the loop runs zero times",
+          "correct": false,
+          "explanation": "A loop that runs zero times still counts as 'completed without break,' so the else does run in that case — but that's not the defining rule."
+        }
+      ]
+    }
+  ]
+}

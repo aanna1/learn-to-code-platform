@@ -1,0 +1,45 @@
+# Grade Report
+
+Real data often arrives as a list of dictionaries — student records, API responses, database rows. Each dictionary here has a `"name"` key and a `"score"` key. Your job is to filter, sort, and compute summary statistics from that structure.
+
+## Your task
+
+You're given a list of student dictionaries, each with `"name"` (a string) and `"score"` (a number). Write three functions.
+
+**`passing_students(students, threshold)`** — return a sorted list of names whose score is **greater than or equal to** `threshold`.
+
+**`class_average(students)`** — return the average score across all students, rounded to 2 decimal places.
+
+**`top_student(students)`** — return the name of the student with the highest score. You can assume there are no ties and the list is non-empty.
+
+## Examples
+
+```python
+students = [
+    {"name": "Ada",      "score": 88},
+    {"name": "Grace",    "score": 95},
+    {"name": "Linus",    "score": 72},
+    {"name": "Margaret", "score": 95},
+    {"name": "Guido",    "score": 60},
+]
+
+passing_students(students, threshold=75)
+# ["Ada", "Grace", "Margaret"]
+
+class_average(students)
+# 82.0
+
+top_student([
+    {"name": "Ada",   "score": 88},
+    {"name": "Grace", "score": 95},
+    {"name": "Linus", "score": 72},
+])
+# "Grace"
+```
+
+## Requirements
+
+- `passing_students`: use a list comprehension to filter, then return `sorted(...)` of the names.
+- `class_average`: compute `sum(scores) / len(students)` and `round(..., 2)`. You may collect scores with a loop or comprehension.
+- `top_student`: find the student dict with the highest score using a loop — no built-in shortcuts needed.
+- All three functions can assume the list is non-empty.

@@ -1,0 +1,31 @@
+# Username Check
+
+Validating user input is one of the first real jobs you'll give a conditional. A signup form has rules, and your code has to check them one at a time and report the first one that fails. This exercise builds exactly that: a chain of checks that returns a clear message.
+
+## Your task
+
+Write a function `check_username(name)` that validates a username against three rules and returns a message describing the result.
+
+Check the rules **in this order** and return as soon as one fails:
+
+1. If the username is empty, return `"Username cannot be empty."`
+2. Otherwise, if it is shorter than 3 characters, return `"Username is too short."`
+3. Otherwise, if it contains a space, return `"Username cannot contain spaces."`
+4. If it passes all three checks, return `"Username is valid."`
+
+## Requirements
+
+- Define a function named `check_username` that takes one argument, `name`.
+- It must **return** the message string, not print it.
+- Use an `if`/`elif`/`else` chain so only the first failing rule is reported.
+- For the empty check, lean on truthiness: an empty string is falsy. `not name` reads as "there is no name."
+- Use `len(name)` for the length and the `in` operator to check for a space.
+
+## Example
+
+```python
+print(check_username(""))         # Username cannot be empty.
+print(check_username("ab"))       # Username is too short.
+print(check_username("a b c"))    # Username cannot contain spaces.
+print(check_username("ada"))      # Username is valid.
+```

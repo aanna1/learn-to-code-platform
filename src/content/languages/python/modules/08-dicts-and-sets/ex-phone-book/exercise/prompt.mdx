@@ -1,0 +1,40 @@
+# Phone Book
+
+A phone book is a dictionary that maps names to phone numbers. This exercise covers every core dictionary operation: adding, updating, looking up, and removing entries.
+
+## Your task
+
+Write four functions that manage a phone book dictionary.
+
+**`add_contact(book, name, number)`** — add or update the entry for `name`. Return the modified dictionary.
+
+**`lookup(book, name)`** — return the phone number for `name`, or `None` if the name isn't in the book. Do not crash on a missing name.
+
+**`remove_contact(book, name)`** — remove `name` from the book if it exists. If `name` isn't there, do nothing (no crash). Return the modified dictionary.
+
+**`all_names(book)`** — return a sorted list of all names currently in the book.
+
+## Examples
+
+```python
+book = {}
+book = add_contact(book, "Ada",   "555-0101")
+book = add_contact(book, "Grace", "555-0102")
+book = add_contact(book, "Ada",   "555-9999")  # update existing
+
+lookup(book, "Ada")    # "555-9999"
+lookup(book, "Linus")  # None
+
+all_names(book)        # ["Ada", "Grace"]
+
+book = remove_contact(book, "Grace")
+book = remove_contact(book, "Linus")  # name not in book — no crash
+all_names(book)        # ["Ada"]
+```
+
+## Requirements
+
+- `add_contact` uses bracket assignment: `book[name] = number`.
+- `lookup` uses `.get()` so a missing name returns `None` without raising `KeyError`.
+- `remove_contact` uses `.pop(name, None)` so removing a missing name is silent.
+- `all_names` returns `sorted(book.keys())` — a fresh sorted list.

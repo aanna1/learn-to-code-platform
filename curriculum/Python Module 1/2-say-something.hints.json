@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Call print() once for each line. Each call goes on its own line in your code.",
+    "The text you want to print goes inside the parentheses, wrapped in quotes: print(\"Hello, world!\")",
+    "Watch out for the apostrophe in \"Let's go!\" — if you wrap the whole string in single quotes, the apostrophe will break it. Use double quotes on the outside: print(\"Let's go!\")",
+    "A comment starts with # and goes on the line above the code it describes: # Print the greeting"
+  ]
+}

@@ -1,0 +1,36 @@
+# Word Filter
+
+A list comprehension builds a new list from an existing one in a single expression: `[expression for item in iterable if condition]`. It's the idiomatic Python answer to "I want a filtered, transformed version of this list" — no `result = []`, no `.append`, no separate loop.
+
+## Your task
+
+Write a function `filter_words(words, min_length)` that:
+
+1. Keeps only words whose length is **strictly greater than** `min_length`.
+2. Converts each kept word to **lowercase**.
+3. Returns the result **sorted alphabetically**.
+
+All three steps should happen inside a single list comprehension (sort with `sorted()`).
+
+## Examples
+
+```python
+filter_words(["Hello", "WORLD", "Python", "hi", "OK"], min_length=2)
+# ["hello", "python", "world"]
+
+filter_words(["cat", "dog", "elephant", "ox"], min_length=3)
+# ["elephant"]
+
+filter_words(["apple", "fig", "kiwi"], min_length=10)
+# []
+
+filter_words([], min_length=0)
+# []
+```
+
+## Requirements
+
+- Use a single list comprehension for filtering and lowercasing.
+- Wrap it in `sorted()` to get alphabetical order.
+- Return an empty list when no words pass the filter.
+- `min_length=2` means words must have **more than 2 characters** (length > 2, not >= 2).
