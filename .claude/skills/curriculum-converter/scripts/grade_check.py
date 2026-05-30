@@ -22,38 +22,50 @@ import traceback
 
 
 def _run_tests_against(tests_path, submission_path):
-    """Run every test_*() in tests_path with submission_path as `submission`.
+    """Run every test_*() in tests_path against submission_path.
 
-    Returns a list of (label, passed, message). Executes in an isolated temp dir with a clean
-    module cache so the solution and starter runs don't contaminate each other.
+    Mirrors the browser runtime (src/lib/languages/python/pyodide.worker.ts): the submission is
+    imported as a real module named `submission`, and the tests are executed *inside the submission
+    module's own namespace*. That single choice makes every test style behave here exactly as it
+    does in the deployed app:
+      - `import submission` / `from submission import x` / `importlib.reload(...)`,
+      - direct calls to the submission's functions without importing,
+      - monkeypatching a name via the test's `globals()` and having the submission's functions see
+        it (they share one namespace).
+    If these two ever diverge again, an exercise can pass here and still break in the browser -- so
+    keep them in lock-step.
+
+    Returns a list of (label, passed, message). Runs in an isolated temp dir with a clean module
+    cache so the solution and starter runs don't contaminate each other.
     """
     workdir = tempfile.mkdtemp(prefix="gradecheck_")
     results = []
     saved_path = list(sys.path)
     saved_stdin = sys.stdin
-    for name in ("submission", "grader_tests"):
-        sys.modules.pop(name, None)
+    sys.modules.pop("submission", None)
     try:
         shutil.copyfile(submission_path, os.path.join(workdir, "submission.py"))
-        shutil.copyfile(tests_path, os.path.join(workdir, "grader_tests.py"))
         sys.path.insert(0, workdir)
         # Feed EOF to any stray top-level input() so it errors instead of hanging.
         sys.stdin = io.StringIO("")
-        spec = importlib.util.spec_from_file_location(
-            "grader_tests", os.path.join(workdir, "grader_tests.py")
-        )
-        mod = importlib.util.module_from_spec(spec)
-        sys.modules["grader_tests"] = mod
         try:
-            spec.loader.exec_module(mod)
+            import submission  # noqa: F401
+            submission = sys.modules["submission"]
+        except Exception:
+            return [("(could not import submission.py)", False,
+                     traceback.format_exc().splitlines()[-1])]
+        ns = submission.__dict__
+        try:
+            with open(tests_path) as fh:
+                exec(compile(fh.read(), "tests.py", "exec"), ns)
         except Exception:
             return [("(could not import tests.py)", False,
                      traceback.format_exc().splitlines()[-1])]
-        test_names = sorted(n for n in dir(mod) if n.startswith("test_"))
+        test_names = sorted(n for n in ns if n.startswith("test_"))
         if not test_names:
             return [("(no tests found)", False, "tests.py defines no test_* functions")]
         for name in test_names:
-            fn = getattr(mod, name)
+            fn = ns.get(name)
             if not callable(fn):
                 continue
             doc = (fn.__doc__ or "").strip().splitlines()
@@ -69,8 +81,7 @@ def _run_tests_against(tests_path, submission_path):
     finally:
         sys.path[:] = saved_path
         sys.stdin = saved_stdin
-        for name in ("submission", "grader_tests"):
-            sys.modules.pop(name, None)
+        sys.modules.pop("submission", None)
         shutil.rmtree(workdir, ignore_errors=True)
     return results
 

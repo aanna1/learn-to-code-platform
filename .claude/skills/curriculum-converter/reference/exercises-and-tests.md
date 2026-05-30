@@ -69,8 +69,23 @@ array breaks the build. Example shape:
 ```
 
 ### `tests.py` — the grader
+**How the grader runs (the contract, mirrored by `scripts/grade_check.py` and the browser
+runtime):** the learner's code is imported as a real module named **`submission`**, and the test
+file is then executed *inside that module's own namespace*. Because of that single fact, any of
+these test styles work — use whichever is clearest:
+- `import submission` / `from submission import func` / `importlib.reload(sys.modules["submission"])`
+  (the file-module style the templates use);
+- call the submission's functions **directly** by name, no import (`func(...)`), since the test
+  shares the submission's namespace;
+- **monkeypatch** a name with `globals()[name] = fake` and the submission's own functions will pick
+  it up (same namespace) — handy for faking `roll_die`, `input`, `random`, etc.
+
+`scripts/grade_check.py` runs tests the exact same way, so "passes grade_check" means "passes in
+the browser." If you ever change one, change the other.
+
 Conventions the runtime enforces (do not deviate):
-- The learner's submission is importable as a module named **`submission`**.
+- The learner's submission is importable as a module named **`submission`** (and its names are in
+  scope directly, per above).
 - Define one or more **`test_*()`** functions. The **first line of each docstring** is the
   human-readable name shown to the learner — write it as a clear assertion ("Output's first line
   is 'Hello, world!'").

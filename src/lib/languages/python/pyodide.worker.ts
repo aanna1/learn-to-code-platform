@@ -52,6 +52,42 @@ def _run_tests(_ns):
     return _json.dumps(_results)
 `;
 
+/**
+ * Sets up the learner's code as a real, importable module named `submission`
+ * before the tests run, and exposes its namespace dict as `__sub_ns__`. Writes the
+ * code to a file on Pyodide's in-memory FS and imports it so the module has a proper
+ * loader. The tests are then executed *inside the submission module's own namespace*
+ * (see handleRunTests), which is what makes every test style work at once:
+ *   - `import submission` / `from submission import x` / `importlib.reload(...)`
+ *     (the file-module + reload pattern used by output-capture exercises),
+ *   - direct calls to the submission's functions without importing,
+ *   - monkeypatching a name via the test's own `globals()` and having the
+ *     submission's functions pick it up (they share one namespace).
+ * `os.path.dirname(__file__)` resolves to where submission.py lives, which is also
+ * on sys.path, so test helpers that re-add it and reimport keep working.
+ *
+ * `__submission_code__` is injected by the caller. The module is imported with
+ * __name__ == "submission" (never "__main__"), so a learner's
+ * `if __name__ == "__main__":` demo block is skipped during grading.
+ */
+const SUBMISSION_BOOTSTRAP = `
+import sys as _sys, os as _os, io as _io, contextlib as _contextlib
+
+_sub_dir = "/home/pyodide/_submission"
+_os.makedirs(_sub_dir, exist_ok=True)
+with open(_os.path.join(_sub_dir, "submission.py"), "w") as _f:
+    _f.write(__submission_code__)
+if _sub_dir not in _sys.path:
+    _sys.path.insert(0, _sub_dir)
+# Drop any cached version so this run imports the current code, not a stale module.
+_sys.modules.pop("submission", None)
+# Import once; suppress whatever the submission prints at import time so it doesn't
+# leak into the terminal before the test results appear.
+with _contextlib.redirect_stdout(_io.StringIO()):
+    import submission as _submission
+__sub_ns__ = _submission.__dict__
+`;
+
 function makeStreamingDecoder(): (bytes: Uint8Array) => string {
   const decoder = new TextDecoder();
   return (bytes: Uint8Array) => decoder.decode(bytes, { stream: true });
@@ -155,22 +191,25 @@ async function handleRun(code: string): Promise<void> {
 async function handleRunTests(code: string, tests: string): Promise<void> {
   resetInterrupt();
   configureStreams(false);
-  // Fresh namespace so one submission can't leak state into the next. __name__ is
-  // set to a non-"__main__" value so any `if __name__ == "__main__":` block (used
-  // by exercises for interactive demo code) is skipped during testing.
-  const ns = pyodide.toPy({ __name__: "__tests__" });
+  // The learner's code is passed in as __submission_code__ and turned into a fresh,
+  // importable `submission` module by SUBMISSION_BOOTSTRAP (a new module each run, so
+  // state can't leak between submissions). __sub_ns__ is that module's namespace dict;
+  // the tests run inside it so every test style works (see SUBMISSION_BOOTSTRAP).
+  const boot = pyodide.toPy({ __submission_code__: code });
+  let subns: any;
   try {
-    pyodide.runPython(code, { globals: ns });
+    pyodide.runPython(SUBMISSION_BOOTSTRAP, { globals: boot });
+    subns = boot.get("__sub_ns__");
   } catch (error) {
-    ns.destroy?.();
+    boot.destroy?.();
     post({ type: "testResult", results: [], allPassed: false, error: parseError(error) });
     return;
   }
   try {
-    pyodide.runPython(tests, { globals: ns });
-    pyodide.runPython(TEST_RUNNER, { globals: ns });
-    const runner = ns.get("_run_tests");
-    const json: string = runner(ns);
+    pyodide.runPython(tests, { globals: subns });
+    pyodide.runPython(TEST_RUNNER, { globals: subns });
+    const runner = subns.get("_run_tests");
+    const json: string = runner(subns);
     runner.destroy?.();
     const results = JSON.parse(json) as { name: string; passed: boolean; message?: string }[];
     post({
@@ -181,7 +220,8 @@ async function handleRunTests(code: string, tests: string): Promise<void> {
   } catch (error) {
     post({ type: "testResult", results: [], allPassed: false, error: parseError(error) });
   } finally {
-    ns.destroy?.();
+    subns?.destroy?.();
+    boot.destroy?.();
   }
 }
 

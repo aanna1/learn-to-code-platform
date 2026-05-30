@@ -147,8 +147,22 @@ Built the full IDE and mounted it on the temp route `/dev/ide` (exported as
 - **Test convention** (Phase 4 seed exercises must follow): `tests.py` defines `test_*()`
   functions that call the user's code and `assert`; the first docstring line is the shown
   name. Interactive/demo code in an exercise's starter/solution goes under
-  `if __name__ == "__main__":` — the test runner sets `__name__` to a non-`"__main__"`
-  value so that block is skipped during Submit (avoids `input()` EOF crashes).
+  `if __name__ == "__main__":` — the test runner imports the submission with
+  `__name__ == "submission"` (non-`"__main__"`) so that block is skipped during Submit
+  (avoids `input()` EOF crashes).
+- **Test-harness namespace contract (fixed 2026-05-30 — was a live bug).** `handleRunTests`
+  in `pyodide.worker.ts` writes the learner's code to `/home/pyodide/_submission/submission.py`,
+  imports it as a real module `submission`, and runs `tests.py` **inside that module's own
+  `__dict__`** (`__sub_ns__`). This makes all test styles work at once: `import submission` /
+  `from submission import x` / `importlib.reload(...)`, direct calls to the submission's
+  functions without importing, and monkeypatching via `globals()[name] = fake` (the test and the
+  submission share one namespace). The earlier runtime execed code+tests into a bare namespace and
+  created **no** `submission` module, so every exercise using `from submission import …` /
+  `importlib.reload(…)` / `__file__` crashed live with `ModuleNotFoundError: submission` —
+  modules 03–08 were broken; 01–02 happened to use the direct-call style and worked. The skill's
+  `scripts/grade_check.py` now runs tests the **same** way, so "passes grade_check" ⟺ "passes in
+  the browser" — keep the two in lock-step. Re-validated headlessly across all 8 modules (every
+  solution passes, every starter fails ≥1).
 - **NOT browser-verified**: this environment has no browser, so the interactive runtime
   (actual Pyodide run, SAB-blocked `input()`, Monaco/xterm rendering, Ruff markers) was NOT
   click-tested. What WAS verified: typecheck, static build, worker chunk emitted, route
