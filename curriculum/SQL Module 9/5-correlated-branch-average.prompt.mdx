@@ -1,0 +1,7 @@
+"Who earns more than the average salary *of their own branch*?" — not the company average, each person measured against their own branch. The starter compares everyone to the company-wide average, so it wrongly returns Jan and Michael. You need a **correlated subquery**: one that reaches back to the outer row and re-runs for each employee, averaging only that person's branch.
+
+Add the correlation to the inner query's `WHERE`, order by `employee_id`, then **Run** and **Submit**.
+
+<Callout type="tip">
+The tell for a correlated subquery is an alias reference across the boundary — `e.branch_id` used *inside* a query that is otherwise about `x`. That's what makes the inner `AVG` recompute per branch. Ryan (branch `NULL`) drops out: his branch matches no rows, `AVG` of nothing is `NULL`, and `> NULL` is unknown.
+</Callout>

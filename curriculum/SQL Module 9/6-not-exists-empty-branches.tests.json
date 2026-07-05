@@ -1,0 +1,24 @@
+[
+  {
+    "name": "returns Buffalo, the one branch with no employees (not an empty result)",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["branch_name"],
+      "rows": [
+        ["Buffalo"]
+      ]
+    }
+  },
+  {
+    "name": "generalizes: a second empty branch also shows up",
+    "setup": "INSERT INTO branch (branch_id, branch_name, mgr_id) VALUES (5, 'Nashua', NULL);",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["branch_name"],
+      "rows": [
+        ["Buffalo"],
+        ["Nashua"]
+      ]
+    }
+  }
+]

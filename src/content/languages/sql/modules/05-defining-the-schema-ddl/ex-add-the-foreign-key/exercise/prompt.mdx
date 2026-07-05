@@ -1,0 +1,9 @@
+A foreign key is what turns "these two tables are related" from a diagram into a rule the database actually enforces. Here you'll wire an `employee` table to a `branch` table so an employee can never claim a branch that doesn't exist.
+
+The `branch` table is done. Finish the `employee` table so that its `branch_id` column is a **foreign key** referencing `branch(branch_id)`.
+
+The starter creates both tables but leaves `employee` without its foreign key. Add the `FOREIGN KEY (branch_id) REFERENCES branch(branch_id)` constraint, press **Run**, then **Submit** — the checks read your schema's foreign keys, not any data.
+
+<Callout type="tip">
+A foreign key is a *table* constraint: it goes on its own line inside the parentheses, after the columns, not attached to a column's type. The shape is `FOREIGN KEY (local_column) REFERENCES other_table(their_column)`.
+</Callout>

@@ -1,0 +1,14 @@
+[
+  {
+    "name": "shows each branch and its city exactly once",
+    "orderMatters": false,
+    "expected": {
+      "columns": ["branch_id", "city"],
+      "rows": [
+        [1, "Corporate"],
+        [2, "Scranton"],
+        [3, "Stamford"]
+      ]
+    }
+  }
+]

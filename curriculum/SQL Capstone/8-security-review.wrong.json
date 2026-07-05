@@ -1,0 +1,10 @@
+{
+  "the-hole": "LIKE is an inherently unsafe operator that should never be used",
+  "the-fix": "Strip the words UNION and SELECT out of the search text before running it",
+  "least-privilege": "It prevents SQL injection from ever happening on that account",
+  "layers": {
+    "Parameterized query": "Caps the blast radius if an account is compromised",
+    "Least-privilege GRANTs": "Removes the injection vulnerability itself",
+    "catalog_public view": "Exposes only safe columns and hides customer/staff tables"
+  }
+}

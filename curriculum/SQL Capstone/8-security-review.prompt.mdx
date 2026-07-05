@@ -1,0 +1,16 @@
+**Stage 6 — Secure it (the review).** The schema works and you've fronted the catalog with a view. Now the deliberate security pass that closes the course: "it works" and "it's safe" are different claims.
+
+Inkwell's website has a title search a junior dev built the fast way:
+
+```
+# VULNERABLE
+query = "SELECT title, price FROM book WHERE title LIKE '%" + search + "%'"
+```
+
+An attacker types `x%' UNION SELECT username, password FROM staff_user --` into the box, and — exactly as in Module 11 — the `UNION` staples every staff credential onto what should have been a book list.
+
+Answer the four questions: why the query is injectable, the correct fix, why least-privilege `GRANT`s matter even after you parameterize, and how each part of the security pass fits together. Use the **draft** box to substitute the payload by hand first (it isn't graded); then complete the fields and press **Submit answer**.
+
+<Callout type="note">
+This is a **Track-2 reasoning exercise** — the vulnerability lives in the application code that glues the string together, which the browser has no tier for. The `CREATE VIEW` from the previous exercise *did* run; parameterizing and `GRANT`/`REVOKE` are reasoned about here, exactly as a real code review demands.
+</Callout>

@@ -1,0 +1,7 @@
+[
+  "Record.process() should just return [f'Record:{self.name}'] — no super().process() needed here, since Record is the end of the chain.",
+  "UpperMixin.process() calls super().process() to get the list from downstream, then returns [s.upper() for s in that_list].",
+  "PrefixMixin.process() calls super().process() and returns [f'{self.prefix}:{s}' for s in that_list]. It also needs __init__(self, prefix='', **kwargs) that stores self.prefix and calls super().__init__(**kwargs).",
+  "ProcessedRecord inherits (UpperMixin, PrefixMixin, Record) in that order. Its __init__ just passes name and prefix through to super().__init__().",
+  "get_mro_names: use cls.__mro__ which is a tuple of classes in MRO order. Filter out object with 'if c is not object', then return [c.__name__ for c in ...]."
+]

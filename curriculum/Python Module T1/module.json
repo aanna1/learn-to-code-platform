@@ -1,0 +1,13 @@
+{
+  "id": "15-make-code-better",
+  "title": "Make Your Existing Code Better",
+  "description": "pathlib, comprehensions, f-string formatting, type hints, dataclasses, enums, and logging — the tools that separate working code from maintainable code.",
+  "order": 15,
+  "lessons": [
+    { "id": "lecture", "title": "Make Your Code Better", "type": "lecture", "order": 1 },
+    { "id": "ex-fstring-formats", "title": "F-String Formats", "type": "exercise", "order": 2 },
+    { "id": "ex-comprehension-workshop", "title": "Comprehension Workshop", "type": "exercise", "order": 3 },
+    { "id": "ex-data-modeling", "title": "Data Modeling", "type": "exercise", "order": 4 },
+    { "id": "ex-code-makeover", "title": "Code Makeover", "type": "exercise", "order": 5 }
+  ]
+}

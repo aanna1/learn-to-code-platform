@@ -1,0 +1,28 @@
+# Date Reformatter
+
+Dates are stored in a dozen different formats depending on where the data came from. ISO format (`2026-03-14`) is common in logs and databases; US format (`03/14/2026`) is what most Americans expect to read. Translating between them is a perfect job for `re.sub` with capture groups.
+
+## Your task
+
+Write a function `reformat_dates(text)` that takes a string and returns a new string with every ISO date (`YYYY-MM-DD`) replaced by US format (`MM/DD/YYYY`). Everything else in the string stays unchanged.
+
+## Requirements
+
+- Use `re.sub` with a pattern that captures year, month, and day in three groups.
+- The replacement string must rearrange the groups: month first, then day, then year, separated by `/`.
+- Only match the exact ISO pattern — four digits, hyphen, two digits, hyphen, two digits. Don't match partial numbers.
+- Leave all non-date text untouched.
+
+## Example
+
+```python
+text = "Invoice dated 2026-03-14, due 2026-04-01."
+print(reformat_dates(text))
+# Invoice dated 03/14/2026, due 04/01/2026.
+```
+
+```python
+text = "No dates here."
+print(reformat_dates(text))
+# No dates here.
+```

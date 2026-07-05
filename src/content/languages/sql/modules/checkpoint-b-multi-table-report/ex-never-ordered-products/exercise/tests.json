@@ -1,0 +1,24 @@
+[
+  {
+    "name": "returns only Doohickey — the one product never on any order",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["name"],
+      "rows": [
+        ["Doohickey"]
+      ]
+    }
+  },
+  {
+    "name": "a newly stocked product that no one has ordered also shows up",
+    "setup": "INSERT INTO product (product_id, name, price) VALUES (14, 'Trinket', 3.00);",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["name"],
+      "rows": [
+        ["Doohickey"],
+        ["Trinket"]
+      ]
+    }
+  }
+]

@@ -1,0 +1,7 @@
+Stack, don't join: list every distinct `branch_id` that appears *anywhere* in the company's data — either as an employee's `branch_id` or as a branch's own `branch_id` — with no duplicates, ordered ascending (`NULL` sorts first).
+
+The starter uses `UNION ALL`, which keeps every duplicate — `branch_id = 2` alone shows up five times, once per Scranton employee. Switch to the set operator that folds duplicates together.
+
+<Callout type="tip">
+`UNION` and `UNION ALL` both stack two `SELECT`s vertically. The only difference is whether repeated rows survive. You only need to change one word.
+</Callout>

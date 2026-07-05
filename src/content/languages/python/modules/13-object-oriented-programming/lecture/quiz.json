@@ -1,0 +1,94 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What does `self.name = name` inside `__init__` do that `name = name` does not?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It stores the value on the object as an attribute, so it persists after `__init__` returns.",
+          "correct": true,
+          "explanation": "Correct. `self.name = name` attaches the value to the object itself. `name = name` just reassigns a local variable that disappears when the method exits."
+        },
+        {
+          "id": "b",
+          "text": "It makes the attribute read-only so it can't be changed later.",
+          "correct": false,
+          "explanation": "Not quite. `self.name = name` creates a normal, writable attribute. To get read-only behavior you'd use `@property` without a setter."
+        },
+        {
+          "id": "c",
+          "text": "It validates that `name` is a string before storing it.",
+          "correct": false,
+          "explanation": "No validation happens here. `self.name = name` stores whatever value is passed in, regardless of its type."
+        },
+        {
+          "id": "d",
+          "text": "It shares the attribute across all instances of the class.",
+          "correct": false,
+          "explanation": "The opposite — `self.name` is per-instance. Attributes defined on the class body (outside `__init__`) are shared across all instances."
+        }
+      ]
+    },
+    {
+      "id": "q2",
+      "question": "When should you define `__repr__` instead of (or in addition to) `__str__`?",
+      "options": [
+        {
+          "id": "a",
+          "text": "When you want a detailed, programmer-facing representation — useful in the REPL, in error messages, and when objects appear inside lists.",
+          "correct": true,
+          "explanation": "Right. `__repr__` is for debugging contexts: the interactive interpreter, collections of objects, log output. If you only define one, `__repr__` is usually the more useful choice."
+        },
+        {
+          "id": "b",
+          "text": "When you want `print()` to display a nice human-readable message.",
+          "correct": false,
+          "explanation": "`print()` calls `__str__`, not `__repr__`. `__repr__` is used when Python needs a developer-facing description, such as inside a list or at the REPL prompt."
+        },
+        {
+          "id": "c",
+          "text": "Only when the object contains numbers, because `__str__` can't format floats.",
+          "correct": false,
+          "explanation": "`__str__` has no trouble with floats. The choice between `__str__` and `__repr__` is about audience (end-user vs. developer), not data type."
+        },
+        {
+          "id": "d",
+          "text": "`__repr__` is required for `sorted()` to work on your objects.",
+          "correct": false,
+          "explanation": "`sorted()` uses `__lt__`, not `__repr__`. `__repr__` controls how the object appears when printed, but has nothing to do with ordering."
+        }
+      ]
+    },
+    {
+      "id": "q3",
+      "question": "A `Square` class inherits from `Rectangle`. Its `__init__` calls `super().__init__(side, side)`. What would happen if that `super()` call were removed?",
+      "options": [
+        {
+          "id": "a",
+          "text": "`Square` would be created without `self.width` or `self.height`, so any method that reads those attributes — like `area()` — would raise `AttributeError`.",
+          "correct": true,
+          "explanation": "Exactly. `Rectangle.__init__` is what sets `self.width` and `self.height`. Without calling `super().__init__`, those attributes are never created, and `area()` (which reads `self.width * self.height`) fails."
+        },
+        {
+          "id": "b",
+          "text": "Python raises a `TypeError` immediately when you define the class.",
+          "correct": false,
+          "explanation": "Python doesn't check at class-definition time. The error only surfaces when you call a method that needs the missing attributes."
+        },
+        {
+          "id": "c",
+          "text": "The `Square` would use `Rectangle`'s `__init__` automatically, because inheritance copies all methods.",
+          "correct": false,
+          "explanation": "Inheritance makes `Rectangle.__init__` available, but `Square` overrides it by defining its own `__init__`. Without the `super()` call, the parent's setup code never runs."
+        },
+        {
+          "id": "d",
+          "text": "Nothing — `Square` doesn't need `width` and `height` because it only has `side`.",
+          "correct": false,
+          "explanation": "`Square` inherits `area()` and `perimeter()` from `Rectangle`, and both methods read `self.width` and `self.height`. Those attributes must exist on the instance."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "name": "each order shows the customer's name and city, ordered by order_id",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["order_id", "name", "city"],
+      "rows": [
+        [100, "Alice", "Scranton"],
+        [101, "Alice", "Scranton"],
+        [102, "Bob", "Scranton"],
+        [103, "Carol", "Stamford"]
+      ]
+    }
+  },
+  {
+    "name": "a newly placed order joins to the right customer too",
+    "setup": "INSERT INTO sales_order (order_id, customer_id, order_date) VALUES (104, 2, '2024-04-01');",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["order_id", "name", "city"],
+      "rows": [
+        [100, "Alice", "Scranton"],
+        [101, "Alice", "Scranton"],
+        [102, "Bob", "Scranton"],
+        [103, "Carol", "Stamford"],
+        [104, "Bob", "Scranton"]
+      ]
+    }
+  }
+]

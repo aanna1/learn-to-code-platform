@@ -1,0 +1,36 @@
+[
+  {
+    "name": "pairs each employee with their supervisor's name, ordered by employee_id (Jan has no supervisor, so she's absent)",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["employee", "supervisor"],
+      "rows": [
+        ["Michael", "Jan"],
+        ["Dwight", "Michael"],
+        ["Jim", "Michael"],
+        ["Pam", "Michael"],
+        ["Andy", "Jan"],
+        ["Stanley", "Michael"],
+        ["Ryan", "Michael"]
+      ]
+    }
+  },
+  {
+    "name": "generalizes to a newly hired employee reporting to Dwight",
+    "setup": "INSERT INTO employee (employee_id, first_name, last_name, branch_id, salary, hire_date, supervisor_id) VALUES (108, 'Kevin', 'Malone', 2, 45000, '2008-01-01', 102);",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["employee", "supervisor"],
+      "rows": [
+        ["Michael", "Jan"],
+        ["Dwight", "Michael"],
+        ["Jim", "Michael"],
+        ["Pam", "Michael"],
+        ["Andy", "Jan"],
+        ["Stanley", "Michael"],
+        ["Ryan", "Michael"],
+        ["Kevin", "Dwight"]
+      ]
+    }
+  }
+]

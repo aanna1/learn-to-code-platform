@@ -1,0 +1,488 @@
+## Why this matters
+
+Picture a course management system. Two hundred students, each with a name, an ID, a list of grades, and a major. You want to print transcripts, compute GPAs, send reminder emails, and check who's failing.
+
+You start with parallel lists:
+
+```python
+names  = ["Alice", "Bob", "Carol"]
+ids    = [101, 102, 103]
+grades = [[88, 92], [77, 85], [99, 96]]
+majors = ["CS", "Math", "Physics"]
+```
+
+To get Alice's full info, you index all four lists at position 0. To add a student, you append to all four. To drop one, you pop from all four. Miss one update and your data goes out of sync — suddenly Alice has Bob's grades. Hard-to-spot bug.
+
+You upgrade to dicts:
+
+```python
+students = [
+    {"name": "Alice", "id": 101, "grades": [88, 92], "major": "CS"},
+    {"name": "Bob",   "id": 102, "grades": [77, 85], "major": "Math"},
+]
+```
+
+Better — each student is one thing. But every useful function takes a student-shaped dict: `compute_gpa(student)`, `send_reminder(student)`, `is_failing(student)`. The data and the operations live in separate places. Nothing in the code says these functions belong together.
+
+Classes fix that. A class bundles data and its operations into one shape. You define a `Student` class once; each student is an instance of it. Methods live with the data they need. Adding a new operation means adding a method, not another floating function.
+
+OOP is one of the bigger ideas in programming. You can ignore the deep end — multiple inheritance, metaclasses, descriptors — for years. The shallow end is what you'll start using today.
+
+<Callout type="info">
+No installation needed. Every code block on this platform has a **Run** button — press it and your code executes instantly in the browser.
+</Callout>
+
+## What you'll be able to do by the end
+
+- Define a class with `class`, set up instance attributes in `__init__`, and explain what `self` means.
+- Write methods that read and modify an object's state.
+- Customize how objects print, compare, and behave under common Python operations using dunder methods.
+- Use inheritance to share code between related classes and `super()` to call the parent's version of a method.
+- Reach for `@property` to expose a method as an attribute.
+- Read code with `@classmethod` and `@staticmethod`.
+
+## Core concepts
+
+### From dicts to classes
+
+Here's the dict version of a student:
+
+```python
+alice = {"name": "Alice", "house": "Ravenclaw", "grades": [88, 92, 95]}
+
+def gpa(student):
+    return sum(student["grades"]) / len(student["grades"])
+
+print(gpa(alice))  # 91.66...
+```
+
+Works fine. But `gpa` only makes sense if the dict has a `"grades"` key. Pass in any other dict and it crashes with `KeyError`. The connection between data shape and operations is held together by convention, not by anything Python can check.
+
+A class makes the connection explicit:
+
+```python
+class Student:
+    def __init__(self, name, house, grades):
+        self.name = name
+        self.house = house
+        self.grades = grades
+
+    def gpa(self):
+        return sum(self.grades) / len(self.grades)
+
+
+alice = Student("Alice", "Ravenclaw", [88, 92, 95])
+print(alice.gpa())  # 91.66...
+```
+
+Same information, same computation. New structure: the function lives inside the class. To compute Alice's GPA, you ask her — `alice.gpa()`. The function knows it operates on a `Student` because it lives in the `Student` class.
+
+### `class`, `__init__`, and `self`
+
+The keyword `class` starts a class definition. By convention, class names are CapWords: `Student`, `BankAccount`, `LogEntry`. Functions are `snake_case`. Mixing the two is one of the quickest ways to make Python code look unprofessional.
+
+```python
+class Student:
+    pass
+```
+
+The colon and indentation work exactly as they do for `if` and `def`. Everything indented under `class` belongs to the class. (`pass` is a placeholder that lets you define an empty class without a syntax error.)
+
+`__init__` is a method with a special name. Python calls it automatically when you create an instance. Its job: set up the new object's starting state. You don't call `__init__` yourself; Python calls it when you write `Student(...)`.
+
+```python
+class Student:
+    def __init__(self, name, house, grades):
+        self.name = name
+        self.house = house
+        self.grades = grades
+```
+
+Now `self`. Every method's first parameter is `self`, by convention. When you write:
+
+```python
+alice = Student("Alice", "Ravenclaw", [88, 92, 95])
+```
+
+Python: (1) creates a new empty `Student` object; (2) calls `Student.__init__(new_object, "Alice", "Ravenclaw", [88, 92, 95])`; (3) inside `__init__`, `self` *is* the new object.
+
+So `self.name = name` stores the parameter value onto the object as an attribute. After `__init__` finishes, `alice.name` works.
+
+`self` is just "the object the method was called on." `alice.gpa()` is Python's nicer way of writing `Student.gpa(alice)`. The object in front of the dot becomes the first argument, always.
+
+<Callout type="warning">
+A near-universal beginner mistake is forgetting `self.` inside `__init__`:
+
+```python
+def __init__(self, name):
+    name = name   # wrong: assigns the parameter to itself
+```
+
+No error here — but the object has no attribute. The first time you write `alice.name` you'll get `AttributeError: 'Student' object has no attribute 'name'`. The fix is `self.name = name`. The `self.` prefix is how you tell Python "store this on the object."
+</Callout>
+
+Try building a `Student` and reading its attributes:
+
+<Runnable code={`class Student:
+    def __init__(self, name, house, grades):
+        self.name = name
+        self.house = house
+        self.grades = grades
+
+alice = Student("Alice", "Ravenclaw", [88, 92, 95])
+print(alice.name)
+print(alice.house)
+print(alice.grades)`} />
+
+### Methods
+
+Methods are functions defined inside a class. Their first parameter is `self`, and they read or modify attributes through it.
+
+```python
+class Student:
+    def __init__(self, name, grades):
+        self.name = name
+        self.grades = grades
+
+    def gpa(self):
+        return sum(self.grades) / len(self.grades)
+
+    def add_grade(self, score):
+        self.grades.append(score)
+        return self.gpa()
+```
+
+`add_grade` mutates `self.grades` — the change sticks on the object. It also calls `self.gpa()` to reuse another method on the same object; methods can call each other through `self`. And when you call `alice.add_grade(80)`, you pass one argument from the outside, but the method signature has two parameters (`self` and `score`) because Python supplies `self` for you.
+
+<Runnable code={`class Student:
+    def __init__(self, name, grades):
+        self.name = name
+        self.grades = grades
+
+    def gpa(self):
+        return sum(self.grades) / len(self.grades)
+
+    def add_grade(self, score):
+        self.grades.append(score)
+        return self.gpa()
+
+alice = Student("Alice", [88, 92, 95])
+print(alice.gpa())          # 91.66...
+print(alice.add_grade(80))  # 88.75
+print(alice.grades)         # [88, 92, 95, 80]`} />
+
+### `__str__` and `__repr__`: make your objects printable
+
+Try printing a `Student` with no special methods defined:
+
+```python
+print(alice)  # <__main__.Student object at 0x10b1c2f50>
+```
+
+Useless. The fix is `__str__`, which Python calls whenever something asks for a human-readable version of the object (such as `print` or `str()`).
+
+```python
+class Student:
+    def __init__(self, name, grades):
+        self.name = name
+        self.grades = grades
+
+    def __str__(self):
+        average = sum(self.grades) / len(self.grades)
+        return f"{self.name} (GPA: {average:.2f})"
+```
+
+There's a sibling called `__repr__`, used in debugging contexts — the interactive interpreter, lists of objects, error messages. The rule of thumb: `__str__` is for end users; `__repr__` is for you, the programmer. If you only define one, define `__repr__`. If you define both, Python uses each in the right context.
+
+<Runnable code={`class Student:
+    def __init__(self, name, grades):
+        self.name = name
+        self.grades = grades
+
+    def __repr__(self):
+        return f"Student(name={self.name!r}, grades={self.grades!r})"
+
+    def __str__(self):
+        return self.name
+
+alice = Student("Alice", [88, 92, 95])
+print(alice)        # Alice         (uses __str__)
+print([alice])      # [Student(name='Alice', grades=[88, 92, 95])]  (uses __repr__)`} />
+
+The `!r` inside the f-string calls `repr()` on the value, which wraps strings in quotes. Notice that printing a *list* of students uses `__repr__` for each element — that's why a useful `__repr__` makes debugging much easier.
+
+### `__eq__`, `__lt__`, `__len__`: hooking into operators
+
+By default, two `Student` objects are equal only if they're the same object in memory:
+
+```python
+a = Student("Alice", [88, 92])
+b = Student("Alice", [88, 92])
+print(a == b)   # False
+```
+
+Without `__eq__`, Python falls back to identity comparison. To make two students with the same data compare equal, define `__eq__`. And defining `__lt__` lets Python sort your objects:
+
+<Runnable code={`class Student:
+    def __init__(self, name, grades):
+        self.name = name
+        self.grades = grades
+
+    def gpa(self):
+        return sum(self.grades) / len(self.grades)
+
+    def __lt__(self, other):
+        return self.gpa() < other.gpa()
+
+    def __repr__(self):
+        return f"{self.name}({self.gpa():.1f})"
+
+students = [
+    Student("Alice", [88, 92, 95]),
+    Student("Bob",   [77, 85]),
+    Student("Carol", [99, 96, 92]),
+]
+print(sorted(students))
+# [Bob(81.0), Alice(91.7), Carol(95.7)]`} />
+
+`sorted()` works because Python uses `__lt__` under the hood. Same for `min` and `max`. Define the dunders that match how you'd naturally describe the object: a student has a GPA ordering, a roster has a length (`__len__`), a money value can be added (`__add__`). When the rest of Python's syntax fits your object, dunders are how you make it work.
+
+### Inheritance and `super()`
+
+You've built a `Rectangle` class. Now you want a `Square`. A square is a rectangle where both sides are equal. You could rewrite everything — but then you've duplicated every method. Fix a bug in `Rectangle` and you must fix it in `Square` too. Inheritance lets you say "a `Square` is a `Rectangle` with this small difference":
+
+```python
+class Rectangle:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+
+    def area(self):
+        return self.width * self.height
+
+    def perimeter(self):
+        return 2 * (self.width + self.height)
+
+    def __str__(self):
+        return f"Rectangle({self.width} x {self.height})"
+
+
+class Square(Rectangle):
+    def __init__(self, side):
+        super().__init__(side, side)
+
+    def __str__(self):
+        return f"Square({self.width})"
+```
+
+`class Square(Rectangle):` says `Square` inherits from `Rectangle`. `Square` gets `area`, `perimeter`, and everything else `Rectangle` defines for free. The two methods `Square` defines either override the parent's version (`__str__`) or extend it (`__init__`).
+
+`super()` calls the parent's version of a method. Here, `super().__init__(side, side)` calls `Rectangle.__init__(self, side, side)`, which sets `self.width = side` and `self.height = side`.
+
+<Runnable code={`class Rectangle:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+
+    def area(self):
+        return self.width * self.height
+
+    def perimeter(self):
+        return 2 * (self.width + self.height)
+
+    def __str__(self):
+        return f"Rectangle({self.width} x {self.height})"
+
+class Square(Rectangle):
+    def __init__(self, side):
+        super().__init__(side, side)
+
+    def __str__(self):
+        return f"Square({self.width})"
+
+s = Square(5)
+print(s.area())       # 25
+print(s.perimeter())  # 20
+print(s)              # Square(5)`} />
+
+Inheritance is powerful and easy to overdo. Prefer holding one object as an attribute of another ("composition") over inheritance unless the child is genuinely *a kind of* the parent. A `Square` is a `Rectangle`, fine. A `Car` is not an `Engine` — a `Car` has an `Engine`.
+
+### `_private` and the underscore convention
+
+Python has no real private attributes. You can read and write anything from outside the class. But there's a convention: a leading underscore signals "internal — outside code shouldn't reach in."
+
+```python
+class BankAccount:
+    def __init__(self, owner, balance=0):
+        self.owner = owner
+        self._balance = balance   # internal
+
+    def deposit(self, amount):
+        self._balance += amount
+
+    def withdraw(self, amount):
+        if amount > self._balance:
+            raise ValueError("Insufficient funds.")
+        self._balance -= amount
+```
+
+The leading underscore on `_balance` says: go through `deposit` and `withdraw`, don't modify `_balance` directly. Python won't stop you, but other programmers will know you didn't mean for them to. This is a contract, not a wall.
+
+### `@property`: methods that look like attributes
+
+`gpa` depends on `grades`, but you have to call it as `alice.gpa()`. Why isn't it just `alice.gpa`, the same way `alice.name` works? `@property` makes that possible:
+
+<Runnable code={`class Student:
+    def __init__(self, name, grades):
+        self.name = name
+        self.grades = grades
+
+    @property
+    def gpa(self):
+        return sum(self.grades) / len(self.grades)
+
+alice = Student("Alice", [88, 92, 95])
+print(alice.gpa)   # no parens needed`} />
+
+`@property` above a method turns it into a read-only computed attribute. From the outside, `alice.gpa` looks like a stored value. Inside, the method runs every time you access it.
+
+The `@something` syntax above a function is called a **decorator**. It wraps the function with extra behavior. You'll see decorators throughout Python — `@staticmethod` and `@classmethod` are next.
+
+### `@classmethod` and `@staticmethod`: a light touch
+
+`@classmethod` defines a method that receives the *class itself* as its first argument (conventionally named `cls`), instead of an instance. The most common use is alternate constructors — a second way to build an object:
+
+```python
+class Student:
+    def __init__(self, name, grades):
+        self.name = name
+        self.grades = grades
+
+    @classmethod
+    def from_string(cls, csv_line):
+        name, *grade_strs = csv_line.strip().split(",")
+        return cls(name, [int(g) for g in grade_strs])
+
+
+alice = Student.from_string("Alice,88,92,95")
+print(alice.name, alice.grades)
+```
+
+`from_string` is called on the class itself: `Student.from_string(...)`. Inside, `cls` is `Student`, so `cls(name, [...])` builds a new instance. Using `cls` instead of hardcoding `Student` means subclasses that inherit this method still build the right type.
+
+`@staticmethod` is a plain function that lives inside a class for organizational reasons — no `self`, no `cls`:
+
+```python
+class TempConverter:
+    @staticmethod
+    def c_to_f(celsius):
+        return celsius * 9 / 5 + 32
+
+print(TempConverter.c_to_f(100))  # 212.0
+```
+
+Both decorators are worth recognizing in other people's code even if you don't reach for them often at first.
+
+### Persisting objects with JSON
+
+Custom objects don't go through `json.dump` directly — JSON has no idea what a `Student` is. The standard pattern is a `to_dict` method that converts the object to a plain dict, and a `from_dict` classmethod that rebuilds it:
+
+```python
+class Student:
+    def __init__(self, name, grades):
+        self.name = name
+        self.grades = grades
+
+    def to_dict(self):
+        return {"name": self.name, "grades": self.grades}
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(d["name"], d["grades"])
+```
+
+To save a list of students you convert each to a dict first, then dump the list. To load, reverse it:
+
+```python
+import json
+
+# Save
+data = [s.to_dict() for s in students]
+json_text = json.dumps(data, indent=2)
+
+# Load
+students = [Student.from_dict(d) for d in json.loads(json_text)]
+```
+
+<Callout type="info">
+In this browser environment there's no real filesystem, so we use `json.dumps`/`json.loads` (strings) rather than `json.dump`/`json.load` (files). The pattern is identical — just swap the file object for a string.
+</Callout>
+
+## Common pitfalls
+
+**Forgetting `self.` inside `__init__`.**
+
+```python
+def __init__(self, name):
+    name = name   # not an attribute, just a local variable
+```
+
+No error — but the object has no attribute. Add `self.name = name`.
+
+**Forgetting `self` in the method signature.**
+
+```python
+def gpa():
+    return sum(self.grades) / len(self.grades)
+```
+
+`TypeError` the moment you call it on an instance. Every instance method needs `self` as its first parameter.
+
+**Mutable default arguments — the most famous Python gotcha.**
+
+```python
+class Student:
+    def __init__(self, name, grades=[]):   # danger
+        self.grades = grades
+```
+
+That `[]` is created once, when the class is defined, then shared across every `Student` created without an explicit `grades` argument. Add a grade to one, and every default-constructed student sees it. Use `None` as the default and assign a fresh list inside the body:
+
+```python
+def __init__(self, name, grades=None):
+    self.grades = grades if grades is not None else []
+```
+
+**Class-level mutable attributes.**
+
+```python
+class Student:
+    grades = []   # shared by every instance
+```
+
+`grades` here is a class attribute shared by all instances. Use class attributes only for true constants (`SCHOOL_NAME = "Hogwarts"`), never for per-instance mutable data. Assign mutable state inside `__init__`.
+
+**Overriding `__init__` without calling `super().__init__`.**
+
+```python
+class Square(Rectangle):
+    def __init__(self, side):
+        self.side = side   # forgot to set width and height
+```
+
+`Square(5).area()` now fails because `area` reads `self.width`, which was never set. Call `super().__init__(side, side)`.
+
+**Confusing `==` with `is`.**
+
+`is` checks whether two names point to the same object in memory. `==` checks whether they're equal by value. Without `__eq__`, `==` falls back to `is`, which is why two freshly-built equivalent students aren't considered equal by default.
+
+## Recap
+
+- A class bundles related data and the operations on that data. Instances are particular objects built from the class blueprint.
+- `__init__` runs when you create an instance and sets up starting state. `self` is the new object and must be the first parameter of every instance method.
+- Dunder methods hook into Python's syntax: `__str__` for printing, `__repr__` for debugging, `__eq__` and `__lt__` for comparison, `__len__` for `len()`, `__add__` for `+`.
+- Inheritance lets a child class reuse a parent's code. Call `super().__init__(...)` from the child's `__init__` to let the parent set up its share of the state.
+- A leading underscore (`_balance`) signals "internal — don't touch from outside." It's a convention, not enforcement.
+- `@property` turns a method into a read-only computed attribute, accessed without parentheses.
+- `@classmethod` is good for alternate constructors. `@staticmethod` is for utility functions namespaced inside the class.
+- Mutable defaults (`grades=[]`) and class-level mutable attributes are the two biggest beginner traps. Use `None` defaults and assign fresh containers inside `__init__`.

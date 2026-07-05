@@ -1,0 +1,12 @@
+{
+  "id": "14-testing-and-quality",
+  "title": "Testing & Code Quality",
+  "description": "Write assert checks and unittest test cases, transform loops into comprehensions, and see where Python takes you next.",
+  "lessons": [
+    { "id": "lecture", "title": "Testing, Quality & What's Next", "type": "lecture", "order": 1 },
+    { "id": "ex-safe-divide", "title": "Safe Divide", "type": "exercise", "order": 2 },
+    { "id": "ex-test-a-stack", "title": "Test a Stack", "type": "exercise", "order": 3 },
+    { "id": "ex-comprehension-workshop", "title": "Comprehension Workshop", "type": "exercise", "order": 4 },
+    { "id": "ex-name-guard", "title": "Name Guard", "type": "exercise", "order": 5 }
+  ]
+}

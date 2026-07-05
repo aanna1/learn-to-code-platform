@@ -1,0 +1,10 @@
+{
+  "which-nf": "3NF",
+  "partials": ["qty", "emp_id"],
+  "fds": [
+    "emp_id -> emp_name"
+  ],
+  "decompose": {
+    "order_items": ["emp_name", "branch_city", "client_name", "qty"]
+  }
+}

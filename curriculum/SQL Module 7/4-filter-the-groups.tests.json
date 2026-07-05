@@ -1,0 +1,10 @@
+[
+  {
+    "name": "returns only the branch (or branches) with more than one employee",
+    "orderMatters": false,
+    "expected": {
+      "columns": ["branch_id", "headcount"],
+      "rows": [[2, 5]]
+    }
+  }
+]

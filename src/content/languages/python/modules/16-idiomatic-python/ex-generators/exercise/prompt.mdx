@@ -1,0 +1,40 @@
+# Generators
+
+Generators produce values lazily — one at a time, on demand — instead of building a whole list up front. This exercise has three parts that build on each other.
+
+## Part 1: running sum
+
+Implement `running_sum(numbers)` as a generator that yields the cumulative total after each element.
+
+```
+running_sum([1, 2, 3, 4])  →  yields 1, 3, 6, 10
+```
+
+The generator should work on any iterable of numbers, not just lists.
+
+## Part 2: first_n
+
+Implement `first_n(iterable, n)` that returns the first `n` values from any iterable as a list. Do this without importing `itertools` — use a manual loop with a counter.
+
+```python
+first_n(running_sum([1, 2, 3, 4, 5]), 3)  →  [1, 3, 6]
+```
+
+This should also work on infinite sequences (which is the point of a generator).
+
+## Part 3: fibonacci
+
+Implement `fibonacci()` as a generator that produces Fibonacci numbers indefinitely: `0, 1, 1, 2, 3, 5, 8, 13, ...`
+
+Use `first_n` to verify it:
+
+```python
+first_n(fibonacci(), 8)  →  [0, 1, 1, 2, 3, 5, 8, 13]
+```
+
+## Requirements
+
+- `running_sum` must be a generator function (must use `yield`).
+- `fibonacci` must be a generator function (must use `yield`).
+- `first_n` must stop after exactly `n` items even when the iterable is infinite.
+- All three functions must handle the edge case of `n=0` or an empty input without crashing.

@@ -1,0 +1,6 @@
+[
+  "Start `get_int` with `while True:`, then `try: return int(input(prompt))` and `except ValueError: print('Please enter a whole number.')`.",
+  "For `get_int_in_range`, parse inside `try`/`except` first. If parsing succeeds, *then* check the range with an `if` statement outside the `except`.",
+  "Use `continue` after printing an error message to restart the loop. Use `return value` only when both the parse and the range check pass.",
+  "The range check is `if value < low or value > high:` — both boundaries are inclusive, so use `<` and `>`, not `<=` and `>=`."
+]

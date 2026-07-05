@@ -1,0 +1,12 @@
+{
+  "id": "12-regular-expressions",
+  "title": "Regular Expressions",
+  "description": "Read and write regex patterns to search, extract, and replace text — and know when to reach for .split() or a parser instead.",
+  "lessons": [
+    { "id": "lecture",              "title": "Pattern Matching with Regular Expressions", "type": "lecture",  "order": 1 },
+    { "id": "ex-zip-validator",     "title": "Zip Code Validator",                        "type": "exercise", "order": 2 },
+    { "id": "ex-phone-finder",      "title": "Phone Number Finder",                       "type": "exercise", "order": 3 },
+    { "id": "ex-date-reformatter",  "title": "Date Reformatter",                          "type": "exercise", "order": 4 },
+    { "id": "ex-log-parser",        "title": "Log Parser",                                "type": "exercise", "order": 5 }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "You don't want every column this time — so * isn't what you need.",
+    "List the columns you want by name, separated by commas.",
+    "The query should read: SELECT name, major FROM students;"
+  ]
+}

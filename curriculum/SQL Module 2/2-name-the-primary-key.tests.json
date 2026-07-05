@@ -1,0 +1,15 @@
+[
+  {
+    "name": "returns the primary key alongside name and major, so the two Jacks are distinguishable",
+    "orderMatters": false,
+    "expected": {
+      "columns": ["student_id", "name", "major"],
+      "rows": [
+        [1, "Jack", "Biology"],
+        [2, "Kate", "Sociology"],
+        [3, "Claire", "English"],
+        [4, "Jack", "Biology"]
+      ]
+    }
+  }
+]

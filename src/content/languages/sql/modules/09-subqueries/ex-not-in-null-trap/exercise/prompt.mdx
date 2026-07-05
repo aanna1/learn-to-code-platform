@@ -1,0 +1,7 @@
+Now flip the previous question: which employees are **not** managers? The obvious move is to negate — `NOT IN` instead of `IN`. Run the starter first and watch it return **zero rows**. That's not your mistake; it's one of the most notorious bugs in all of SQL.
+
+`branch.mgr_id` contains a `NULL` (Buffalo has no manager), and comparing anything to `NULL` is `UNKNOWN` — so `NOT IN` is never true for *anyone*, and every row is excluded. Fix it so the subquery can't hand back a `NULL`, then **Submit**.
+
+<Callout type="warning">
+The rule: **`IN` tolerates `NULL`s, but `NOT IN` breaks on them.** Whenever you write `NOT IN (subquery)`, guarantee the subquery is `NULL`-free with `IS NOT NULL` — or, better still, rewrite it as `NOT EXISTS`, which has no such failure mode (the last exercise).
+</Callout>

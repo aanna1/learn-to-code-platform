@@ -1,0 +1,185 @@
+For ten modules you've been the person writing the SQL. This module shows you the other side of the keyboard — where an *attacker* writes part of your query for you, and the database runs it without ever knowing the difference. **SQL injection** is that attack: it's what happens when data from a user (a login box, a search field, a URL) gets stitched into a SQL statement as if it were code. It has sat at or near the top of the OWASP list of web-application risks for two decades, it's how an enormous share of real breaches actually happen, and — this is the good news — it has one clean, well-understood fix. By the end of this module you'll be able to look at a query and see the hole, exploit it in your head, and close it for good.
+
+<Callout type="note">
+This module is tagged `[SEC]` — the security throughline of the course. It reads a little differently from the others: the villain isn't a query you type, it's a line of *application code* that builds one. This is where the CNIT 27200 catalog's phrase "programmatic access to a database and practical issues that database developers must handle" comes to life — injection is fundamentally a *programmatic* problem.
+</Callout>
+
+## Prerequisites
+
+Modules 06 (`WHERE`, `LIKE`), 08 (`UNION` — the exfiltration attack is a `UNION` you didn't authorize), and 10 (`UPDATE`/`DELETE` — an injected write is exactly those statements, turned against you). You'll see all three used as weapons.
+
+## What you'll learn
+
+- What SQL injection is, and why building queries by *string concatenation* is the root cause
+- **Authentication bypass** — logging in as anyone with `' OR '1'='1' --`, walked through character by character
+- **`UNION`-based exfiltration** — stealing another table's data through a search box
+- **Injected writes and blind injection** — and the "stacked query" caveat
+- The one real fix: **parameterized queries / prepared statements**, and *why* they work categorically
+- **Defense in depth** — allowlist input validation, least privilege, safe error handling
+- Why validation and escaping are *supplements*, never *substitutes*, for parameterizing
+
+## The root cause: gluing strings into a query
+
+Almost every web app runs SQL on the user's behalf. Log in, and somewhere on a server a line of code builds a query out of what you typed. Here's the fatal way to do it — pasting the input straight into the query text:
+
+```python
+# VULNERABLE — do not do this
+username = request.form["username"]
+password = request.form["password"]
+query = "SELECT id, username, role FROM users " \
+        "WHERE username = '" + username + "' AND password = '" + password + "'"
+db.execute(query)
+```
+
+For a normal login (`username = admin`, `password = s3cr3t`) that builds exactly what you'd expect:
+
+```sql
+SELECT id, username, role FROM users WHERE username = 'admin' AND password = 's3cr3t'
+```
+
+Here's the whole problem in one sentence: **by the time that string reaches the database, there is no boundary left between the developer's SQL and the user's input — it's all just one line of text.** The database faithfully parses the entire thing as a command. If the user can sneak SQL *syntax* into their input, they're no longer filling in a value — they're rewriting your query. Everything below is a consequence of that single mistake.
+
+We'll attack a small `users` table (a credentials table is the classic target):
+
+```
+users
++----+-----------+----------+-------+
+| id | username  | password | role  |
++----+-----------+----------+-------+
+| 1  | admin     | s3cr3t   | admin |
+| 2  | jhalpert  | pam4ever | user  |
+| 3  | dwight    | beets    | user  |
++----+-----------+----------+-------+
+```
+
+## Attack 1: logging in as anyone
+
+The attacker doesn't type a username. They type SQL. Into the **username** box, put:
+
+```
+' OR '1'='1' --
+```
+
+Now substitute that into the vulnerable template and watch what the database actually receives:
+
+```sql
+SELECT id, username, role FROM users WHERE username = '' OR '1'='1' --' AND password = 'whatever'
+```
+
+Read it the way the parser does. The attacker's leading `'` closes the empty username string early. Then `OR '1'='1'` adds a condition that is *always true*. Then `--` begins a SQL comment, so everything after it is **ignored entirely** — password check and all. What's left is:
+
+```sql
+SELECT id, username, role FROM users WHERE username = '' OR '1'='1'
+```
+
+`'1'='1'` is true for every row, so the query returns **all three users**. A typical login takes the first row back as "the logged-in user" — and that's `admin`. No password, full admin access.
+
+Two details make this real rather than hand-wavy. First, that trailing `--` isn't decoration: without it, the leftover `'` and `AND password = '...'` from the template would still be there, and because `AND` binds tighter than `OR`, a bare `' OR '1'='1` *doesn't* bypass a two-condition query. Commenting out the rest is what makes the attack land. Second, an attacker who wants a *specific* account skips the `OR` entirely and just types `admin' --` into the username:
+
+```sql
+SELECT id, username, role FROM users WHERE username = 'admin' --' AND password = 'x'
+```
+
+The `--` deletes the password check; they're logged in as `admin` knowing only the username. This single technique — close the quote, comment out the rest — is the "hello world" of SQL injection. **You'll run it yourself in the first exercise.**
+
+## Attack 2: stealing other tables with UNION
+
+Back in Module 08 you learned `UNION` stacks one query's rows onto another's, with a warning that this is "the engine behind an entire family of attacks." Here it is. Say the store has a product search that builds this:
+
+```python
+# VULNERABLE
+query = "SELECT name, price FROM product WHERE name LIKE '%" + search + "%'"
+```
+
+The attacker types this into the search box:
+
+```
+none%' UNION SELECT username, password FROM users --
+```
+
+which assembles into:
+
+```sql
+SELECT name, price FROM product WHERE name LIKE '%none%' UNION SELECT username, password FROM users --%'
+```
+
+The product search matches nothing (`none`), but the injected `UNION SELECT` runs against `users` and **stacks every credential onto the results** the page expected to show. The "product list" comes back as the usernames and passwords, rendered into a product grid:
+
+```
++----------+----------+
+| name     | price    |
++----------+----------+
+| admin    | s3cr3t   |
+| dwight   | beets    |
+| jhalpert | pam4ever |
++----------+----------+
+```
+
+The two `UNION` rules from Module 08 are exactly the attacker's checklist: match the **column count** (two columns out, so they select two) and match the **types**. Attackers find the column count by probing — adding `UNION SELECT NULL`, then `NULL, NULL`, until the error stops — which is why leaking raw database errors helps them (more on that below). **The second exercise has you run this exfiltration and watch the credentials appear.**
+
+## Attack 3: changing data, and attacking blind
+
+Reading data is bad; injection can also *write* it. If the injectable statement is an `UPDATE`, an attacker can rewrite rows — `SET role = 'admin'` on their own account, say. You'll also hear about the dramatic **stacked query**: ending the statement and starting a new one, like `'; DROP TABLE users; --`.
+
+<Callout type="warning">
+**Dialect note:** stacked queries are less universal than the movies suggest. Many database drivers refuse to run more than one statement per call — the browser engine and Python's SQLite driver both reject `SELECT ...; DROP ...` outright ("you can only execute one statement at a time"). So `; DROP TABLE` often *doesn't* work — but that is cold comfort, because `UNION`-based reads and boolean logic injected *inside a single statement* need no second statement at all. Don't rely on your driver's stacking rules as a defense; they're an accident, not a control.
+</Callout>
+
+And what if the page shows no results at all — just "login failed" or "search returned nothing"? Attackers switch to **blind injection**, the boolean/time-based probing that Module 09 hinted at. They inject a condition and watch the app's *behavior*: `... AND (SELECT substr(password,1,1) FROM users WHERE username='admin') = 'a'` returns a page if the guess is right and a different page if it's wrong, letting them read a secret one character at a time. The **time-based** cousin injects a deliberate delay and reads the answer from how long the page takes to load. Slow, but fully automated — no visible output required.
+
+## The one real fix: parameterized queries
+
+Every attack above works because user input got mixed into the *code* of the query. The fix removes that possibility entirely: **send the query and the data to the database separately.** This is called a **parameterized query** (or **prepared statement**). You write the SQL with placeholders where values go, and hand the values over as a separate list:
+
+```python
+# SAFE — parameterized query
+query = "SELECT id, username, role FROM users WHERE username = ? AND password = ?"
+db.execute(query, [username, password])
+```
+
+The `?` marks are placeholders. Here's why this is a *categorical* fix, not a patch: the database receives the query template — `... WHERE username = ? AND password = ?` — and **compiles its structure first**, before it has ever seen the user's input. The values are bound in *afterward*, as pure data that slots into the placeholders. They are never parsed as SQL, so there is nothing an attacker can type that becomes code. Feed the parameterized version the exact same attack from Attack 1 — `' OR '1'='1' --` — and the database looks for a user whose username is *literally that seventeen-character string*. No such user exists, so it returns **zero rows** and the login fails, which is exactly right. Same input, same query, opposite outcome, because the input never touched the code path.
+
+This is the single most important habit in this course. Every mainstream language has it built in:
+
+- **Python:** `cursor.execute("... WHERE id = ?", (user_id,))`
+- **Java:** `PreparedStatement` with `?` placeholders and `setString(1, input)`
+- **PHP (PDO):** `prepare("... WHERE id = :id")` then `execute(["id" => input])`
+- **C# / .NET:** `SqlCommand` with `cmd.Parameters.AddWithValue("@id", input)`
+
+Different syntax, identical idea: **the query is code, the input is data, and the two never mix.** Note this is *not* the same as "escaping the quotes" — escaping tries to sanitize dangerous characters after the fact and is notoriously easy to get wrong (different quoting rules, Unicode tricks, numeric contexts with no quotes at all). Parameterizing sidesteps the whole problem instead of trying to out-clever the attacker.
+
+## What parameters can't do, and defense in depth
+
+Parameterization covers *values*. It can't stand in for a **table or column name**, or the direction in `ORDER BY salary DESC` — those are parts of the query's structure, not values, so there's no placeholder for them. When you must build one of those from user input (say, "sort by the column they picked"), use **allowlist validation**: check the input against a fixed set of known-good options and reject anything else.
+
+```python
+# identifiers can't be parameters — allowlist them
+allowed = {"salary", "hire_date", "last_name"}
+if sort_column not in allowed:
+    raise ValueError("bad sort column")
+query = f"SELECT * FROM employee ORDER BY {sort_column}"   # safe: value came from the allowlist
+```
+
+Parameterized queries are the primary defense; these layers make the system harder to attack even if something slips:
+
+- **Allowlist input validation.** Reject input that doesn't fit the expected shape (an email that isn't an email, an ID that isn't a number). This shrinks the attack surface — but it's a *supplement*, never a substitute. Blocklists ("strip out the word `UNION`") are trivially bypassed (`UNunionION`, encodings, casing); allowlists are far better, and parameterizing is better still.
+- **Least privilege.** The account your application connects with should have exactly the permissions it needs and no more. A read-only web page's database user has no business being able to `UPDATE`, `DELETE`, `DROP`, or read the `users` table — so even a successful injection hits a wall. You'll set these permissions with `GRANT`/`REVOKE` in Module 12; this is where they pay off.
+- **Safe error handling.** Never show raw database errors to users. A message like `unknown column 'password' in ...` hands attackers a map of your schema and confirms their probes (recall how Attack 2's attacker counted columns by reading errors). Log the detail server-side; show the user a generic "something went wrong."
+
+Layer them, but keep the order straight: **parameterize first**, then validate, then restrict privileges, then fail safely. The extra layers reduce damage; only parameterization removes the vulnerability.
+
+## Try it in the IDE — and where you can't
+
+Two of this module's exercises put you at the attacker's keyboard: you'll type the query the vulnerable app *would have built* against a real seeded `users` table and watch every credential come back. That reconstruction is the exact skill a code reviewer needs — seeing, in your head, the string the app assembles.
+
+<Callout type="note">
+One honest limit: the vulnerability itself lives in *application code* gluing strings together, and the browser has no application tier — so you can't exploit a live server here. What you *can* do is run the malicious query the app builds (the exercises), and reason precisely about the code that builds it (the two review exercises). Both are exactly what real defensive work demands.
+</Callout>
+
+## Recap
+
+SQL injection happens when an application builds a query by **concatenating user input into the query string**, erasing the boundary between code and data so the database parses an attacker's input as SQL. With it, an attacker can **bypass login** (`' OR '1'='1' --` closes the string, adds an always-true condition, and comments out the password check), **exfiltrate other tables** by injecting a `UNION SELECT` into a search, **modify data** through injected `UPDATE`/`DELETE`, and even read secrets **blind** by watching the app's behavior when no output is shown. The one categorical fix is the **parameterized query** (prepared statement): the SQL structure is compiled first with `?`/`:name` placeholders, then the values are bound as pure data that can never become code — so the exact same malicious input is treated as a harmless literal. Around that primary defense, layer **allowlist validation** (the only safe way to handle identifiers like sort columns, since they can't be parameterized), **least privilege** to cap the blast radius, and **safe error handling** so leaked messages don't map your schema. Validation and escaping are supplements; only parameterization removes the hole.
+
+## Up next
+
+**Module 12 — Access Control, Views & Auditing** closes the security track: `GRANT` and `REVOKE` to give each user exactly the permissions they need and nothing more, **views** as an access-control boundary that exposes only the safe columns of a table, and audit logging plus backup/recovery as the integrity controls that answer "who changed this, and can we undo it?" It's the practical, defensive counterpart to the attacks you just learned to run.

@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "SELECT * copies every column of book, including book_id, genre, and author_id. Name only the columns the public catalog should show: title and price.",
+    "The catalog shows an author NAME, not an id -- so join book to author and build the name with a.first_name || ' ' || a.last_name AS author.",
+    "Full view: CREATE VIEW catalog_public AS SELECT b.title, a.first_name || ' ' || a.last_name AS author, b.price FROM book b JOIN author a ON a.author_id = b.author_id;  then SELECT * FROM catalog_public ORDER BY title;."
+  ]
+}

@@ -1,0 +1,5 @@
+Everyone in the Scranton branch (`branch_id` 2) is getting a 3000 raise. The starter already computes the new salary the right way — `salary = salary + 3000`, which adds 3000 to each person's *own* current salary — but with no `WHERE` it raises the whole company. Restrict it to Scranton, then **Submit**.
+
+<Callout type="tip">
+Setting a column from itself (`salary = salary + 3000`) is evaluated per row, so each employee's raise is based on their own salary — not everyone ending up at the same number.
+</Callout>

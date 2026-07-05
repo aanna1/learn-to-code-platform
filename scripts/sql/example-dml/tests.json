@@ -1,0 +1,20 @@
+[
+  {
+    "name": "office products go up by 10",
+    "probe": "SELECT name, price FROM products WHERE category = 'office' ORDER BY name;",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["name", "price"],
+      "rows": [["Mug", 22], ["Pen", 13]]
+    }
+  },
+  {
+    "name": "home products are left untouched",
+    "probe": "SELECT name, price FROM products WHERE category = 'home' ORDER BY name;",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["name", "price"],
+      "rows": [["Chair", 95], ["Desk", 210], ["Lamp", 40]]
+    }
+  }
+]

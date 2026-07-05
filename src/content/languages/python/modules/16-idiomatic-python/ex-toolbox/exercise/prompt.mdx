@@ -1,0 +1,53 @@
+# Idiomatic toolbox
+
+This exercise combines several tools from the standard library into a small text-analysis module. Each function has a clear job; together they form a mini word-frequency analyzer.
+
+## Functions to implement
+
+### `word_counts(text)`
+
+Return a `Counter` mapping each word to how many times it appears in `text`. Words should be:
+
+- Lowercased.
+- Stripped of leading and trailing punctuation (`.`, `,`, `!`, `?`, `;`, `:`, `"`, `'`).
+- Filtered to non-empty strings only (after stripping).
+
+```python
+word_counts("Hello, hello! World.")
+# Counter({'hello': 2, 'world': 1})
+```
+
+### `group_by_length(words)`
+
+Given a list of words, return a `defaultdict(list)` mapping each word length to the words of that length, sorted alphabetically within each group.
+
+```python
+group_by_length(["cat", "dog", "ox", "ant", "be"])
+# defaultdict(list, {3: ['ant', 'cat', 'dog'], 2: ['be', 'ox']})
+```
+
+### `top_n_words(text, n)`
+
+Return the `n` most common words in `text` as a list of `(word, count)` tuples, most frequent first. Use `word_counts` internally.
+
+```python
+top_n_words("the cat sat on the mat the cat", 2)
+# [('the', 3), ('cat', 2)]
+```
+
+### `safe_append(item, items=None)`
+
+Append `item` to `items` and return the list. If `items` is not provided, create a fresh list each time — do not use a mutable default argument.
+
+```python
+a = safe_append("x")
+b = safe_append("y")
+print(a, b)   # ['x']  ['y']   — two separate lists
+```
+
+## Requirements
+
+- `word_counts` must return a `Counter` (from `collections`).
+- `group_by_length` must return a `defaultdict(list)` with words sorted within each group.
+- `top_n_words` must use `word_counts` internally.
+- `safe_append` must use `None` as the default for `items`, not `[]`.

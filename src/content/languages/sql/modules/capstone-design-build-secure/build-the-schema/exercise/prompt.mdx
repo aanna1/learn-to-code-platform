@@ -1,0 +1,11 @@
+**Stage 3 — Define it (DDL).** You've modeled Inkwell's business and normalized it to five tables (`author`, `book`, `customer`, `book_order`, `order_line`). Now make the database *enforce* that design: turn the model into `CREATE TABLE` statements whose keys and constraints refuse anything that breaks it.
+
+Every constraint here is a design decision made mandatory — primary keys give each row identity, foreign keys make the relationships real, `NOT NULL` marks what can't be missing, `UNIQUE` blocks duplicate emails, and `CHECK` refuses a negative price. The starter builds `author` and `customer` correctly but leaves `book`, `book_order`, and `order_line` under-constrained. Finish them, press **Run**, then **Submit**.
+
+<Callout type="note">
+`order_line` is the associative entity that resolves the order-to-book many-to-many. Its primary key is the **composite** `(order_id, book_id)` — which both identifies each line *and* stops the same book appearing twice on one order — and **both** columns are foreign keys.
+</Callout>
+
+<Callout type="tip">
+Inline foreign key: `author_id INTEGER NOT NULL REFERENCES author(author_id)`. Composite primary key: a table-level line `PRIMARY KEY (order_id, book_id)`. The grader checks structure (keys and foreign keys), not the data.
+</Callout>

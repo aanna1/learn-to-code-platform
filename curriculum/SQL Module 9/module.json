@@ -1,0 +1,44 @@
+{
+  "id": "09-subqueries",
+  "title": "Subqueries",
+  "description": "Nesting one query inside another: scalar subqueries and the single-value rule, IN subqueries, the notorious NOT IN NULL trap and its fixes, correlated subqueries, EXISTS/NOT EXISTS as the safe anti-join, derived tables, and choosing between a subquery and a join.",
+  "order": 11,
+  "lessons": [
+    {
+      "id": "lecture",
+      "title": "Subqueries",
+      "type": "lecture",
+      "order": 1
+    },
+    {
+      "id": "ex-scalar-above-average",
+      "title": "Scalar Subquery: Above Average",
+      "type": "exercise",
+      "order": 2
+    },
+    {
+      "id": "ex-in-managers",
+      "title": "IN Subquery: Who Manages a Branch",
+      "type": "exercise",
+      "order": 3
+    },
+    {
+      "id": "ex-not-in-null-trap",
+      "title": "NOT IN and the NULL Trap",
+      "type": "exercise",
+      "order": 4
+    },
+    {
+      "id": "ex-correlated-branch-average",
+      "title": "Correlated Subquery: Beat Your Branch",
+      "type": "exercise",
+      "order": 5
+    },
+    {
+      "id": "ex-not-exists-empty-branches",
+      "title": "NOT EXISTS: Branches With No Employees",
+      "type": "exercise",
+      "order": 6
+    }
+  ]
+}

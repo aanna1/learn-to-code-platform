@@ -1,0 +1,12 @@
+[
+  {
+    "name": "returns the employee with no branch assigned",
+    "orderMatters": false,
+    "expected": {
+      "columns": ["first_name"],
+      "rows": [
+        ["Ryan"]
+      ]
+    }
+  }
+]

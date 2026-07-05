@@ -1,0 +1,42 @@
+# Daily Snapshot
+
+You've used `random`, `datetime`, and `json` separately. This exercise puts them together into a small data generator. The same pattern shows up in logging, simulations, and anywhere you need structured records built from real-time values.
+
+## Your task
+
+Write two functions.
+
+**`make_snapshot()`** — return a dict with these exact keys:
+
+- `"date"` — today's date as a string in `"YYYY-MM-DD"` format (use `date.today().isoformat()`)
+- `"temperature"` — a random integer between -10 and 40 inclusive
+- `"condition"` — a random choice from `["sunny", "cloudy", "rainy", "stormy", "snowy"]`
+- `"humidity"` — a random integer between 0 and 100 inclusive
+
+**`snapshot_to_json()`** — call `make_snapshot()` and return the result serialized as a JSON string with `indent=2`.
+
+## Examples
+
+```python
+snap = make_snapshot()
+print(snap)
+# {"date": "2026-05-30", "temperature": 17, "condition": "cloudy", "humidity": 63}
+
+text = snapshot_to_json()
+print(text)
+# {
+#   "date": "2026-05-30",
+#   "temperature": 17,
+#   "condition": "cloudy",
+#   "humidity": 63
+# }
+```
+
+## Requirements
+
+- Use `from datetime import date` and `import random` and `import json`.
+- `"date"` value must be a string (`date.today().isoformat()` gives `"2026-05-30"` format).
+- `"temperature"` is an `int` in [-10, 40] — use `random.randint`.
+- `"condition"` is one of the five strings — use `random.choice`.
+- `"humidity"` is an `int` in [0, 100] — use `random.randint`.
+- `snapshot_to_json()` must return a string that can be parsed back by `json.loads`.

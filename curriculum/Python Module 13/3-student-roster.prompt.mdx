@@ -1,0 +1,32 @@
+Build a `Student` class that supports GPA computation, sorting, and a clean debug representation.
+
+A `Student` takes a `name` (string) and `grades` (list of numbers):
+
+```python
+alice = Student("Alice", [88, 92, 95])
+```
+
+Your class needs:
+
+**`gpa` (property)** — returns the average of `grades`. Accessible as `alice.gpa`, no parentheses.
+
+**`__repr__`** — returns a string like `Student(name='Alice', gpa=91.7)` (GPA rounded to one decimal place). This is the format Python uses when displaying a student in a list.
+
+**`__lt__(self, other)`** — makes students sortable by GPA. `sorted(students)` should return them lowest-to-highest GPA.
+
+**`add_grade(score)`** — appends `score` to `grades`. Nothing is returned.
+
+<Runnable code={`class Student:
+    def __init__(self, name, grades):
+        self.name = name
+        self.grades = grades
+
+    # Add gpa property, __repr__, __lt__, and add_grade here
+
+students = [
+    Student("Alice", [88, 92, 95]),
+    Student("Bob",   [77, 85]),
+    Student("Carol", [99, 96, 92]),
+]
+print(sorted(students))
+# [Student(name='Bob', gpa=81.0), Student(name='Alice', gpa=91.7), Student(name='Carol', gpa=95.7)]`} />

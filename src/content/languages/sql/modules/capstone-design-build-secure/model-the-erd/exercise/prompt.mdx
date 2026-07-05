@@ -1,0 +1,11 @@
+**Stage 1 — Model it (ER).** Inkwell Books wants to move its order tracking off a spreadsheet. Here's the business in plain English — turning it into a schema is the job:
+
+> Inkwell sells **books**, each written by an **author** and priced individually. **Customers** place **orders**; a single order can contain several different books, and each book on an order has a quantity.
+
+Underline the nouns — *books, authors, customers, orders* — and you have your entities; the verbs — *written by, place, contain* — are your relationships. Three of them are simple one-to-many; one is a many-to-many that needs an **associative entity** to resolve.
+
+There's no code editor here — you build the model directly. Name the order–book cardinality, choose how to resolve it, and fill in the structured ERD (five entities, four relationships). Use the **draft** box to sketch first (it isn't graded); then complete the fields and press **Submit answer**.
+
+<Callout type="note">
+This is a **Track-2 modeling exercise**. The ERD is graded on its *structure* — entities, their keys, and the relationships (endpoints, cardinality, identifying-ness) — never on how it's drawn. Endpoints compare both ways, so `book_order 1:N order_line` and `order_line N:1 book_order` count the same.
+</Callout>

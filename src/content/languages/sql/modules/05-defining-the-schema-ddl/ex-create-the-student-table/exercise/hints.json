@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Each constraint goes right after its column's type, on the same line.",
+    "student_id INTEGER PRIMARY KEY makes student_id the table's key.",
+    "name TEXT NOT NULL rejects any row that leaves name empty.",
+    "major TEXT DEFAULT 'undecided' fills in 'undecided' when no major is given. Keep the single quotes around the string."
+  ]
+}

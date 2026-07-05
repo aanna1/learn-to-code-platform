@@ -1,0 +1,52 @@
+# Data Modeling
+
+Dataclasses and enums are tools for making data safe and self-documenting. This exercise puts both to work.
+
+## Your task
+
+### Part 1: `Priority` enum
+
+Define a `Priority` enum with three members: `LOW`, `MEDIUM`, and `HIGH`. Each member's value should be its lowercase string name.
+
+```python
+Priority.LOW.value    # "low"
+Priority.MEDIUM.value # "medium"
+Priority.HIGH.value   # "high"
+```
+
+### Part 2: `Task` dataclass
+
+Define a `Task` dataclass with these fields:
+
+| Field | Type | Default |
+|---|---|---|
+| `title` | `str` | required |
+| `priority` | `Priority` | required |
+| `tags` | `list[str]` | empty list |
+
+The `tags` field must use `field(default_factory=list)` — not `= []`. This ensures each `Task` gets its own independent list.
+
+### Part 3: `summary()` method
+
+Add a `summary()` method to `Task` that returns a formatted string:
+
+```
+[PRIORITY] title (tags: tag1, tag2)
+```
+
+- The priority is the enum value in uppercase: `LOW` → `"LOW"`.
+- If there are no tags, the tags section reads `(tags: none)`.
+
+```python
+t = Task("Write tests", Priority.HIGH, ["testing", "ci"])
+t.summary()  # "[HIGH] Write tests (tags: testing, ci)"
+
+t2 = Task("Read docs", Priority.LOW)
+t2.summary() # "[LOW] Read docs (tags: none)"
+```
+
+## Requirements
+
+- `Priority` must be a proper `Enum` subclass, not a plain class with constants.
+- `tags` must use `field(default_factory=list)` so instances do not share the same list.
+- `@dataclass` must generate `__repr__` and `__eq__` — do not write them by hand.

@@ -1,0 +1,99 @@
+# Code Makeover
+
+This exercise puts the whole module together. Below is a working function — it produces correct output, but it uses every pattern this module taught you to replace.
+
+## The "before" code
+
+```python
+def generate_report(items):
+    result = []
+    for item in items:
+        if item["status"] == "active":
+            line = item["name"] + ": $" + str(round(item["value"], 2)) + " (active)"
+        else:
+            line = item["name"] + ": $" + str(round(item["value"], 2)) + " (inactive)"
+        result.append(line)
+    total = 0
+    for item in items:
+        if item["status"] == "active":
+            total = total + item["value"]
+    result.append("Total active: $" + str(round(total, 2)))
+    return "\n".join(result)
+```
+
+Problems with this code:
+
+- `item["status"] == "active"` — a string constant that a typo turns into a silent bug.
+- `item["name"]`, `item["value"]` — dict access with no type safety.
+- `str(round(item["value"], 2))` — manual number-to-string conversion that a format spec handles in one character.
+- Two separate loops where one comprehension and one generator expression would do.
+
+## Your task
+
+Rewrite this as a clean, idiomatic version using the tools from this module.
+
+### Step 1: Define `Status`
+
+An `Enum` with two members:
+
+```python
+Status.ACTIVE.value    # "active"
+Status.INACTIVE.value  # "inactive"
+```
+
+### Step 2: Define `Item`
+
+A `@dataclass` with three fields:
+
+| Field | Type |
+|---|---|
+| `name` | `str` |
+| `value` | `float` |
+| `status` | `Status` |
+
+### Step 3: Implement `generate_report`
+
+```python
+def generate_report(items: list[Item]) -> str:
+```
+
+The function takes a list of `Item` instances and returns a string. Each item produces one line in the format:
+
+```
+Alice: $1,234.56 (active)
+Bob: $89.00 (inactive)
+```
+
+Then a final summary line:
+
+```
+Total active: $1,234.56
+```
+
+Rules:
+
+- Use a **list comprehension** to build the per-item lines.
+- Use **f-string format specs** for the value: `:.2f` and `:,` combined give `1,234.56`.
+- Use the **enum value** for the status label: `item.status.value`.
+- Use a **generator expression** inside `sum()` to total only the active items, comparing with `is Status.ACTIVE`.
+- Join everything with `"\n"` and return.
+
+## Example
+
+```python
+items = [
+    Item("Alice", 1234.56, Status.ACTIVE),
+    Item("Bob", 89.0, Status.INACTIVE),
+    Item("Carol", 500.0, Status.ACTIVE),
+]
+print(generate_report(items))
+```
+
+Output:
+
+```
+Alice: $1,234.56 (active)
+Bob: $89.00 (inactive)
+Carol: $500.00 (active)
+Total active: $1,734.56
+```

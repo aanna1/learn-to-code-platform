@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "salary = salary + 3000 is right — it adds 3000 to each row's current salary. The problem is which rows it touches.",
+    "Add WHERE branch_id = 2 so only the Scranton employees get the raise.",
+    "Full answer: UPDATE employee SET salary = salary + 3000 WHERE branch_id = 2;"
+  ]
+}

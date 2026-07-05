@@ -1,0 +1,7 @@
+[
+  "For magnitude(): use (self.x**2 + self.y**2 + self.z**2) ** 0.5 — Python's ** operator handles square roots when you raise to the power 0.5.",
+  "For __repr__(): return an f-string like f'Vector3({self.x}, {self.y}, {self.z})'.",
+  "For __slots__: make sure it's a tuple of strings at class level — __slots__ = ('x', 'y', 'z'). This removes __dict__ from every instance.",
+  "For @dataclass(slots=True): pass slots=True inside the parentheses of the decorator, not as a separate line. Python 3.10+ only.",
+  "For try_bad_attr(): wrap obj.nonexistent = True in try/except AttributeError. Return 'blocked' in the except branch and 'allowed' after the assignment if no exception was raised."
+]

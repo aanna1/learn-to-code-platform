@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Cardinality: the tell is 'many … many' — once on each side. An order has many books AND a book is on many orders, so neither side is the 'one'.",
+    "A many-to-many can't be a single foreign key (that caps it to one book per order) and can't be repeating columns (that's a 1NF violation). Invent the associative entity order_line with the composite key (order_id, book_id).",
+    "Identifying vs. non-identifying is the one-question test: is the parent's key part of the child's PK? order_id and book_id ARE part of order_line's PK (identifying); author_id is NOT part of book's PK, and customer_id is NOT part of book_order's PK (both non-identifying)."
+  ]
+}

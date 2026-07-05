@@ -1,0 +1,44 @@
+# Validate Input
+
+Raw user input is always a string. Your program needs a number. When those two facts collide, you get a crash — unless you're ready for it.
+
+This exercise drills the input-validation loop: keep prompting until the user gives you something usable, then return it.
+
+## Your task
+
+Write two functions.
+
+**`get_int(prompt)`** — display `prompt`, read a line of input, and return it as an integer. If the input isn't a valid integer, print `"Please enter a whole number."` and ask again. Keep looping until a valid integer is entered.
+
+**`get_int_in_range(prompt, low, high)`** — same idea, but also reject integers outside `[low, high]` (inclusive). Print `f"Please enter a number between {low} and {high}."` for out-of-range values, and `"Please enter a whole number."` for non-numeric input. Return only when both checks pass.
+
+## Examples
+
+If the user types `"abc"`, then `"3.5"`, then `"7"`:
+```
+get_int("Pick a number: ")
+# Pick a number: abc
+# Please enter a whole number.
+# Pick a number: 3.5
+# Please enter a whole number.
+# Pick a number: 7
+# returns 7
+```
+
+If the user types `"abc"`, then `"0"`, then `"3"` (with `low=1, high=5`):
+```
+get_int_in_range("Pick 1–5: ", 1, 5)
+# Pick 1–5: abc
+# Please enter a whole number.
+# Pick 1–5: 0
+# Please enter a number between 1 and 5.
+# Pick 1–5: 3
+# returns 3
+```
+
+## Requirements
+
+- Use `while True:` with `try`/`except ValueError` to handle bad input.
+- In `get_int_in_range`, do the range check *after* parsing succeeds, outside the `try` block (or in an `else` clause).
+- Use `continue` to restart the loop on failure; use `return` to exit when the value is valid.
+- Both functions must use `input(prompt)` (not `input()` with a separate `print`).

@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The duplication lives in the emp_name and branch_city columns — you have to select them to see it.",
+    "You want three columns from orders: product, emp_name, and branch_city, in that order.",
+    "List them separated by commas: SELECT product, emp_name, branch_city FROM orders;"
+  ]
+}

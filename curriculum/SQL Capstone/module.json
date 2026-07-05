@@ -1,0 +1,16 @@
+{
+  "id": "capstone-design-build-secure",
+  "title": "Capstone — Design, Build & Secure a Small Database",
+  "description": "The whole course in one project, on the Inkwell Books scenario. Model it into an ERD (resolving the order-to-book many-to-many with an associative entity), normalize the fat spreadsheet to 3NF, define it with CREATE TABLE constraints, then query it — a three-join spend aggregate, a NOT IN never-sold subquery, and a LEFT JOIN + COALESCE revenue-by-author — and finally secure it: spot the injectable search, cap the blast radius with least privilege, and expose only what's safe with a view. Ties together Modules 03–12.",
+  "order": 15,
+  "lessons": [
+    { "id": "model-the-erd", "title": "Stage 1 — Model It (ERD)", "type": "modeling", "order": 1 },
+    { "id": "normalize-to-3nf", "title": "Stage 2 — Normalize It (3NF)", "type": "modeling", "order": 2 },
+    { "id": "build-the-schema", "title": "Stage 3 — Define It (DDL)", "type": "exercise", "order": 3 },
+    { "id": "customer-spend", "title": "Stage 5 — Spend Per Customer", "type": "exercise", "order": 4 },
+    { "id": "never-sold-books", "title": "Stage 5 — Never-Sold Books", "type": "exercise", "order": 5 },
+    { "id": "revenue-by-author", "title": "Stage 5 — Revenue By Author", "type": "exercise", "order": 6 },
+    { "id": "secure-the-catalog", "title": "Stage 6 — A Safe Catalog View", "type": "exercise", "order": 7 },
+    { "id": "security-review", "title": "Stage 6 — The Security Review", "type": "modeling", "order": 8 }
+  ]
+}

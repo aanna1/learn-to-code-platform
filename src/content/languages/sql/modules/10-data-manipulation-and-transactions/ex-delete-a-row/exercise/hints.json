@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Run the starter and check the row count: it's 0. DELETE FROM employee with no WHERE removes every row — the same trap as an UPDATE with no WHERE.",
+    "Add a WHERE that names the single row to remove: WHERE employee_id = 107.",
+    "Full answer: DELETE FROM employee WHERE employee_id = 107;"
+  ]
+}

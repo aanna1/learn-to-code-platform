@@ -1,0 +1,15 @@
+[
+  {
+    "name": "returns only Scranton employees earning more than 55000",
+    "orderMatters": false,
+    "expected": {
+      "columns": ["first_name", "salary"],
+      "rows": [
+        ["Michael", 90000],
+        ["Dwight", 62000],
+        ["Jim", 60000],
+        ["Stanley", 58000]
+      ]
+    }
+  }
+]

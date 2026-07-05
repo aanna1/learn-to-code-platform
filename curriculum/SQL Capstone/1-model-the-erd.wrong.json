@@ -1,0 +1,17 @@
+{
+  "order-book-card": "1:N",
+  "resolve-nm": "Put book_id as a foreign key column on book_order",
+  "erd": {
+    "entities": [
+      { "name": "author", "attributes": [{ "name": "author_id", "pk": true }] },
+      { "name": "customer", "attributes": [{ "name": "customer_id", "pk": true }] },
+      { "name": "book", "attributes": [{ "name": "book_id", "pk": true }] },
+      { "name": "book_order", "attributes": [{ "name": "order_id", "pk": true }] }
+    ],
+    "relationships": [
+      { "from": "author", "to": "book", "cardinality": "1:N", "identifying": true },
+      { "from": "customer", "to": "book_order", "cardinality": "1:N", "identifying": false },
+      { "from": "book", "to": "book_order", "cardinality": "N:M", "identifying": false }
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+Here's a scare with a happy ending. Someone ran `UPDATE employee SET salary = 0` with no `WHERE` — every salary is now zero. But they were careful in one way: they opened a **transaction** with `BEGIN` first, and never committed it. The change is still pending, which means it can be thrown away completely. Add the one line that undoes it, then **Submit**.
+
+<Callout type="note">
+`ROLLBACK` discards *everything* since `BEGIN`, as a single all-or-nothing unit — the table returns to exactly how it looked before the transaction opened. Only `COMMIT` would have made the zeroed salaries permanent. This is the safety net that makes writing to a database trustworthy.
+</Callout>

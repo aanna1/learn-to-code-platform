@@ -1,0 +1,6 @@
+[
+  "After splitting with `line.split(':')`, check `if len(parts) != 2:` — a line like 'Charlie' splits into 1 part, and 'Eve:72:extra' splits into 3.",
+  "Inside `try`, do `score = int(score_str)`. In `except ValueError:`, append to `errors`. In `else:`, append `{\"name\": name, \"score\": score}` to `records` — `else` only runs when `try` succeeded.",
+  "Build the error string with an f-string: `f\"Line {i}: score must be an integer\"` and `f\"Line {i}: expected 'name:score' format\"`. The `i` comes from `enumerate(lines, 1)`.",
+  "For `summary`, use `len(result['records'])` and `len(result['errors'])` to get the counts, then return `f\"Parsed {n} records, {m} errors.\"`"
+]

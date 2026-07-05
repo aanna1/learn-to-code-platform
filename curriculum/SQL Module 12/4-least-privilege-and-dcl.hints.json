@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Sort the verbs: DDL defines objects (CREATE/ALTER/DROP), DML changes data (INSERT/UPDATE/DELETE), DCL changes who's permitted to run that DML (GRANT/REVOKE).",
+    "Least privilege means enumerating exactly the rights an account needs and stopping there. GRANT ALL hands over destructive rights (DELETE, DROP, ALTER) an app account should never have.",
+    "A privilege held through a role isn't a personal copy — revoke it from the role and every member loses it together. And remember SQLite has no users at all, so GRANT/REVOKE simply don't exist there."
+  ]
+}

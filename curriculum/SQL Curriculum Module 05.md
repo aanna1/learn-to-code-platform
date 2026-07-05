@@ -1,0 +1,296 @@
+# Module 05 — Defining the Schema (DDL)
+
+> Tags: `[27200]`
+
+Every table you've seen so far in this course has been a picture — rows and columns drawn out
+so you could see the idea. This module is where that stops being a picture and becomes a real,
+queryable table. The tool for that is **DDL — Data Definition Language**: the part of SQL that
+creates, reshapes, and destroys the *structure* a database stores data in, as opposed to the
+data itself.
+
+By the end you'll be able to take a table design — the kind you'd sketch on paper from an ER
+diagram — and turn it into working `CREATE TABLE` SQL, complete with the constraints that stop
+bad data from ever getting in.
+
+## Prerequisites
+
+Module 02 (tables, primary keys, foreign keys). If you've also done the ER-modeling and
+normalization modules, even better — this module is the step where a normalized design
+actually gets built. But you don't need them to follow the syntax here.
+
+## What you'll learn
+
+- The core SQL data types — `INT`, `DECIMAL`, `VARCHAR`, `DATE`/`TIMESTAMP`, `BLOB` — and how to
+  choose sizes deliberately instead of guessing
+- How to write `CREATE TABLE`, including defining a primary key inline or separately
+- The core column constraints — `NOT NULL`, `UNIQUE`, `DEFAULT`, `PRIMARY KEY`, `FOREIGN KEY
+  ... REFERENCES`, `CHECK` — and what each one actually stops from happening
+- How to reshape an existing table with `ALTER TABLE` (`ADD`/`DROP`/`MODIFY` column), and remove
+  one entirely with `DROP TABLE`
+- Where MySQL, SQLite (this course's engine), and Oracle (the exam's environment) disagree on
+  some of the above, and what to write in each case
+
+## Why DDL comes before everything else
+
+You cannot insert a row into a table that doesn't exist, and you cannot query a column that was
+never defined. So whenever you're building a relational database, the very first thing you do —
+before a single piece of data goes in — is **define the schema**: create every table, with
+every column and every constraint, exactly the way your ER diagram and normalization pass said
+it should look. Everything from Module 06 onward assumes the schema already exists. This module
+is how it gets there.
+
+## Core data types
+
+A column doesn't just have a name — it has a **data type**, which tells the RDBMS exactly what
+kind of value it's allowed to hold and how much room to set aside for it. A handful of types
+cover almost everything you'll need:
+
+| Type | Holds | Example |
+|---|---|---|
+| `INT` | A whole number, no decimal point | `42`, `-7`, `0` |
+| `DECIMAL(M, N)` | A fixed-precision decimal: `M` total digits, `N` of them after the point | `DECIMAL(10, 4)` → up to 10 digits total, 4 after the decimal |
+| `VARCHAR(n)` | Text, up to `n` characters | `VARCHAR(20)` → a string up to 20 characters long |
+| `DATE` | A calendar date, `YYYY-MM-DD` | `2026-07-02` |
+| `TIMESTAMP` | A date *and* time, usually for "when did this happen" | `2026-07-02 14:30:00` |
+| `BLOB` | Raw binary data — files, images | — |
+
+`DECIMAL(10, 4)` reads as "ten digits total, four of them after the decimal point" — so it can
+hold anything from `-999999.9999` up to `999999.9999`. A student's GPA, which only ever needs
+one digit before the point and two after, would reasonably be `DECIMAL(3, 2)`.
+
+`VARCHAR(n)` is worth slowing down on, because picking `n` is a real design decision, not a
+formality. `VARCHAR(1000)` for a person's name "works," in the sense that it won't error — but
+almost no name is anywhere close to 1000 characters, and multiplied across millions of rows,
+that's real wasted space for no benefit. `VARCHAR(20)` or `VARCHAR(50)` is a much more honest
+size for a name column. The rule of thumb: size a `VARCHAR` for the data it will realistically
+hold, not the largest string you can imagine.
+
+> **Dialect note:** these six types are close to universal, but not identical everywhere.
+> Oracle uses `VARCHAR2` instead of `VARCHAR` and `NUMBER` instead of `INT`/`DECIMAL` (a single
+> type that covers both, with optional precision/scale). SQLite — this course's engine — is
+> more relaxed still: it only loosely enforces types at all. The exam is handwritten against
+> Oracle's conventions, so if you see `VARCHAR2(20)` or `NUMBER(3,2)` on the exam, that's Oracle
+> spelling the same ideas from this table differently, not a new concept.
+
+## Creating a table
+
+The full shape of `CREATE TABLE` is: the keyword, a table name, and — inside parentheses — a
+comma-separated list of column definitions.
+
+```sql
+CREATE TABLE student (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(20) NOT NULL,
+    major VARCHAR(20)
+);
+```
+
+Every SQL statement ends with a semicolon — leave it off and most tools will just sit there
+waiting for the rest of the statement. SQL keywords (`CREATE`, `TABLE`, `NOT`, `NULL`) are
+conventionally written in uppercase and table/column names in lowercase; SQL itself doesn't
+care about case for keywords, but writing it this way makes it easy to tell "the SQL" apart from
+"the names you chose" at a glance, and it's the convention this course uses throughout.
+
+You can mark the primary key inline, as above (right after the column's type), or declare it
+separately at the end — both do the same thing:
+
+```sql
+CREATE TABLE student (
+    student_id INT,
+    name VARCHAR(20) NOT NULL,
+    major VARCHAR(20),
+    PRIMARY KEY (student_id)
+);
+```
+
+The second form is the one you'll reach for once a table needs more than one thing declared
+about its keys — which is exactly what happens once foreign keys enter the picture, next.
+
+## Constraints: telling the database what "valid" means
+
+A **constraint** is a rule attached to a column (or a whole table) that the RDBMS enforces on
+every single row, forever — not a guideline you're trusting yourself to follow, an actual gate
+the database checks on every insert and update.
+
+**`NOT NULL`** — this column can never be empty.
+
+```sql
+name VARCHAR(20) NOT NULL
+```
+
+Try to insert a row without a name, and the database rejects it outright, before it ever
+becomes bad data you have to clean up later.
+
+**`UNIQUE`** — no two rows may share the same value in this column.
+
+```sql
+major VARCHAR(20) UNIQUE
+```
+
+(In a real student table you'd never make `major` unique — plenty of students share a major.
+`UNIQUE` fits columns like `email` or `ssn`, where duplication would actually be a bug. The
+transcript this course draws from uses `major` here purely to show the mechanism; don't copy
+the example into a real design.)
+
+**`DEFAULT`** — if no value is given for this column, use this one instead of `NULL`.
+
+```sql
+major VARCHAR(20) DEFAULT 'undecided'
+```
+
+Insert a student without specifying a major, and their `major` column is `'undecided'`, not
+empty — useful whenever "we don't know yet" has an honest, meaningful default.
+
+**`PRIMARY KEY`** — you met this in Module 02, but here's the mechanical truth behind it: a
+primary key is really just a column that is both `NOT NULL` and `UNIQUE` at the same time, with
+one added guarantee — every table can only have one. That's it. There's no third, secret rule;
+it's those two familiar constraints, combined, on the one column (or set of columns) you've
+chosen to identify each row.
+
+**`FOREIGN KEY ... REFERENCES`** — declares that a column's values must match the primary key of
+another table (or be `NULL`, if the column allows it). This is the DDL you write to make Module
+02's foreign keys real:
+
+```sql
+CREATE TABLE employee (
+    employee_id INT PRIMARY KEY,
+    first_name VARCHAR(20) NOT NULL,
+    branch_id INT,
+    FOREIGN KEY (branch_id) REFERENCES branch(branch_id)
+);
+```
+
+Once this constraint exists, the database itself refuses to let `branch_id` hold any value that
+isn't a real `branch_id` already sitting in the `branch` table (or `NULL`). Try to insert an
+employee with `branch_id = 99` when no branch `99` exists, and the insert fails — the same way a
+`NOT NULL` violation fails. This is called **referential integrity**: the guarantee that a
+foreign key never points at nothing.
+
+**`CHECK`** — a custom rule the value has to satisfy, beyond just its type.
+
+```sql
+salary DECIMAL(10, 2) CHECK (salary >= 0)
+```
+
+`CHECK` is how you rule out values that are the *right type* but still nonsensical — a negative
+salary is a perfectly valid `DECIMAL`, it's just never correct.
+
+> **Watch out:** constraints are checked on every `INSERT` and every `UPDATE`, not just when the
+> table is created. A `NOT NULL` column doesn't just reject a row missing that value on day
+> one — it rejects it forever, on every future insert, which is exactly the point. Constraints
+> aren't a one-time validation step; they're a standing rule the database enforces permanently.
+
+## Auto-generating primary keys
+
+Manually typing the next integer for every insert — 1, then 2, then 3 — gets old fast, and it's
+an easy way to accidentally reuse a key. Every RDBMS has a way to have the database pick the
+next value for you, but this is one of the sharpest dialect differences you'll run into:
+
+```sql
+-- MySQL
+student_id INT AUTO_INCREMENT PRIMARY KEY
+
+-- SQLite (this course's IDE)
+student_id INTEGER PRIMARY KEY AUTOINCREMENT
+
+-- Oracle (the exam's environment)
+student_id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY
+-- or, in older Oracle style: a SEQUENCE object whose .NEXTVAL is inserted manually
+```
+
+> **Dialect note:** this is the single biggest syntax difference you'll hit between what runs in
+> this course's IDE and what the exam expects. All three achieve the same thing — the database
+> assigns the next primary key value automatically so your `INSERT` statements can just leave it
+> out — but if you write `AUTO_INCREMENT` on the exam, an Oracle-trained grader will mark it as
+> the wrong dialect. Know the *idea* (auto-generated surrogate keys) cold, and know that Oracle
+> spells it `GENERATED ... AS IDENTITY` or a `SEQUENCE`, not `AUTO_INCREMENT`.
+
+## Reshaping and removing tables
+
+Schemas change. `ALTER TABLE` modifies an existing table without touching the rows already in
+it:
+
+```sql
+ALTER TABLE student ADD COLUMN gpa DECIMAL(3, 2);
+ALTER TABLE student DROP COLUMN gpa;
+```
+
+And `DROP TABLE` removes a table completely — structure and every row in it, gone:
+
+```sql
+DROP TABLE student;
+```
+
+> **Watch out:** `DROP TABLE` isn't a "clear the data" operation, it's a "the table no longer
+> exists" operation. There's no confirmation prompt in raw SQL. If you only meant to empty a
+> table, not erase its structure, `DROP TABLE` is the wrong tool — that's a DML job, and it's
+> coming in Module 10.
+
+## Try it: predict what happens
+
+```sql
+CREATE TABLE student (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(20) NOT NULL,
+    major VARCHAR(20) DEFAULT 'undecided'
+);
+
+INSERT INTO student (student_id, major) VALUES (1, 'Biology');
+```
+
+<details>
+<summary>Predict what happens, then click to check</summary>
+
+**It fails.** The `INSERT` doesn't provide a value for `name`, and `name` was declared
+`NOT NULL` with no default — so the database has nothing valid to put there and rejects the
+whole row. Notice what *doesn't* fail: leaving out `major` would have been fine, because
+`major` has a `DEFAULT` to fall back on. `NOT NULL` and `DEFAULT` look similar at a glance —
+both deal with "what if this column is missing?" — but they answer completely different
+questions. `DEFAULT` says "use this if nothing's given." `NOT NULL`, with no default, says
+"nothing being given is not acceptable at all."
+
+</details>
+
+## Recap
+
+DDL is how a table design stops being a diagram and becomes something you can actually insert
+data into. `CREATE TABLE` defines a table's columns and their data types; constraints —
+`NOT NULL`, `UNIQUE`, `DEFAULT`, `PRIMARY KEY`, `FOREIGN KEY ... REFERENCES`, `CHECK` — are
+rules the database enforces on every row, permanently, not just at creation time. A primary key
+is really `NOT NULL` + `UNIQUE` in disguise; a foreign key constraint is what makes referential
+integrity real instead of just a convention you're trusting yourself to follow. `ALTER TABLE`
+reshapes an existing table; `DROP TABLE` removes one entirely, data and all. And because this
+course runs on SQLite while the exam is written against Oracle, a few of these — especially
+auto-generated primary keys — are worth knowing in more than one dialect.
+
+## Quiz seeds
+
+- Q: A column is declared `NOT NULL` with no `DEFAULT`. What happens if you try to insert a row
+  without providing a value for it?
+  - ✅ The insert fails — `NOT NULL` with no default means a value is required every time
+  - ❌ The column is set to an empty string automatically — `NOT NULL` doesn't supply a
+    fallback value on its own; that's what `DEFAULT` is for
+  - ❌ The column is set to `NULL` and a warning is logged — `NOT NULL` rejects the insert
+    outright, it doesn't warn and proceed
+
+- Q: What does a `FOREIGN KEY ... REFERENCES` constraint actually enforce?
+  - ✅ That the column's value matches an existing primary key in the referenced table (or is
+    `NULL`, if allowed) — referential integrity
+  - ❌ That the column's value is unique within its own table — that's what a `UNIQUE`
+    constraint does, not a foreign key
+  - ❌ That the two tables are physically stored next to each other — foreign keys are a
+    logical constraint on values, not a storage detail
+
+- Q: You write `student_id INT AUTO_INCREMENT PRIMARY KEY` on the CNIT 27200 test-out exam.
+  What's the problem?
+  - ✅ `AUTO_INCREMENT` is MySQL syntax; the exam is handwritten against Oracle, which uses
+    `GENERATED ... AS IDENTITY` or a `SEQUENCE` instead
+  - ❌ Nothing — `AUTO_INCREMENT` is universal ANSI SQL syntax, this concern is misplaced.
+    It's actually one of the least portable keywords across RDBMSs
+  - ❌ `AUTO_INCREMENT` can't be combined with `PRIMARY KEY` in any dialect — it can, in MySQL;
+    the issue here is specifically which dialect the exam expects
+
+## Up next
+
+Module 06 is where the payoff starts: `SELECT`, `WHERE`, and `ORDER BY` — asking the schema
+you now know how to build for exactly the rows you want back.

@@ -1,0 +1,13 @@
+{
+  "which-nf": "3NF",
+  "partials": ["order_date", "quantity"],
+  "fds": [
+    "order_id -> order_date"
+  ],
+  "decompose": {
+    "book": ["author_name", "price"],
+    "customer": ["customer_name", "customer_email"],
+    "book_order": ["order_date"],
+    "order_line": ["quantity"]
+  }
+}

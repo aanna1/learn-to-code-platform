@@ -1,0 +1,16 @@
+[
+  {
+    "name": "returns only the name and major columns",
+    "orderMatters": false,
+    "expected": {
+      "columns": ["name", "major"],
+      "rows": [
+        ["Ada", "Computer Science"],
+        ["Grace", "Mathematics"],
+        ["Alan", "Computer Science"],
+        ["Katherine", "Physics"],
+        ["Dorothy", "Chemistry"]
+      ]
+    }
+  }
+]

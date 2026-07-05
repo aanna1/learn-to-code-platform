@@ -1,0 +1,13 @@
+`AVG(salary)` over the whole table gives one company-wide number. The more useful question is usually "average salary *per branch*" — and that's what `GROUP BY` is for: it splits the rows into groups that share a value, then computes the aggregate once for each group.
+
+The starter query still gives you one company-wide average.
+
+## Your task
+
+Rewrite it to group by `branch_id`, returning one row per branch with that branch's `COUNT(*)` (aliased `headcount`) and `AVG(salary)` (aliased `avg_salary`). Ryan, whose `branch_id` is `NULL`, forms his own group — `GROUP BY` doesn't drop `NULL` values, it buckets them together like any other value.
+
+Press **Run** to see the grid, then **Submit** to check it.
+
+<Callout type="tip">
+Every column in the SELECT list must be either grouped by or wrapped in an aggregate — so `branch_id` (grouped), `COUNT(*)`, and `AVG(salary)` are the three columns you need.
+</Callout>

@@ -1,0 +1,49 @@
+{
+  "draft": "These are Oracle/server concepts you learn for the handwritten exam — GRANT, REVOKE, and roles don't run in the browser's SQLite (it has no user accounts). Reason them out on paper the way the exam expects.",
+  "fields": [
+    {
+      "id": "sublanguage",
+      "type": "single-select",
+      "label": "Which SQL sublanguage do GRANT and REVOKE belong to, and what do they control?",
+      "options": [
+        "DCL (Data Control Language) — they control who is permitted to run operations on database objects, as opposed to DML, which changes the data itself",
+        "DML (Data Manipulation Language) — they change the database, so they're the same family as INSERT and UPDATE",
+        "DDL (Data Definition Language) — they define structure, like CREATE and DROP",
+        "DQL (Data Query Language) — they're a form of SELECT that returns permission rows"
+      ]
+    },
+    {
+      "id": "least-privilege",
+      "type": "single-select",
+      "label": "Why is GRANT SELECT, INSERT ON orders TO app_user better than GRANT ALL PRIVILEGES ON orders TO app_user for a web application's account?",
+      "options": [
+        "It follows least privilege — the app gets only the two rights it needs, so a successful injection on that account still can't DELETE, DROP, or alter the table",
+        "They're equivalent; ALL is just shorter to type",
+        "GRANT ALL isn't valid SQL, so the first one is the only option that runs",
+        "GRANT ALL is slower for the database to evaluate at query time"
+      ]
+    },
+    {
+      "id": "role-revoke",
+      "type": "single-select",
+      "label": "You run CREATE ROLE analyst; GRANT SELECT ON employee TO analyst; GRANT analyst TO jim, pam;. Later you REVOKE SELECT ON employee FROM analyst;. What happens?",
+      "options": [
+        "Both Jim and Pam immediately lose SELECT on employee, because they held it through the role — revoking from the role revokes for every member at once",
+        "Nothing changes for Jim and Pam; they keep the privilege they were given",
+        "Only Jim loses it; a role-level revoke applies to just the first member listed",
+        "The analyst role is deleted, but Jim and Pam keep a private copy of the privilege"
+      ]
+    },
+    {
+      "id": "sqlite-no-dcl",
+      "type": "single-select",
+      "label": "You try GRANT SELECT ON employee TO hr_clerk in the course's browser IDE and get a syntax error. Why?",
+      "options": [
+        "SQLite is a serverless, single-file database with no user accounts, so it has no GRANT/REVOKE at all — access control there is the OS file permissions; the exam's Oracle engine does support DCL",
+        "The clause order is wrong; it should be GRANT SELECT TO hr_clerk ON employee",
+        "You must CREATE USER hr_clerk first, then the GRANT works in SQLite",
+        "GRANT only works inside an explicit BEGIN ... COMMIT transaction block"
+      ]
+    }
+  ]
+}

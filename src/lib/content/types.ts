@@ -5,7 +5,7 @@
  * the lesson renderer (Phase 3), and the seed content (Phase 4) all build against.
  */
 
-export type LessonType = "lecture" | "exercise";
+export type LessonType = "lecture" | "exercise" | "modeling";
 
 /** A module entry as listed in course.json. */
 export interface CourseModuleRef {
@@ -73,5 +73,19 @@ export interface ExerciseContent {
   starter: string;
   solution: string;
   tests: string;
+  hints: Hints;
+}
+
+/**
+ * A fully-loaded Track-2 "modeling" lesson (structured exercise). `question` and
+ * `answer` are the raw parsed question.json / answer.json; the renderer + grader
+ * (src/lib/structured) own their shape, so the loader stays agnostic and just
+ * passes them through as parsed JSON.
+ */
+export interface ModelingContent {
+  meta: LessonRef;
+  promptMdxSource: string;
+  question: unknown;
+  answer: unknown;
   hints: Hints;
 }

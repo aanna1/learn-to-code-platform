@@ -1,0 +1,11 @@
+**Stage 5 (continued).** Last query: **revenue by author — including authors who've sold nothing.** The shop wants the zeros this time, so it's an outer join all the way down.
+
+The starter uses inner `JOIN`s, which silently drop any author with no sales — so Octavia Butler (whose only book, *Kindred*, has never sold) vanishes. Switch to `LEFT JOIN` so every author's row survives, and wrap the sum in `COALESCE(..., 0)` so her `NULL` total becomes a real `0`. Press **Run**, then **Submit**.
+
+<Callout type="note">
+This is the exact inner-vs-outer decision from Module 08, mirrored against the customer-spend query: there an inner join was *right* (no purchase means no "spend"); here an outer join is right (an author with no sales still has revenue — it's just zero). Same data, opposite choice, driven by the question.
+</Callout>
+
+<Callout type="tip">
+`SUM` over no rows is `NULL`, not `0` — that's why you need `COALESCE(SUM(b.price * ol.quantity), 0)`. Order by `revenue DESC, author` so ties break predictably.
+</Callout>

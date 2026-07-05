@@ -1,0 +1,254 @@
+A quick reference for the SQL you'll use most often across this course. Skim it, copy from it, keep it open in another tab while you work through the lessons. This course's IDE runs on **SQLite**; where the CNIT 27200 exam's **Oracle** dialect differs, the lessons flag it — the most common of those notes are repeated here.
+
+<Callout type="note">
+In every language on this platform, running code prints text to a terminal. In SQL, running a query hands back a **table** — the results grid — instead. A query's answer is a set of rows and columns, not a line of output.
+</Callout>
+
+## 1. The relational model
+
+A **table** (relation) holds one **row** (record) per thing and one **column** (attribute) per fact about it. Two keys tie it all together:
+
+- **Primary key (PK)** — the column (or set of columns) that uniquely identifies each row. Never NULL, never duplicated.
+- **Foreign key (FK)** — a column that points at another table's primary key. This is how tables relate.
+
+```
+students                     enrollments
+--------                     -----------
+id  (PK)  name   major       id (PK)  student_id (FK -> students.id)  course
+1         Ada    CS          10       1                               CS101
+2         Alan   Math        11       1                               CS201
+```
+
+A quick ER-diagram symbol reference (crow's-foot notation):
+
+```
+Relationship        Reads as
+-----------------   ---------------------------------------
+A ||──|| B          one-to-one       (one A, one B)
+A ||──o< B          one-to-many      (one A, zero-or-more B)
+A >o──o< B          many-to-many     (resolve with a junction table)
+||  = "exactly one"    o< = "zero or many"    |< = "one or many"
+```
+
+A **many-to-many** relationship is never stored directly — it's resolved by a third **associative (junction) table** whose rows each carry one FK to each side.
+
+## 2. Normal forms (a quick checklist)
+
+Normalization = store each fact once, in one place. Walk a table up the forms:
+
+```
+1NF  Every cell holds a single value (no lists, no repeating groups),
+     and each row is unique (has a key).
+2NF  Already 1NF, AND every non-key column depends on the WHOLE key
+     (no partial dependency on part of a composite key).
+3NF  Already 2NF, AND no non-key column depends on another non-key column
+     (no transitive dependency).
+```
+
+Rule of thumb: *"each non-key column depends on the key, the whole key, and nothing but the key."* When one table starts repeating the same fact across rows, split it and link the halves with a foreign key.
+
+## 3. Defining tables (DDL)
+
+```sql
+CREATE TABLE students (
+  id     INTEGER PRIMARY KEY,
+  name   TEXT NOT NULL,
+  major  TEXT NOT NULL DEFAULT 'Undeclared',
+  email  TEXT UNIQUE,
+  gpa    REAL CHECK (gpa >= 0.0 AND gpa <= 4.0)
+);
+
+ALTER TABLE students ADD COLUMN grad_year INTEGER;
+DROP TABLE students;                     -- deletes the table and all its data
+```
+
+A **foreign key** constraint ties one table's column to another's key:
+
+```sql
+CREATE TABLE enrollments (
+  id         INTEGER PRIMARY KEY,
+  student_id INTEGER NOT NULL REFERENCES students(id),
+  course     TEXT NOT NULL
+);
+```
+
+Constraints, at a glance: `PRIMARY KEY`, `NOT NULL`, `UNIQUE`, `DEFAULT <value>`, `CHECK (<condition>)`, `FOREIGN KEY ... REFERENCES`.
+
+Common types, SQLite (this IDE) vs. Oracle (the exam):
+
+```
+Kind          SQLite             Oracle
+-----------   ----------------   -----------------------
+whole number  INTEGER            NUMBER(n)
+decimal       REAL               NUMBER(p, s)
+text          TEXT               VARCHAR2(n) / CHAR(n)
+date/time     TEXT (ISO-8601)    DATE / TIMESTAMP
+auto id       INTEGER PRIMARY     GENERATED ... IDENTITY
+              KEY (auto)          (or a SEQUENCE)
+```
+
+<Callout type="warning">
+Auto-increment is the syntax most likely to differ between this IDE and the exam. SQLite auto-numbers an `INTEGER PRIMARY KEY` for you; MySQL uses `AUTO_INCREMENT`; Oracle uses an identity column or a sequence. Learn the concept here; check the exam's dialect for the exact keyword.
+</Callout>
+
+## 4. Reading data (DQL)
+
+```sql
+SELECT * FROM students;                  -- every column, every row
+SELECT name, major FROM students;        -- only the columns you name
+SELECT DISTINCT major FROM students;     -- drop duplicate rows
+
+SELECT name, major
+FROM students
+WHERE major = 'Physics'                  -- keep only matching rows
+ORDER BY name ASC                        -- sort (ASC = A to Z, DESC = Z to A)
+LIMIT 10;                                -- first 10 rows (Oracle: FETCH FIRST 10 ROWS ONLY)
+```
+
+Operators you'll use inside `WHERE`:
+
+```sql
+WHERE price > 100                        -- =  <>  <  <=  >  >=
+WHERE major = 'Physics' AND id > 2       -- AND / OR / NOT
+WHERE major IN ('Physics', 'Chemistry')  -- membership
+WHERE price BETWEEN 10 AND 50            -- inclusive range
+WHERE name LIKE 'A%'                     -- pattern: % = any run, _ = one char
+WHERE major IS NULL                      -- test NULL with IS, never =
+WHERE branch_id IS NOT NULL
+```
+
+## 5. Aggregates and grouping
+
+```sql
+SELECT COUNT(*), SUM(salary), AVG(salary), MIN(salary), MAX(salary)
+FROM employees;
+
+SELECT major, COUNT(*) AS n
+FROM students
+GROUP BY major                           -- one output row per distinct major
+HAVING COUNT(*) > 1;                     -- HAVING filters GROUPS; WHERE filters ROWS
+```
+
+The evaluation order is `FROM`, then `WHERE`, `GROUP BY`, `HAVING`, `SELECT`, `ORDER BY`, `LIMIT`. That's why `WHERE` can't see an aggregate (it runs before grouping) and `HAVING` can.
+
+## 6. Joining tables
+
+```sql
+-- INNER JOIN: only rows that match in BOTH tables
+SELECT s.name, e.course
+FROM students AS s
+JOIN enrollments AS e ON e.student_id = s.id;
+
+-- LEFT JOIN: every LEFT row, matched or not (unmatched right side is NULL)
+SELECT s.name, e.course
+FROM students AS s
+LEFT JOIN enrollments AS e ON e.student_id = s.id;
+
+-- SELF JOIN: a table joined to itself (e.g. employee to supervisor)
+SELECT e.name AS employee, m.name AS manager
+FROM employees AS e
+JOIN employees AS m ON e.supervisor_id = m.id;
+```
+
+Which join keeps which rows:
+
+```
+INNER JOIN   rows with a match on both sides             (intersection)
+LEFT  JOIN   all left rows + matches (unmatched -> NULL)
+RIGHT JOIN   all right rows + matches                     (mirror of LEFT)
+FULL  JOIN   all rows from both, matched where possible   (union)
+```
+
+<Callout type="note">
+SQLite (this IDE) supports `INNER` and `LEFT` joins natively. `RIGHT` and `FULL OUTER` joins need a newer SQLite build; a `RIGHT JOIN` is just a `LEFT JOIN` with the tables swapped. Oracle supports all four directly.
+</Callout>
+
+## 7. Subqueries
+
+A query nested inside another. Pick the shape by what the inner query returns:
+
+```sql
+-- SCALAR: inner returns ONE value -> compare against it
+SELECT name FROM employees
+WHERE salary > (SELECT AVG(salary) FROM employees);
+
+-- IN: inner returns a COLUMN of values -> test membership
+SELECT name FROM employees
+WHERE id IN (SELECT manager_id FROM branches);
+
+-- CORRELATED: inner references the outer row, re-runs per row
+SELECT name FROM employees AS e
+WHERE salary > (SELECT AVG(salary) FROM employees WHERE branch_id = e.branch_id);
+
+-- EXISTS: inner is a yes/no test -> true if it returns any row
+SELECT name FROM branches AS b
+WHERE NOT EXISTS (SELECT 1 FROM employees WHERE branch_id = b.id);
+```
+
+<Callout type="warning">
+The `NOT IN` NULL trap: if the inner query returns even one NULL, `NOT IN` yields no rows at all. For "not in this set", prefer `NOT EXISTS`, or add `WHERE <col> IS NOT NULL` to the subquery.
+</Callout>
+
+## 8. Changing data (DML) and transactions
+
+```sql
+INSERT INTO students (name, major) VALUES ('Ada', 'Computer Science');
+
+UPDATE students SET major = 'Mathematics' WHERE id = 2;
+
+DELETE FROM students WHERE id = 5;
+```
+
+Wrap related changes in a **transaction** so they succeed or fail as one unit:
+
+```sql
+BEGIN;                                   -- start a transaction
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+COMMIT;                                  -- make all of it permanent
+-- ROLLBACK;                             -- ...or undo everything since BEGIN
+```
+
+<Callout type="warning">
+`UPDATE` and `DELETE` without a `WHERE` clause change **every row**. Always write the `WHERE` first. This is also the shape of an attack: injection that strips or bypasses your `WHERE` can turn a one-row update into a whole-table one.
+</Callout>
+
+The CRUD, SQL, and CIA map — which security property breaks when each operation is abused:
+
+```
+CRUD     SQL       Abused, it breaks…
+------   -------   ---------------------
+Create   INSERT    Integrity
+Read     SELECT    Confidentiality
+Update   UPDATE    Integrity
+Delete   DELETE    Availability
+```
+
+## 9. Writing secure SQL
+
+```sql
+-- NEVER build a query by pasting user text straight in:
+--   "SELECT * FROM users WHERE name = '" + input + "'"   <-- injectable
+-- A login form fed   ' OR '1'='1' --   turns that into "match every row".
+
+-- DO use a parameter placeholder and let the driver bind the value:
+SELECT * FROM users WHERE name = ?;      -- ? is filled in safely by the driver
+```
+
+Parameterized queries are the **one categorical fix** — the value can never change the query's structure. Around it, layer defense in depth:
+
+```sql
+-- Least privilege: grant only what each account needs, nothing more.
+GRANT SELECT ON students TO reporting_user;    -- read-only
+REVOKE DELETE ON students FROM reporting_user;
+
+-- A view exposes only safe columns/rows as an access boundary:
+CREATE VIEW student_public AS
+  SELECT id, name, major FROM students;        -- no email, no gpa
+```
+
+A least-privilege checklist: parameterize every query that touches user input; validate identifiers (table/column names, which can't be parameterized) against an **allowlist**; grant each account the narrowest rights that let it do its job; hand out **views** instead of base tables where callers only need a slice; keep error messages generic so they don't leak your schema.
+
+<Callout type="note">
+`GRANT`, `REVOKE`, and `CREATE ROLE` are real Oracle/MySQL SQL, but this IDE's SQLite engine has no user accounts, so those statements are syntax errors here. Learn them for the exam and for reasoning about access control; you'll practice `CREATE VIEW` (which does run here) in the lessons.
+</Callout>

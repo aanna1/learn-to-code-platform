@@ -1,0 +1,32 @@
+You have a `temperature.py` module with two functions:
+
+```python
+def celsius_to_fahrenheit(c: float) -> float:
+    """Convert Celsius to Fahrenheit. Raise ValueError if c < -273.15."""
+
+def parse_temp(s: str) -> float:
+    """Parse '23.5C' or '74.3F' → Celsius float.
+    Raise ValueError if the string is not in that format."""
+```
+
+Your job is to test both functions using the parametrize pattern and exception checking.
+
+**Part 1 — parametrize:** Write `check_celsius_to_fahrenheit(c, expected)` that checks one conversion case, and a `test_celsius_conversions()` function that loops over `cases` and calls it for each. The cases to cover:
+
+| c      | expected |
+|--------|----------|
+| 0      | 32.0     |
+| 100    | 212.0    |
+| -40    | -40.0    |
+| 37     | 98.6     |
+
+Don't write four separate test functions. Use one `check_*` function and a `cases` list — the `test_celsius_conversions()` wrapper loops over `cases` and calls `check_celsius_to_fahrenheit(c, expected)` for each.
+
+**Part 2 — exception checking:** Write two more tests:
+
+- `test_celsius_to_fahrenheit_invalid` — passing `c = -300` (below absolute zero) should raise `ValueError`
+- `test_parse_temp_invalid` — passing `"hot"` (no unit suffix) should raise `ValueError`
+
+Use `try/except` to check the exceptions, and add an `assert False, "..."` after the risky call so the test fails if no exception is thrown.
+
+The starter code provides the `temperature` module and empty stubs. The `assert_raises` helper is provided for you.

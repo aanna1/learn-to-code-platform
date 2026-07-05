@@ -1,0 +1,37 @@
+{
+  "id": "11-file-io",
+  "title": "File Input & Output",
+  "description": "Open files, read and write text, parse CSV rows, and store Python data as JSON \u2014 the tools that let your programs work with real-world data.",
+  "lessons": [
+    {
+      "id": "lecture",
+      "title": "File I/O Fundamentals",
+      "type": "lecture",
+      "order": 1
+    },
+    {
+      "id": "ex-read-lines",
+      "title": "Read and Count",
+      "type": "exercise",
+      "order": 2
+    },
+    {
+      "id": "ex-csv-grades",
+      "title": "Grade Average",
+      "type": "exercise",
+      "order": 3
+    },
+    {
+      "id": "ex-json-notes",
+      "title": "Notes Keeper",
+      "type": "exercise",
+      "order": 4
+    },
+    {
+      "id": "ex-append-log",
+      "title": "Append Logger",
+      "type": "exercise",
+      "order": 5
+    }
+  ]
+}

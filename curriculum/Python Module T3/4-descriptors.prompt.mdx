@@ -1,0 +1,72 @@
+You're going to write a descriptor that enforces a constraint on class attributes, then apply it to a class.
+
+## The descriptor: `Clamped`
+
+Write a descriptor called `Clamped` that clamps any assigned value to a `[min_val, max_val]` range. When the descriptor is constructed, it takes `min_val` and `max_val` as arguments:
+
+```python
+class Config:
+    volume = Clamped(0, 100)
+    brightness = Clamped(0, 255)
+```
+
+- On `__set__`: if the value is below `min_val`, store `min_val`; if above `max_val`, store `max_val`; otherwise store the value as-is. Store on the instance (not on the descriptor itself).
+- On `__get__`: return the stored value. If no value has been set yet, return `min_val` as the default.
+- Implement `__set_name__` so the descriptor knows what attribute it's bound to and can store values under a private name (e.g. `_volume`).
+
+## The class: `AudioSettings`
+
+Apply `Clamped` to an `AudioSettings` class with:
+
+- `volume = Clamped(0, 100)` — integer, 0–100.
+- `bass = Clamped(-10, 10)` — integer, -10 to 10.
+
+Implement `__init__(self, volume: int, bass: int)` that sets both attributes through the descriptors.
+
+## What to implement
+
+```python
+class Clamped:
+    def __init__(self, min_val, max_val):
+        ...
+
+    def __set_name__(self, owner, name):
+        ...
+
+    def __get__(self, instance, owner):
+        ...
+
+    def __set__(self, instance, value):
+        ...
+
+
+class AudioSettings:
+    volume = Clamped(0, 100)
+    bass = Clamped(-10, 10)
+
+    def __init__(self, volume: int, bass: int) -> None:
+        ...
+```
+
+## Checking your work
+
+```python
+s = AudioSettings(50, 5)
+print(s.volume, s.bass)    # 50 5
+
+s.volume = 150             # clamped to 100
+print(s.volume)            # 100
+
+s.volume = -5              # clamped to 0
+print(s.volume)            # 0
+
+s.bass = 20                # clamped to 10
+print(s.bass)              # 10
+
+# Default before any assignment
+class Widget:
+    opacity = Clamped(0, 255)
+
+w = Widget()
+print(w.opacity)           # 0  (the min_val default)
+```

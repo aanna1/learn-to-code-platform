@@ -1,0 +1,17 @@
+Time to normalize a real table by hand — the skill the exam actually tests. Here's the wide, 1NF table from the lecture, one row per product on an order:
+
+```
+order_items
++----------+---------+-----+--------+----------+-----------+-------------+-----------+-------------+
+| order_id | product | qty | emp_id | emp_name | branch_id | branch_city | client_id | client_name |
++----------+---------+-----+--------+----------+-----------+-------------+-----------+-------------+
+PK = (order_id, product)
+```
+
+Every cell is atomic, so it's in 1NF — but it's still carrying the redundancy you saw earlier: the employee's name, the branch's city, and the client's name repeat on every line. Work it down to 3NF and answer the four questions.
+
+This lesson has no code editor. Instead you'll answer with structured fields — pick a normal form, check the partial dependencies, list the functional dependencies, and sort each fact into its 3NF table. Use the **draft** box first if it helps; it isn't graded. When you're ready, press **Submit answer** and each part is checked instantly.
+
+<Callout type="note">
+This is a **Track-2 modeling exercise** — graded by comparing your structured answer to the canonical one, not by running SQL. It's how the platform grades the parts of database design that don't reduce to a query.
+</Callout>

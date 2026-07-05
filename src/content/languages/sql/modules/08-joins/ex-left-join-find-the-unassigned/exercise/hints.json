@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "An INNER JOIN drops any employee who doesn't match a branch. You need a join that keeps every row from employee regardless of whether it matches.",
+    "Swap JOIN for LEFT JOIN. Everything else about the query — the ON condition, the columns, the ORDER BY — stays the same.",
+    "Full shape: SELECT e.first_name, b.branch_name FROM employee e LEFT JOIN branch b ON e.branch_id = b.branch_id ORDER BY e.employee_id; Ryan's branch_name comes back NULL instead of him disappearing."
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "questions": [
+    {
+      "question": "Which SQL sublanguage do `GRANT` and `REVOKE` belong to, and what do they control?",
+      "options": [
+        {
+          "text": "DCL (Data Control Language) — they control *who is permitted* to run operations on database objects, as opposed to DML, which changes the data itself.",
+          "correct": true,
+          "explanation": "Correct. DCL is the security sublanguage: it changes permissions, not data or structure."
+        },
+        {
+          "text": "DML, because they change the database.",
+          "correct": false,
+          "explanation": "DML (INSERT/UPDATE/DELETE) changes data; GRANT/REVOKE change *permissions*, which is DCL."
+        },
+        {
+          "text": "DDL, because they define structure.",
+          "correct": false,
+          "explanation": "DDL (CREATE/ALTER/DROP) defines objects; granting privileges on those objects is DCL, a separate family."
+        },
+        {
+          "text": "DQL, because they return a set of permission rows like a query.",
+          "correct": false,
+          "explanation": "DQL is SELECT. GRANT/REVOKE don't return result sets — they change who is allowed to act, which is DCL."
+        }
+      ]
+    },
+    {
+      "question": "Why is `GRANT SELECT, INSERT ON orders TO app_user` better than `GRANT ALL PRIVILEGES ON orders TO app_user` for a web application's account?",
+      "options": [
+        {
+          "text": "It follows least privilege — the app gets only the two rights it needs, so a successful injection on that account still can't `DELETE`, `DROP`, or alter the table.",
+          "correct": true,
+          "explanation": "Correct. Enumerating exactly the needed privileges caps what an attacker who hijacks the account can do."
+        },
+        {
+          "text": "They're equivalent; `ALL` is just shorter.",
+          "correct": false,
+          "explanation": "`ALL` grants every privilege including destructive ones, dramatically widening what a hijacked account can do."
+        },
+        {
+          "text": "`GRANT ALL` isn't valid SQL.",
+          "correct": false,
+          "explanation": "It's valid — it's just a security anti-pattern because it over-grants."
+        },
+        {
+          "text": "`GRANT ALL` makes every query on the table run more slowly.",
+          "correct": false,
+          "explanation": "Privileges are checked at grant/connection time, not per row; the problem with GRANT ALL is security, not performance."
+        }
+      ]
+    },
+    {
+      "question": "A team lead should see employee names and branches but never salaries, all from the one `employee` table. What's the standard way to enforce that?",
+      "options": [
+        {
+          "text": "Create a view that selects only the safe columns (`employee_id`, `first_name`, `last_name`, `branch_id`), grant `SELECT` on the view, and revoke access to the base table.",
+          "correct": true,
+          "explanation": "Correct. The view exposes a subset of columns and the database enforces the boundary — salary isn't reachable through it."
+        },
+        {
+          "text": "Ask the application to hide the salary column in its UI.",
+          "correct": false,
+          "explanation": "That's cosmetic; anyone who queries the table directly still sees salary. The control must be in the database."
+        },
+        {
+          "text": "Delete the salary column from the `employee` table.",
+          "correct": false,
+          "explanation": "That destroys data HR legitimately needs; a view exposes a subset without removing anything."
+        },
+        {
+          "text": "Add a `WHERE salary IS NULL` filter to every query the team lead runs.",
+          "correct": false,
+          "explanation": "That doesn't hide the column, relies on the user cooperating, and isn't enforced by the database — a view is the real boundary."
+        }
+      ]
+    },
+    {
+      "question": "You define `CREATE ROLE analyst; GRANT SELECT ON employee TO analyst; GRANT analyst TO jim, pam;`. Later you `REVOKE SELECT ON employee FROM analyst;`. What happens?",
+      "options": [
+        {
+          "text": "Both Jim and Pam immediately lose `SELECT` on `employee`, because they held it through the role — revoking from the role revokes for every member at once.",
+          "correct": true,
+          "explanation": "Correct. A role-level revoke applies to every account that holds the role; that's the whole point of managing access by role."
+        },
+        {
+          "text": "Nothing changes for Jim and Pam; they keep the privilege.",
+          "correct": false,
+          "explanation": "They inherited it via the role, so revoking it from the role removes it from all members."
+        },
+        {
+          "text": "Only Jim loses it.",
+          "correct": false,
+          "explanation": "A role-level revoke applies to every account that holds the role, not just one."
+        },
+        {
+          "text": "The `analyst` role is dropped, but Jim and Pam keep a personal copy of the privilege.",
+          "correct": false,
+          "explanation": "Revoking a privilege from a role doesn't drop the role, and members don't get a private copy — the privilege is held *through* the role."
+        }
+      ]
+    },
+    {
+      "question": "You try `GRANT SELECT ON employee TO hr_clerk` in the course's browser IDE and get a syntax error. Why?",
+      "options": [
+        {
+          "text": "SQLite is a serverless, single-file database with no user accounts, so it has no `GRANT`/`REVOKE` at all — access control there is the OS file permissions; the exam's Oracle engine does support DCL.",
+          "correct": true,
+          "explanation": "Correct. SQLite has no users, so DCL simply doesn't exist in it — you learn GRANT/REVOKE for the exam's server database."
+        },
+        {
+          "text": "The syntax is wrong; it should be `GRANT SELECT TO hr_clerk ON employee`.",
+          "correct": false,
+          "explanation": "The clause order is correct; SQLite simply doesn't implement GRANT because it has no users."
+        },
+        {
+          "text": "You must `CREATE USER hr_clerk` first, then it works.",
+          "correct": false,
+          "explanation": "SQLite has no users or GRANT whatsoever; creating a user isn't possible there either."
+        },
+        {
+          "text": "`GRANT` only works after you enable foreign-key enforcement.",
+          "correct": false,
+          "explanation": "Foreign keys are unrelated; SQLite has no GRANT at all because it has no accounts to grant to."
+        }
+      ]
+    }
+  ]
+}

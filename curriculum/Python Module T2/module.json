@@ -1,0 +1,13 @@
+{
+  "id": "16-idiomatic-python",
+  "title": "Idiomatic Python",
+  "description": "Iterators, generators, context managers, closures, decorators, and the standard-library tools that let you put behavior in one place and reuse it everywhere.",
+  "order": 16,
+  "lessons": [
+    { "id": "lecture",             "title": "Idiomatic Python",     "type": "lecture",  "order": 1 },
+    { "id": "ex-generators",       "title": "Generators",           "type": "exercise", "order": 2 },
+    { "id": "ex-context-managers", "title": "Context Managers",     "type": "exercise", "order": 3 },
+    { "id": "ex-decorators",       "title": "Decorators",           "type": "exercise", "order": 4 },
+    { "id": "ex-toolbox",          "title": "Idiomatic Toolbox",    "type": "exercise", "order": 5 }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "identifiers": "You can parameterize a column name exactly like a value with a ?",
+  "why-parameterize": "It automatically deletes any SQL keywords it finds in the input",
+  "blocklist": "Blocklists are perfectly safe and make parameterized queries unnecessary",
+  "layers": {
+    "Parameterized query": "Caps the blast radius of a successful injection",
+    "Least privilege": "Removes the vulnerability entirely",
+    "Safe error handling": "The only safe way to handle identifiers like a sort column",
+    "Allowlist validation": "Denies attackers a schema map from leaked error text"
+  }
+}

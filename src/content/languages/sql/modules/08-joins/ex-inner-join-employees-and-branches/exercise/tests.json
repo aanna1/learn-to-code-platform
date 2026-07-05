@@ -1,0 +1,36 @@
+[
+  {
+    "name": "lists each employee with their branch's name, ordered by employee_id",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name", "last_name", "branch_name"],
+      "rows": [
+        ["Jan", "Levinson", "Corporate"],
+        ["Michael", "Scott", "Scranton"],
+        ["Dwight", "Schrute", "Scranton"],
+        ["Jim", "Halpert", "Scranton"],
+        ["Pam", "Beesly", "Scranton"],
+        ["Andy", "Bernard", "Stamford"],
+        ["Stanley", "Hudson", "Scranton"]
+      ]
+    }
+  },
+  {
+    "name": "generalizes to a newly hired employee, and still drops unassigned Ryan",
+    "setup": "INSERT INTO employee (employee_id, first_name, last_name, branch_id, salary, hire_date, supervisor_id) VALUES (108, 'Kevin', 'Malone', 2, 45000, '2008-01-01', 102);",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name", "last_name", "branch_name"],
+      "rows": [
+        ["Jan", "Levinson", "Corporate"],
+        ["Michael", "Scott", "Scranton"],
+        ["Dwight", "Schrute", "Scranton"],
+        ["Jim", "Halpert", "Scranton"],
+        ["Pam", "Beesly", "Scranton"],
+        ["Andy", "Bernard", "Stamford"],
+        ["Stanley", "Hudson", "Scranton"],
+        ["Kevin", "Malone", "Scranton"]
+      ]
+    }
+  }
+]

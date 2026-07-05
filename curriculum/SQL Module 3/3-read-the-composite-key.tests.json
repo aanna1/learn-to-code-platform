@@ -1,0 +1,15 @@
+[
+  {
+    "name": "returns only the two columns of the composite key, in order",
+    "orderMatters": false,
+    "expected": {
+      "columns": ["employee_id", "project_id"],
+      "rows": [
+        [101, 1],
+        [101, 2],
+        [103, 1],
+        [105, 2]
+      ]
+    }
+  }
+]

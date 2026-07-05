@@ -1,0 +1,9 @@
+{
+  "hints": [
+    "For log_calls: call func(*args, **kwargs) to get the result, then build the arg string with ', '.join(repr(a) for a in args), then log with log.info('%s(%s) -> %r', func.__name__, arg_str, result).",
+    "Always put @functools.wraps(func) on the inner wrapper function, not on the decorator itself. It copies __name__, __doc__, and other metadata from func onto wrapper.",
+    "For repeat: you need three nested functions. The outermost (repeat) receives 'times'. The middle (decorator) receives func. The innermost (wrapper) is what gets called. This is the standard pattern for any decorator that takes arguments.",
+    "Inside repeat's wrapper, use a for loop: 'for _ in range(times): result = func(*args, **kwargs)'. Initialize result = None before the loop so the name exists even if times=0.",
+    "If your log_calls isn't logging anything, check that you're using log = logging.getLogger(__name__) at module level and calling log.info(), not print(). The test wires up a handler to the 'submission' logger."
+  ]
+}

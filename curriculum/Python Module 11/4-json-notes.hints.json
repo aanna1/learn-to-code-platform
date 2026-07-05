@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "For `save_notes`, open the file in write mode and pass the file object to `json.dump`: `with open(filepath, \"w\") as f: json.dump(notes, f, indent=2)`. The `indent=2` makes the JSON readable.",
+    "For `load_notes`, check if the file exists before opening it: `if not Path(filepath).exists(): return []`. Import Path at the top with `from pathlib import Path`.",
+    "If the file exists, open it in read mode and use `json.load(f)` to parse it: `with open(filepath, \"r\") as f: return json.load(f)`. Don't forget the return statement.",
+    "Make sure you're using `json.dump` / `json.load` (which take a file object), not `json.dumps` / `json.loads` (which work with strings). The difference is the final 's'."
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "draft": "Work it on paper first, like the exam: circle the entities in the sheet, list what determines what (the functional dependencies), then draw the ERD with crow's-foot cardinality and solid/dashed lines. Transfer your work into the fields below.",
+  "fields": [
+    {
+      "id": "fds",
+      "type": "token-set",
+      "grammar": "fd",
+      "label": "List the functional dependencies hiding in the enrollments sheet.",
+      "help": "One per line, as  a -> b  (a composite left side is  a, b -> c). A right side may list several columns: a -> b, c.",
+      "placeholder": "student_id -> student_name, student_email\ncourse_id -> course_title, dept_id\n..."
+    },
+    {
+      "id": "erd",
+      "type": "erd-spec",
+      "label": "Model the design as an ERD. Create the four entities and the three relationships that resolve the sheet.",
+      "help": "Model each entity with its PRIMARY KEY attribute(s) only; represent foreign keys through the relationships, not as extra attributes. enrollment is the associative entity with composite key (student_id, course_id).",
+      "cardinalities": ["1:1", "1:N", "N:M"]
+    }
+  ]
+}

@@ -136,10 +136,17 @@ Cross-Origin-Embedder-Policy: require-corp
 ```
 
 Without them, code still runs and output still streams, but `input()` immediately returns
-EOF (and Stop falls back to terminating the worker). Pyodide and Monaco are loaded from
-jsDelivr, which already sends the `Cross-Origin-Resource-Policy: cross-origin` header
-needed to load under `require-corp`, so no self-hosting is required — but the host must be
-able to reach the jsDelivr CDN.
+EOF (and Stop falls back to terminating the worker). The browser runtimes — Pyodide and
+Monaco (Python), Ruff (linting), and sql.js (the SQLite-WASM engine behind the SQL course)
+— are all loaded from the same `cdn.jsdelivr.net` origin, which already sends the
+`Cross-Origin-Resource-Policy: cross-origin` header needed to load under `require-corp`, so
+no self-hosting is required — but the host must be able to reach the jsDelivr CDN. (The C
+course's clang toolchain is the one exception: it exceeds jsDelivr's file-size cap and is
+self-hosted same-origin from `public/c-toolchain/`.)
+
+After the first load, `public/coi-serviceworker.js` caches the jsDelivr runtime assets
+(Pyodide, Monaco, Ruff, sql.js) in a `runtime-cdn` Cache Storage bucket, so revisits and
+subsequent lessons load the engines from disk instead of re-fetching them.
 
 `output: "export"` cannot emit headers itself, so configure them at the host:
 

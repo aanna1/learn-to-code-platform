@@ -1,0 +1,7 @@
+The `branch` table holds the name; the `employee` table holds the person and only a `branch_id` number. Write a query that lists every employee's first name, last name, and their branch's *name* — not just its id.
+
+Join `employee` to `branch` on `employee.branch_id = branch.branch_id`, order the result by `employee_id`, then press **Run** to see the grid and **Submit** to check it.
+
+<Callout type="tip">
+`INNER JOIN` (or plain `JOIN` — they mean the same thing) only keeps rows that find a match on both sides. Ryan's `branch_id` is `NULL`, so don't be surprised when he doesn't show up in your results — that's the correct behavior, not a bug.
+</Callout>

@@ -1,0 +1,7 @@
+[
+  "For slow_task: declare it with 'async def'. Inside, write 'await asyncio.sleep(0.05)' then return the formatted string.",
+  "For run_all: create one coroutine per task_id with a generator expression — (slow_task(tid) for tid in task_ids). Unpack it into asyncio.gather with *. Wrap the result in list() since gather returns a tuple.",
+  "For run_with_errors: pass return_exceptions=True to asyncio.gather. This makes it return each exception as a value instead of raising it.",
+  "After gather returns, zip task_ids with outcomes. For each pair, check isinstance(outcome, Exception) — if True, store 'error'; otherwise store the string outcome.",
+  "Build the final dict with a dict comprehension: {tid: ('error' if isinstance(o, Exception) else o) for tid, o in zip(task_ids, outcomes)}."
+]

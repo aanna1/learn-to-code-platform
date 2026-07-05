@@ -1,0 +1,8 @@
+{
+  "root-cause": "User input is concatenated straight into the query string, so the database can't tell the developer's SQL from the attacker's input and parses all of it as code",
+  "bypass-input": "' OR '1'='1' --",
+  "why-dashes": "The -- comments out the leftover AND password = '...' so only the always-true OR survives; without it, AND (which binds tighter than OR) still enforces the password and the stray quote breaks the syntax",
+  "the-fix": [
+    "Rewrite it as a parameterized query (prepared statement) with ? placeholders and pass the input as a separate value"
+  ]
+}

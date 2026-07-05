@@ -1,5 +1,6 @@
 import type { Language } from "@/lib/languages/types";
 import { python } from "@/lib/languages/python";
+import { sql } from "@/lib/languages/sql";
 
 /**
  * The language registry. This is the ONLY place languages are listed. The
@@ -7,7 +8,7 @@ import { python } from "@/lib/languages/python";
  * so adding a language is: implement the Language interface, import it, add it to
  * this array. No component or route changes.
  */
-const LANGUAGES: readonly Language[] = [python];
+const LANGUAGES: readonly Language[] = [python, sql];
 
 const BY_ID: ReadonlyMap<string, Language> = new Map(
   LANGUAGES.map((language) => [language.config.id, language]),

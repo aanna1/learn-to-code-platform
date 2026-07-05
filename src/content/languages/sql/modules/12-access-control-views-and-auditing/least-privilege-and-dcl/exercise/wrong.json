@@ -1,0 +1,6 @@
+{
+  "sublanguage": "DML (Data Manipulation Language) — they change the database, so they're the same family as INSERT and UPDATE",
+  "least-privilege": "They're equivalent; ALL is just shorter to type",
+  "role-revoke": "Nothing changes for Jim and Pam; they keep the privilege they were given",
+  "sqlite-no-dcl": "You must CREATE USER hr_clerk first, then the GRANT works in SQLite"
+}

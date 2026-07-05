@@ -1,0 +1,9 @@
+`SELECT` picks columns; `WHERE` picks rows. Here you'll do both — narrow the table down to just the people who match two conditions at once.
+
+The Scranton branch is `branch_id = 2`. Return the **`first_name`** and **`salary`** of every Scranton employee earning **more than 55000** — both conditions, joined with `AND`.
+
+The starter filters on the branch but not the salary, so Pam (who earns 42000) still slips through. Add the salary condition, press **Run**, then **Submit**.
+
+<Callout type="tip">
+Combine two conditions with `AND`: `WHERE branch_id = 2 AND salary > 55000`. Remember `>` is strict — someone earning exactly 55000 would not be included.
+</Callout>

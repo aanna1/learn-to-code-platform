@@ -1,0 +1,129 @@
+{
+  "questions": [
+    {
+      "question": "What is the root cause of SQL injection?",
+      "options": [
+        {
+          "text": "User input is concatenated directly into the query string, so the database can't tell the developer's SQL from the attacker's input and parses all of it as code.",
+          "correct": true,
+          "explanation": "Correct. The boundary between code and data is erased when input is glued into the query text, so the database runs the attacker's syntax as part of the command."
+        },
+        {
+          "text": "SQL is an inherently insecure language that should be avoided.",
+          "correct": false,
+          "explanation": "SQL is fine; the flaw is in how application code *builds* queries from strings, not in SQL itself."
+        },
+        {
+          "text": "The database has a bug that lets attackers run arbitrary commands.",
+          "correct": false,
+          "explanation": "It's not a database bug — the database is faithfully running the malformed query the application handed it."
+        },
+        {
+          "text": "The application stores passwords without hashing them.",
+          "correct": false,
+          "explanation": "Weak password storage is a separate problem; injection works regardless of how passwords are stored, because it exploits how the query is assembled."
+        }
+      ]
+    },
+    {
+      "question": "A login runs `WHERE username = '<input>' AND password = '<input>'`. Why does the payload `' OR '1'='1' --` log the attacker in, but a bare `' OR '1'='1` (no `--`) does not?",
+      "options": [
+        {
+          "text": "The `--` comments out the trailing `AND password = '...'` so only the always-true `OR` remains; without it, `AND` (which binds tighter than `OR`) still enforces the password check and the leftover quote breaks the syntax.",
+          "correct": true,
+          "explanation": "Correct. The `--` is essential: it removes the password condition and the template's leftover quote, leaving just the always-true OR."
+        },
+        {
+          "text": "The two are identical; the `--` is just a stylistic choice.",
+          "correct": false,
+          "explanation": "They're not identical — without the `--`, the surviving `AND password` check and a dangling quote defeat the attack."
+        },
+        {
+          "text": "`' OR '1'='1` fails because `OR` isn't valid in a `WHERE` clause.",
+          "correct": false,
+          "explanation": "`OR` is perfectly valid; the difference is the uncommented `AND password` check that survives without the `--`."
+        },
+        {
+          "text": "The `--` forces the database to skip authentication entirely for all users.",
+          "correct": false,
+          "explanation": "The `--` doesn't disable authentication as a feature — it just comments out the rest of this one query, discarding the password condition."
+        }
+      ]
+    },
+    {
+      "question": "An attacker types `none%' UNION SELECT username, password FROM users --` into a product search that builds `SELECT name, price FROM product WHERE name LIKE '%<input>%'`. What comes back, and what made it possible?",
+      "options": [
+        {
+          "text": "The users' usernames and passwords, stacked onto the (empty) product results — because the injected `UNION` matches the product query's two-column shape.",
+          "correct": true,
+          "explanation": "Correct. `UNION` requires the same column count and compatible types; the attacker selects two columns to match `name, price`, and the credentials render into the product grid."
+        },
+        {
+          "text": "Nothing — a search box can only ever return rows from the product table.",
+          "correct": false,
+          "explanation": "That's the whole danger: the injected `UNION SELECT` runs against a different table entirely, so the results are not limited to products."
+        },
+        {
+          "text": "A syntax error, because you can't `UNION` two different tables.",
+          "correct": false,
+          "explanation": "`UNION` combines any two result sets with matching column counts and types — the tables don't have to be the same."
+        },
+        {
+          "text": "The product rows only — the `UNION` half is silently ignored by the database.",
+          "correct": false,
+          "explanation": "The database runs the whole assembled statement, including the injected `UNION`; nothing is ignored."
+        }
+      ]
+    },
+    {
+      "question": "Why does a **parameterized query** stop injection where \"escaping the input\" is unreliable?",
+      "options": [
+        {
+          "text": "The query structure is compiled before the input is seen, and the value is then bound as pure data that's never parsed as SQL — so no input can become code.",
+          "correct": true,
+          "explanation": "Correct. Keeping the input out of the code path entirely is a categorical fix, unlike escaping, which tries to sanitize dangerous characters after the fact."
+        },
+        {
+          "text": "It automatically deletes any SQL keywords from the input.",
+          "correct": false,
+          "explanation": "It doesn't filter the input at all; it keeps the input out of the code path, so keywords in it are harmless data."
+        },
+        {
+          "text": "It encrypts the user's input before running it.",
+          "correct": false,
+          "explanation": "There's no encryption involved — the mechanism is separating the compiled query from the bound values."
+        },
+        {
+          "text": "It escapes every quote character in the input for you, which is guaranteed to be correct.",
+          "correct": false,
+          "explanation": "Parameterizing is not automated escaping; it binds the value as data so escaping is never needed, avoiding escaping's many edge cases."
+        }
+      ]
+    },
+    {
+      "question": "You need to let users sort a report by a column they choose. Why can't you parameterize the column name, and what should you do instead?",
+      "options": [
+        {
+          "text": "Placeholders only stand in for *values*, not identifiers like column names; validate the chosen column against an **allowlist** of known-good names and reject anything else.",
+          "correct": true,
+          "explanation": "Correct. A column name is part of the query's structure, not a value, so there's no placeholder for it — an allowlist is the safe way to accept it from user input."
+        },
+        {
+          "text": "You can parameterize it exactly like a value with a `?`.",
+          "correct": false,
+          "explanation": "Placeholders can't represent a column or table name, only a value, so this won't work."
+        },
+        {
+          "text": "Just escape the column name and concatenate it.",
+          "correct": false,
+          "explanation": "Escaping an identifier is error-prone; an allowlist of permitted columns is the safe approach."
+        },
+        {
+          "text": "Use a blocklist to strip dangerous words from the column name before concatenating it.",
+          "correct": false,
+          "explanation": "Blocklists are trivially bypassed; an allowlist of exact permitted column names is the correct control for identifiers."
+        }
+      ]
+    }
+  ]
+}

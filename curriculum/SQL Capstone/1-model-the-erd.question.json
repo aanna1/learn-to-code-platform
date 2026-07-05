@@ -1,0 +1,29 @@
+{
+  "draft": "Underline the nouns in Inkwell's paragraph (books, authors, customers, orders) — those are your entities — and the verbs (written by, place, contain) — those are your relationships. Sketch the ERD on paper the way the exam expects, then transfer it into the fields below.",
+  "fields": [
+    {
+      "id": "order-book-card",
+      "type": "single-select",
+      "label": "A single order can contain several different books, and a book can appear on many different orders. What is the cardinality of the order–book relationship?",
+      "options": ["1:1", "1:N", "N:M"]
+    },
+    {
+      "id": "resolve-nm",
+      "type": "single-select",
+      "label": "How do you correctly model that order–book relationship in a relational schema?",
+      "options": [
+        "Add an associative entity (order_line) with the composite key (order_id, book_id) plus the line's own quantity, resolving the N:M into two 1:N relationships",
+        "Put book_id as a foreign key column on book_order",
+        "Put order1_id, order2_id, order3_id columns on book",
+        "Merge order and book into a single wide table"
+      ]
+    },
+    {
+      "id": "erd",
+      "type": "erd-spec",
+      "label": "Model all five entities and the four relationships. author→book and customer→order are non-identifying 1:N; both edges into the associative entity order_line are identifying 1:N.",
+      "help": "PKs: author(author_id), customer(customer_id), book(book_id), book_order(order_id), order_line(order_id, book_id composite). A relationship is identifying when the parent's key is part of the child's primary key — true for book_order→order_line and book→order_line, false for author→book and customer→book_order.",
+      "cardinalities": ["1:1", "1:N", "N:M"]
+    }
+  ]
+}

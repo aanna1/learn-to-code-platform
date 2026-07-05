@@ -1,0 +1,9 @@
+{
+  "hints": [
+    "Start with the Priority enum. Import Enum from the enum module, then define 'class Priority(Enum):' with three members: LOW = 'low', MEDIUM = 'medium', HIGH = 'high'.",
+    "For the Task dataclass, add the @dataclass decorator above the class definition. This generates __init__, __repr__, and __eq__ automatically from the annotated fields.",
+    "The tags field needs 'field(default_factory=list)' as its default, not '= []'. Writing '= []' would share the same list across all Task instances — the decorator actually raises an error to prevent this.",
+    "In summary(), get the priority label with 'self.priority.value.upper()'. For example, Priority.HIGH.value is 'high', and .upper() turns it into 'HIGH'.",
+    "For the tags part of summary(), use a conditional expression: tag_str = ', '.join(self.tags) if self.tags else 'none'. An empty list is falsy, so 'if self.tags' is False when there are no tags."
+  ]
+}

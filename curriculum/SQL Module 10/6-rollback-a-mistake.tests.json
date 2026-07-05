@@ -1,0 +1,17 @@
+[
+  {
+    "name": "salaries are back to normal (Jan 110000, Michael 90000)",
+    "probe": "SELECT first_name, salary FROM employee WHERE employee_id IN (100, 101) ORDER BY employee_id;",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name", "salary"],
+      "rows": [["Jan", 110000], ["Michael", 90000]]
+    }
+  },
+  {
+    "name": "nobody is left with a salary of 0",
+    "probe": "SELECT COUNT(*) AS n FROM employee WHERE salary = 0;",
+    "orderMatters": true,
+    "expected": { "columns": ["n"], "rows": [[0]] }
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "name": "revenue per author including the zeros (Octavia Butler shows 0, not absent)",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["author", "revenue"],
+      "rows": [
+        ["Frank Herbert", 54],
+        ["George Orwell", 39],
+        ["Ursula Le Guin", 26],
+        ["Toni Morrison", 13],
+        ["Octavia Butler", 0]
+      ]
+    }
+  },
+  {
+    "name": "generalizes: a brand-new author with no books still appears with revenue 0",
+    "setup": "INSERT INTO author VALUES (6, 'N.K.', 'Jemisin');",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["author", "revenue"],
+      "rows": [
+        ["Frank Herbert", 54],
+        ["George Orwell", 39],
+        ["Ursula Le Guin", 26],
+        ["Toni Morrison", 13],
+        ["N.K. Jemisin", 0],
+        ["Octavia Butler", 0]
+      ]
+    }
+  }
+]

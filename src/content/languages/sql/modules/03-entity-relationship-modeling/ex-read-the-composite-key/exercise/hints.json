@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "You don't want every column — just the two that form the primary key of assignment.",
+    "The composite key is (employee_id, project_id). Those are the only two columns you want.",
+    "List them by name instead of using *: SELECT employee_id, project_id FROM assignment;"
+  ]
+}

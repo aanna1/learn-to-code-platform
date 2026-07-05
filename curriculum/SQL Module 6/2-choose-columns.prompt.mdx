@@ -1,0 +1,9 @@
+Your first query against real data. The `employee` table is seeded (you can see it at the top of the editor), and the starter grabs *everything* with `SELECT *`. That pulls back every column — including `salary` and `hire_date`, which a "who works here" list has no business exposing.
+
+Rewrite the query so the results grid shows only three columns, in this order: **`first_name`**, **`last_name`**, and **`salary`**. Leave `employee_id`, `branch_id`, and `hire_date` out.
+
+Press **Run** to see the grid, then **Submit**.
+
+<Callout type="tip">
+Instead of `*`, list the columns you want by name, separated by commas: `SELECT first_name, last_name, salary FROM employee;`. The order you list them is the order they appear in the grid.
+</Callout>

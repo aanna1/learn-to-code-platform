@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "An inner JOIN only keeps authors who have a matching sale, so it silently drops anyone with zero revenue. To keep every author, start FROM author and LEFT JOIN outward.",
+    "LEFT JOIN book, then LEFT JOIN order_line -- both outer, so an author with no sold books survives with NULLs.",
+    "SUM over all-NULL is NULL, so wrap it: COALESCE(SUM(b.price * ol.quantity), 0) AS revenue. Then ORDER BY revenue DESC, author."
+  ]
+}

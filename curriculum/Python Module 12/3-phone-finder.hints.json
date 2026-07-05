@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Build the pattern piece by piece: \\(? matches an optional opening paren, \\d{3} matches exactly three digits, \\)? matches an optional closing paren, [-.\\ s]? matches an optional separator (hyphen, dot, or space), and so on.",
+    "The full pattern is r\"\\(?\\d{3}\\)?[-.\\s]?\\d{3}[-.\\s]?\\d{4}\". Each [-.\\ s]? means 'one optional separator character from this set'.",
+    "Use no capture groups (no parentheses other than \\(? and \\)?) so that findall returns a list of full matched strings rather than a list of tuples.",
+    "Return PHONE_PATTERN.findall(text) — findall scans the whole string and returns every match as a list. No loop needed."
+  ]
+}

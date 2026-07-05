@@ -1,0 +1,41 @@
+# JSON Round-Trip
+
+`json.dumps` and `json.loads` are how Python talks to the rest of the world. JSON doesn't know about every Python type, though, and the gaps will bite you if you're not watching.
+
+## Your task
+
+Write three functions using `import json`.
+
+**`to_json(data)`** — serialize a Python dict to a JSON string with `indent=2`. Return the string.
+
+**`from_json(text)`** — parse a JSON string back to a Python dict. Return the dict.
+
+**`safe_serialize(data)`** — serialize a dict to a JSON string, but handle the case where `data` contains non-serializable values (like a `set` or a custom object). If `json.dumps` raises a `TypeError`, return the string `"not serializable"` instead.
+
+## Examples
+
+```python
+person = {"name": "Ada", "age": 25, "active": True}
+
+text = to_json(person)
+print(text)
+# {
+#   "name": "Ada",
+#   "age": 25,
+#   "active": true
+# }
+
+back = from_json(text)
+print(back["name"])     # Ada
+print(type(back))       # <class 'dict'>
+
+safe_serialize({"ok": [1, 2, 3]})         # valid JSON string
+safe_serialize({"bad": {1, 2, 3}})        # "not serializable"
+```
+
+## Requirements
+
+- `to_json` uses `json.dumps` with `indent=2`. Returns a `str`.
+- `from_json` uses `json.loads`. Returns a `dict`.
+- `safe_serialize` catches `TypeError` from `json.dumps` and returns `"not serializable"` in that case. Returns a JSON string on success.
+- Do not modify the input data in any function.

@@ -1,0 +1,4 @@
+-- No tables are pre-created for this exercise — building the student table is the
+-- exercise. Write your CREATE TABLE statement in the editor below, then press Run
+-- to create it and Submit to check its structure. (This fixture block is empty on
+-- purpose.)

@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Kelly is added to branch 2 with the right details",
+    "probe": "SELECT first_name, last_name, branch_id, salary FROM employee WHERE employee_id = 108;",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name", "last_name", "branch_id", "salary"],
+      "rows": [["Kelly", "Kapoor", 2, 45000]]
+    }
+  },
+  {
+    "name": "exactly one row was added — the other eight are untouched",
+    "probe": "SELECT COUNT(*) AS n FROM employee;",
+    "orderMatters": true,
+    "expected": { "columns": ["n"], "rows": [[9]] }
+  }
+]

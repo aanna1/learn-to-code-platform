@@ -1,0 +1,24 @@
+[
+  {
+    "name": "only Michael beats his own branch's average (not the company average)",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name", "salary", "branch_id"],
+      "rows": [
+        ["Michael", 90000, 2]
+      ]
+    }
+  },
+  {
+    "name": "re-runs per branch: a new high earner in Stamford now qualifies too",
+    "setup": "INSERT INTO employee (employee_id, first_name, last_name, branch_id, salary) VALUES (108, 'Toby', 'Flenderson', 3, 80000);",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name", "salary", "branch_id"],
+      "rows": [
+        ["Michael", 90000, 2],
+        ["Toby", 80000, 3]
+      ]
+    }
+  }
+]

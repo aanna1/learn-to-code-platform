@@ -1,0 +1,79 @@
+{
+  "questions": [
+    {
+      "question": "What does this code print?\n\nfrom dataclasses import dataclass\n\n@dataclass\nclass Point:\n    x: float\n    y: float = 0.0\n\np = Point(3.0)\nprint(p)",
+      "options": [
+        {
+          "text": "Point(x=3.0, y=0.0)",
+          "correct": true,
+          "explanation": "Correct. @dataclass generates __repr__ automatically, and it always uses the format ClassName(field=value, ...). The y field gets its default of 0.0 because we only passed one argument."
+        },
+        {
+          "text": "TypeError: Point() missing required argument: 'y'",
+          "correct": false,
+          "explanation": "y has a default value of 0.0, so it is optional. Only fields without defaults are required. Since x has no default, it must be supplied — and it was."
+        },
+        {
+          "text": "<__main__.Point object at 0x...>",
+          "correct": false,
+          "explanation": "That is what a plain class prints when you haven't defined __repr__. The @dataclass decorator generates __repr__ for you, so you get the readable Point(x=3.0, y=0.0) form instead."
+        },
+        {
+          "text": "Point(3.0, 0.0)",
+          "correct": false,
+          "explanation": "Close — the generated __repr__ includes the field names: Point(x=3.0, y=0.0). The format is always keyword=value, not positional."
+        }
+      ]
+    },
+    {
+      "question": "Which expression correctly produces a dict mapping each word to its length, but only for words longer than 3 characters?\n\nwords = [\"hi\", \"hello\", \"hey\", \"world\"]",
+      "options": [
+        {
+          "text": "{w: len(w) for w in words if len(w) > 3}",
+          "correct": true,
+          "explanation": "Correct. This is a dict comprehension: curly braces with a key: value expression, followed by a for clause and an if filter. It produces {'hello': 5, 'world': 5}."
+        },
+        {
+          "text": "[w: len(w) for w in words if len(w) > 3]",
+          "correct": false,
+          "explanation": "Square brackets make a list, not a dict, and the w: len(w) syntax isn't valid inside a list comprehension. For a dict you need curly braces: {w: len(w) for ...}."
+        },
+        {
+          "text": "{w: len(w) for w in words where len(w) > 3}",
+          "correct": false,
+          "explanation": "Python comprehensions use if, not where. 'where' is SQL syntax. The correct form is: {w: len(w) for w in words if len(w) > 3}."
+        },
+        {
+          "text": "{w, len(w) for w in words if len(w) > 3}",
+          "correct": false,
+          "explanation": "A comma between w and len(w) makes this a set of tuples, not a dict. Dict comprehensions use a colon: {w: len(w) for w in words if len(w) > 3}."
+        }
+      ]
+    },
+    {
+      "question": "A script uses logging.info() scattered throughout the file but never calls basicConfig or getLogger. What happens when the script runs?",
+      "options": [
+        {
+          "text": "Nothing prints — logging.info() is silent without explicit configuration.",
+          "correct": false,
+          "explanation": "Not quite. Calling logging.info() on the module does produce output, but it also silently configures a default handler the first time it runs. The problem is that this default may not match what you want — level, format, and destination are all defaults you didn't choose."
+        },
+        {
+          "text": "It works but uses a default handler with WARNING as the minimum level, so INFO messages are silently dropped.",
+          "correct": true,
+          "explanation": "Correct. The root logger's default level is WARNING. Any call to logging.info() below that threshold is silently discarded. The fix is to call logging.basicConfig(level=logging.INFO, ...) at the top of the script before any log calls."
+        },
+        {
+          "text": "It raises RuntimeError because logging must be configured before use.",
+          "correct": false,
+          "explanation": "No error is raised. Python's logging module is designed to be safe to call even without configuration — it just silently discards messages below the WARNING threshold until basicConfig is called."
+        },
+        {
+          "text": "It works identically to calling basicConfig(level=logging.INFO) first.",
+          "correct": false,
+          "explanation": "Not identically. Without basicConfig, the root logger defaults to WARNING level, so INFO messages are dropped. You also get no control over the format, destination, or level — those all stay at their defaults until you configure them explicitly."
+        }
+      ]
+    }
+  ]
+}

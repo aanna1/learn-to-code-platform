@@ -1,0 +1,129 @@
+{
+  "questions": [
+    {
+      "question": "`SELECT first_name FROM employee WHERE salary > (SELECT AVG(salary) FROM employee)` returns Jan and Michael. In what order does the database evaluate this?",
+      "options": [
+        {
+          "text": "The inner subquery runs first, producing the average (`65625`); the outer query then filters as if you'd written `WHERE salary > 65625`.",
+          "correct": true,
+          "explanation": "Correct. A plain (non-correlated) scalar subquery is computed once, up front, and its single value is substituted into the outer query before the WHERE filter runs."
+        },
+        {
+          "text": "The outer query runs first and the subquery re-checks each row against it.",
+          "correct": false,
+          "explanation": "That describes a correlated subquery — one that references the outer row and re-runs per row. This subquery references nothing outside itself, so it's computed just once."
+        },
+        {
+          "text": "Both run at the same time and the two result sets are merged.",
+          "correct": false,
+          "explanation": "SQL doesn't merge them — it evaluates the inner query first and substitutes its single value into the outer one. There's a strict inner-then-outer order."
+        },
+        {
+          "text": "The outer query runs alone; the subquery is only a comment and is ignored.",
+          "correct": false,
+          "explanation": "The subquery is executable SQL, not a comment. It genuinely runs and produces the 65625 that the outer filter depends on."
+        }
+      ]
+    },
+    {
+      "question": "`WHERE employee_id NOT IN (SELECT mgr_id FROM branch)` returns zero rows even though most employees aren't managers. Why?",
+      "options": [
+        {
+          "text": "`branch.mgr_id` includes a `NULL` (Buffalo has no manager); comparing anything to `NULL` is `UNKNOWN`, so `NOT IN` is never true for any row and everything is excluded.",
+          "correct": true,
+          "explanation": "Correct. This is the NOT IN NULL trap: one NULL in the subquery's result makes the whole condition UNKNOWN for every row, so no row qualifies."
+        },
+        {
+          "text": "`NOT IN` isn't valid SQL when used with a subquery.",
+          "correct": false,
+          "explanation": "It's perfectly valid syntax. The problem isn't the grammar — it's the NULL inside the subquery's result poisoning the comparison."
+        },
+        {
+          "text": "Every employee actually is a manager, so correctly none are excluded.",
+          "correct": false,
+          "explanation": "Only three employees are managers. The empty result is the NULL trap, not a reflection of the data."
+        },
+        {
+          "text": "`NOT IN` silently caps its result at zero rows unless you add `DISTINCT`.",
+          "correct": false,
+          "explanation": "There's no such cap and DISTINCT is unrelated. The zero rows come entirely from the NULL in branch.mgr_id."
+        }
+      ]
+    },
+    {
+      "question": "What's the safest way to write \"branches with no employees,\" and why?",
+      "options": [
+        {
+          "text": "`WHERE NOT EXISTS (SELECT 1 FROM employee e WHERE e.branch_id = b.branch_id)` — `NOT EXISTS` checks presence row by row and can't be poisoned by a `NULL` the way `NOT IN` can.",
+          "correct": true,
+          "explanation": "Correct. NOT EXISTS is the robust anti-join: it tests, per branch, whether any matching employee exists, so a NULL in the data can't empty the whole result."
+        },
+        {
+          "text": "`WHERE branch_id NOT IN (SELECT branch_id FROM employee)` — the straightforward negation.",
+          "correct": false,
+          "explanation": "This is exactly the fragile form: employee.branch_id contains a NULL (Ryan's), so it hits the NOT IN trap and returns zero rows."
+        },
+        {
+          "text": "There's no way to express \"no match\" in SQL.",
+          "correct": false,
+          "explanation": "There are two good ways — NOT EXISTS and a LEFT JOIN ... IS NULL. NOT EXISTS is the most robust of them."
+        },
+        {
+          "text": "`WHERE EXISTS (SELECT 1 FROM employee e WHERE e.branch_id = b.branch_id)`.",
+          "correct": false,
+          "explanation": "That's the opposite — EXISTS finds branches that DO have an employee. You want NOT EXISTS for branches with none."
+        }
+      ]
+    },
+    {
+      "question": "What makes a subquery *correlated*, and what's the consequence?",
+      "options": [
+        {
+          "text": "It references a column from the outer query (like `e.branch_id`), so it can't be computed once up front — it conceptually re-runs for each outer row.",
+          "correct": true,
+          "explanation": "Correct. The reference back to the outer row is exactly what correlation means, and it forces a per-row re-evaluation of the inner query."
+        },
+        {
+          "text": "It appears in the `WHERE` clause — any subquery in `WHERE` is correlated.",
+          "correct": false,
+          "explanation": "Location doesn't make a subquery correlated. A plain scalar subquery lives in WHERE too and isn't correlated; referencing an outer-row column is what does it."
+        },
+        {
+          "text": "It returns more than one column.",
+          "correct": false,
+          "explanation": "The number of columns is unrelated to correlation. Correlation is strictly about the reference back to the outer row."
+        },
+        {
+          "text": "It uses an aggregate function like `AVG` inside it.",
+          "correct": false,
+          "explanation": "Plenty of non-correlated subqueries use AVG (the company-average example does). The aggregate is incidental; the outer-row reference is what matters."
+        }
+      ]
+    },
+    {
+      "question": "You need each employee's name *and* their branch's city in one result. Is a `WHERE` subquery enough?",
+      "options": [
+        {
+          "text": "No — a `WHERE` subquery can only *filter* the employee rows; to put the branch's city in the output you need a join, which can pull columns from both tables.",
+          "correct": true,
+          "explanation": "Correct. A subquery in WHERE returns values only for the comparison; its columns never appear in the outer result. Adding columns from another table is a join's job."
+        },
+        {
+          "text": "Yes — just add the branch city to the subquery's `SELECT` list and it'll appear in the output.",
+          "correct": false,
+          "explanation": "A subquery in WHERE returns values for the comparison only; the columns it selects don't surface in the outer query's result set."
+        },
+        {
+          "text": "No, and it's impossible in SQL to combine columns from two tables.",
+          "correct": false,
+          "explanation": "It's very possible — that's exactly what a join (Module 08) does. The subquery just isn't the right tool for adding columns."
+        },
+        {
+          "text": "Yes — a correlated subquery in the `SELECT` list can return the whole branch row.",
+          "correct": false,
+          "explanation": "A scalar subquery in the SELECT list can return one value per row, not a whole row of branch columns. Pulling several columns from branch is a join."
+        }
+      ]
+    }
+  ]
+}

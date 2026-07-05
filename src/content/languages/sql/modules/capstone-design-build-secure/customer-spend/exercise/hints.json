@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Spend is money, not a count: the amount for each line is b.price * ol.quantity. Total that with SUM(b.price * ol.quantity).",
+    "Keep the three joins (customer -> book_order -> order_line -> book) so you can reach both the price (book) and the quantity (order_line).",
+    "Wrap the sum in ROUND(..., 2) and alias it total_spent, then ORDER BY total_spent DESC. Leo has no orders, so an inner join correctly leaves him out."
+  ]
+}

@@ -1,0 +1,39 @@
+# Log Parser
+
+This is the exercise the lecture was building toward. Log files are where regex earns its keep: structured lines, predictable format, too varied for plain `.split()`, too flat to need a real parser.
+
+## Your task
+
+Write a function `count_rejected_ips(log_text)` that parses a block of log lines and returns a dictionary mapping each IP address to the number of times it appeared in a line with a 4xx status code.
+
+Each log line looks like this:
+
+```
+2026-03-14 09:14:23 ERROR user=bob ip=10.0.0.9 path=/admin status=403
+```
+
+The fields are always in this order, always separated by spaces. The `ip` and `status` fields always use the `key=value` format shown.
+
+## Requirements
+
+- Use `re.findall` with two capture groups to extract the IP and status from each matching line in a single pass.
+- Count only lines where the status code starts with `4` (400–499).
+- Return a `dict` mapping IP strings to integer counts.
+- Lines that don't match the expected format should be silently ignored.
+
+## Example
+
+```python
+log = """
+2026-03-14 09:14:22 INFO  user=alice ip=10.0.0.5 path=/login status=200
+2026-03-14 09:14:23 ERROR user=bob   ip=10.0.0.9 path=/admin status=403
+2026-03-14 09:14:25 ERROR user=carol ip=10.0.0.9 path=/admin status=403
+2026-03-14 09:14:30 INFO  user=alice ip=10.0.0.5 path=/home  status=200
+2026-03-14 09:14:35 ERROR user=dave  ip=10.0.0.7 path=/login status=401
+"""
+
+print(count_rejected_ips(log))
+# {'10.0.0.9': 2, '10.0.0.7': 1}
+```
+
+Only the 403 and 401 lines count. The 200 lines are ignored.

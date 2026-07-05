@@ -1,0 +1,6 @@
+[
+  "For `gpa`, put `@property` on the line above `def gpa(self):` and return `sum(self.grades) / len(self.grades)`.",
+  "For `__repr__`, use `f\"Student(name={self.name!r}, gpa={self.gpa:.1f})\"`. The `:.1f` formats to one decimal place.",
+  "For `__lt__`, return `self.gpa < other.gpa`. Python's `sorted()` will use this to order students.",
+  "For `add_grade`, call `self.grades.append(score)`. Because `gpa` is computed from `self.grades` each time, it will automatically reflect the new score."
+]

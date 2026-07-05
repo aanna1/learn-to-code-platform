@@ -1,0 +1,29 @@
+{
+  "draft": "Sketch the ERD on paper first, the way the exam expects: three boxes, the associative entity in the middle, crow's-foot cardinality on each line, and solid (identifying) vs. dashed (non-identifying) lines. Then transfer it into the fields below.",
+  "fields": [
+    {
+      "id": "cardinality",
+      "type": "single-select",
+      "label": "An employee can work on many projects, and a project can have many employees. What is the cardinality of the employee–project relationship?",
+      "options": ["1:1", "1:N", "N:M"]
+    },
+    {
+      "id": "identifying",
+      "type": "matching",
+      "label": "Mark each foreign-key relationship as identifying or non-identifying.",
+      "help": "Ask the one-question test: is the parent's key part of the child's primary key?",
+      "left": [
+        "employee.branch_id -> branch",
+        "assignment.employee_id -> employee"
+      ],
+      "options": ["identifying", "non-identifying"]
+    },
+    {
+      "id": "erd",
+      "type": "erd-spec",
+      "label": "Resolve the employee–project many-to-many into an associative entity. Model exactly three entities and the two relationships.",
+      "help": "Give employee a PK employee_id, project a PK project_id, and assignment the composite PK (employee_id, project_id). Then add employee→assignment and project→assignment as 1:N identifying relationships.",
+      "cardinalities": ["1:1", "1:N", "N:M"]
+    }
+  ]
+}

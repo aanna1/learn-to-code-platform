@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The manager of each branch is stored in branch.mgr_id. An employee is a manager when their employee_id shows up in that column.",
+    "Use IN with a subquery: WHERE employee_id IN (SELECT mgr_id FROM branch). The inner query returns the whole column of manager ids, and IN keeps any employee found in it.",
+    "Full shape: SELECT first_name, last_name FROM employee WHERE employee_id IN (SELECT mgr_id FROM branch) ORDER BY employee_id; Buffalo's NULL mgr_id does no harm here — nobody's id equals NULL, so it's simply ignored."
+  ]
+}

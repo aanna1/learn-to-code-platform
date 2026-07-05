@@ -1,0 +1,54 @@
+{
+  "draft": "Map each control back to the CIA triad from Module 01: what keeps data private (confidentiality), what keeps it correct and accountable (integrity), and what keeps it there at all (availability)?",
+  "fields": [
+    {
+      "id": "team-lead",
+      "type": "single-select",
+      "label": "A team lead should see employee names and branches but never salaries, all from the one employee table. What's the standard way to enforce that?",
+      "options": [
+        "Create a view that selects only the safe columns, grant SELECT on the view, and revoke access to the base table",
+        "Ask the application to hide the salary column in its UI",
+        "Delete the salary column from the employee table",
+        "Tell the team lead not to run queries against the salary column"
+      ]
+    },
+    {
+      "id": "view-boundary",
+      "type": "single-select",
+      "label": "Why is a view called an access-control boundary, not just a convenience?",
+      "options": [
+        "It exposes only the columns and rows its definition selects, and the database enforces that — a user granted the view but revoked on the base table literally cannot reach the hidden data",
+        "It makes the query run faster by caching the result set on disk",
+        "It renames the columns so attackers can't guess what they hold",
+        "It encrypts the underlying table so only the view can decrypt it"
+      ]
+    },
+    {
+      "id": "auditing",
+      "type": "single-select",
+      "label": "Access control decides who CAN act. What does an audit log add on top of that?",
+      "options": [
+        "A record of who actually DID what, from which account and when — the accountability that makes integrity enforceable, and a legal requirement under HIPAA, PCI-DSS, and SOX",
+        "It blocks unauthorized users before they can run a query",
+        "It automatically rolls back any change it considers suspicious",
+        "It encrypts the data at rest so a stolen backup is useless"
+      ]
+    },
+    {
+      "id": "cia",
+      "type": "matching",
+      "label": "Match each control to the part of the CIA triad it primarily protects.",
+      "help": "Confidentiality = kept private; Integrity = correct and accountable; Availability = still there when needed.",
+      "left": [
+        "Views and access control",
+        "Auditing",
+        "Backup and recovery"
+      ],
+      "options": [
+        "Confidentiality",
+        "Integrity",
+        "Availability"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "questions": [
+    {
+      "question": "Which form of `INSERT` is safer for real work, and why?",
+      "options": [
+        {
+          "text": "`INSERT INTO employee (employee_id, first_name, ...) VALUES (...)` — naming the columns means the statement doesn't silently break if the table's column order changes, and lets you omit columns that have defaults.",
+          "correct": true,
+          "explanation": "Correct. The column-list form is robust to schema changes and allows partial inserts, which is why it's the form to prefer in production code."
+        },
+        {
+          "text": "`INSERT INTO employee VALUES (...)` — it's shorter, so there's less to get wrong.",
+          "correct": false,
+          "explanation": "Shorter, but brittle: the positional form depends on exact column order and requires a value for every column, so it silently means something different if the table changes."
+        },
+        {
+          "text": "They're identical in every way — it's purely a matter of style.",
+          "correct": false,
+          "explanation": "They're not identical: the column-list form is more robust to schema changes and allows partial inserts; the positional form does neither."
+        },
+        {
+          "text": "`INSERT INTO employee VALUES (...)` — because leaving the columns off lets the database pick the right ones for you.",
+          "correct": false,
+          "explanation": "The database doesn't pick columns for you in the positional form — it fills them strictly in table order, which is exactly what makes that form brittle."
+        }
+      ]
+    },
+    {
+      "question": "You run `UPDATE employee SET salary = 0;` with no `WHERE`. What happens?",
+      "options": [
+        {
+          "text": "Every row in the table is updated — all eight salaries become 0 — because a missing `WHERE` means \"all rows,\" and there's no confirmation prompt.",
+          "correct": true,
+          "explanation": "Correct. An UPDATE with no WHERE applies to every row, immediately and silently — the single most dangerous mistake in SQL."
+        },
+        {
+          "text": "Nothing — an `UPDATE` without a `WHERE` is a syntax error.",
+          "correct": false,
+          "explanation": "It's valid SQL. The missing WHERE isn't an error; it's exactly what makes the statement apply to the whole table."
+        },
+        {
+          "text": "Only the first row is updated.",
+          "correct": false,
+          "explanation": "An UPDATE with no WHERE affects every row, not just the first one."
+        },
+        {
+          "text": "The database prompts you to confirm before changing every row.",
+          "correct": false,
+          "explanation": "There is no confirmation prompt. The database does exactly what you typed — the reason a missing WHERE is so dangerous."
+        }
+      ]
+    },
+    {
+      "question": "Inside `BEGIN; DELETE FROM employee; ROLLBACK;`, what's the state of the table afterward?",
+      "options": [
+        {
+          "text": "Unchanged — all rows are still there; `ROLLBACK` undoes every change since `BEGIN`, so the delete is discarded as if it never ran.",
+          "correct": true,
+          "explanation": "Correct. Nothing inside the transaction is permanent until COMMIT, so ROLLBACK restores the full pre-transaction state."
+        },
+        {
+          "text": "Empty — the `DELETE` already removed the rows before the rollback could stop it.",
+          "correct": false,
+          "explanation": "ROLLBACK reverses the delete. Nothing inside the transaction is permanent until COMMIT, so the rows come back."
+        },
+        {
+          "text": "Only some rows remain, chosen at random.",
+          "correct": false,
+          "explanation": "A rollback restores the complete pre-transaction state, never a partial or random one."
+        },
+        {
+          "text": "The table is dropped entirely.",
+          "correct": false,
+          "explanation": "DELETE removes rows, not the table, and ROLLBACK undoes even that — the table exists and is full again."
+        }
+      ]
+    },
+    {
+      "question": "On the Oracle database the exam uses, you `UPDATE` a row and then close your session without a `COMMIT`. What happened to your change?",
+      "options": [
+        {
+          "text": "It was discarded — Oracle keeps DML pending until an explicit `COMMIT`, so an uncommitted change is rolled back and never becomes permanent.",
+          "correct": true,
+          "explanation": "Correct. Oracle does not autocommit DML; without a COMMIT the change is pending and a disconnect discards it."
+        },
+        {
+          "text": "It was saved automatically — Oracle autocommits every statement.",
+          "correct": false,
+          "explanation": "That describes SQLite and MySQL defaults, not Oracle. Oracle requires an explicit COMMIT for DML to persist."
+        },
+        {
+          "text": "It's still pending and will apply next time you log in.",
+          "correct": false,
+          "explanation": "An unclean disconnect rolls back uncommitted work; it does not persist across sessions."
+        },
+        {
+          "text": "It became permanent because closing a session forces a `COMMIT`.",
+          "correct": false,
+          "explanation": "Closing a session does not force a COMMIT of pending DML — the uncommitted change is discarded."
+        }
+      ]
+    },
+    {
+      "question": "A `branch` row's `mgr_id` points at an `employee`. You try to `DELETE` that employee, with foreign keys enforced and no special rule set. What happens?",
+      "options": [
+        {
+          "text": "The delete is blocked with a foreign-key error, because removing the employee would leave the branch's `mgr_id` pointing at a row that no longer exists.",
+          "correct": true,
+          "explanation": "Correct. Restrict is the default: the database refuses the delete rather than allow a dangling reference."
+        },
+        {
+          "text": "The employee is deleted and the branch's `mgr_id` automatically becomes `NULL`.",
+          "correct": false,
+          "explanation": "That only happens if the FK was defined ON DELETE SET NULL. The default is to block the delete."
+        },
+        {
+          "text": "Both the employee and the branch are deleted automatically.",
+          "correct": false,
+          "explanation": "That's ON DELETE CASCADE, which must be explicitly declared. It isn't the default."
+        },
+        {
+          "text": "The employee is deleted and the branch is left with a `mgr_id` pointing at nothing.",
+          "correct": false,
+          "explanation": "A dangling reference is exactly what foreign keys exist to prevent — with enforcement on and no special rule, the delete is blocked instead."
+        }
+      ]
+    }
+  ]
+}

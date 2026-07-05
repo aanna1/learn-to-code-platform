@@ -42,6 +42,61 @@
             "id": "08-dicts-and-sets",
             "title": "Dictionaries & Sets",
             "order": 8
+        },
+        {
+            "id": "09-exceptions",
+            "title": "Exceptions & Defensive Coding",
+            "order": 9
+        },
+        {
+            "id": "10-libraries-and-modules",
+            "title": "Libraries & Modules",
+            "order": 10
+        },
+        {
+            "id": "11-file-io",
+            "title": "File Input & Output",
+            "order": 11
+        },
+        {
+            "id": "12-regular-expressions",
+            "title": "Regular Expressions",
+            "order": 12
+        },
+        {
+            "id": "13-object-oriented-programming",
+            "title": "Object-Oriented Programming",
+            "order": 13
+        },
+        {
+            "id": "14-testing-and-quality",
+            "title": "Testing & Code Quality",
+            "order": 14
+        },
+        {
+            "id": "15-make-code-better",
+            "title": "Make Your Existing Code Better",
+            "order": 15
+        },
+        {
+            "id": "16-idiomatic-python",
+            "title": "Idiomatic Python",
+            "order": 16
+        },
+        {
+            "id": "17-advanced-language-features",
+            "title": "Advanced Language Features",
+            "order": 17
+        },
+        {
+            "id": "18-concurrency-and-performance",
+            "title": "Concurrency & Performance",
+            "order": 18
+        },
+        {
+            "id": "t5-tooling-and-ecosystem",
+            "title": "Tooling and the Ecosystem",
+            "order": 19
         }
     ]
 }

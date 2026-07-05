@@ -1,0 +1,7 @@
+"Which branches have **no** employees?" This is an anti-join — find the rows with no match — and the `NOT IN` version in the starter falls straight into the `NULL` trap again (`employee.branch_id` contains Ryan's `NULL`, so it returns zero rows). This time the fix isn't a patched `NOT IN`; it's the right tool for anti-joins: **`NOT EXISTS`**.
+
+Rewrite the query with `NOT EXISTS` and a correlated subquery, order by `branch_id`, then **Run** and **Submit**.
+
+<Callout type="tip">
+`NOT EXISTS` checks for the *presence* of matching rows one branch at a time, so a `NULL` in the data can't poison the whole result the way it does with `NOT IN`. When you need "everything that *doesn't* match," reach for `NOT EXISTS` first — and note the security lens from the lecture: a filter that silently fails on `NULL` is a real risk when that filter is an access control.
+</Callout>

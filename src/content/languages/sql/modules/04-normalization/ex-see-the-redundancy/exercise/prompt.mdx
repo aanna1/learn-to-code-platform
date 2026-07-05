@@ -1,0 +1,19 @@
+The lecture opened with a table that "does too much" — one row per order line, with the employee's name and the branch's city copied onto every single line. That copying is the **redundancy** normalization exists to remove, and it's the root of the update, insert, and delete anomalies. But you can't fix what you can't see, so first: look at it.
+
+The `orders` table above is exactly that denormalized table. The starter query shows only the `product` column, which hides the problem — the repetition is in the columns it leaves out.
+
+## Your task
+
+Change the query so the results grid shows `product`, `emp_name`, and `branch_city` — three columns, in that order.
+
+Then read down the columns: `emp_name` says "Michael" on three separate rows, and `branch_city` says "Scranton" on all four. Each of those is one fact stored many times. If Scranton is ever renamed, every one of those rows has to change together — miss one and the database contradicts itself. That's the **update anomaly**, and it's the whole reason the next forms split this table apart.
+
+Press **Run** to see the grid, then **Submit** to check it.
+
+<Callout type="note">
+This is an integrity risk, not just an untidy one: the same question ("what city is this?") could return two different answers depending on which row you read. Storing each fact once is how normalization closes that gap.
+</Callout>
+
+<Callout type="tip">
+List the three columns by name, separated by commas: `SELECT product, emp_name, branch_city FROM orders;`.
+</Callout>

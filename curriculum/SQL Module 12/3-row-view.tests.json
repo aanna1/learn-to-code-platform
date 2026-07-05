@@ -1,0 +1,32 @@
+[
+  {
+    "name": "the view shows the five Scranton employees and no other branch",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name", "last_name", "branch_id"],
+      "rows": [
+        ["Michael", "Scott", 2],
+        ["Dwight", "Schrute", 2],
+        ["Jim", "Halpert", 2],
+        ["Pam", "Beesly", 2],
+        ["Stanley", "Hudson", 2]
+      ]
+    }
+  },
+  {
+    "name": "a new Scranton hire shows up through the view; a new Stamford hire does not",
+    "setup": "INSERT INTO employee (employee_id, first_name, last_name, branch_id, salary) VALUES (108, 'Kelly', 'Kapoor', 2, 47000), (109, 'Karen', 'Filippelli', 3, 61000);",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name", "last_name", "branch_id"],
+      "rows": [
+        ["Michael", "Scott", 2],
+        ["Dwight", "Schrute", 2],
+        ["Jim", "Halpert", 2],
+        ["Pam", "Beesly", 2],
+        ["Stanley", "Hudson", 2],
+        ["Kelly", "Kapoor", 2]
+      ]
+    }
+  }
+]

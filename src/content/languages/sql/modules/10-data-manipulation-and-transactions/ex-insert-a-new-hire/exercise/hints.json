@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The column-list form is INSERT INTO employee (col1, col2, ...) VALUES (v1, v2, ...); — the values line up with the columns you named, in the order you named them.",
+    "The starter has every value right except one: branch_id. Scranton is branch 2, not branch 1. Change that single value.",
+    "Full answer: INSERT INTO employee (employee_id, first_name, last_name, branch_id, salary) VALUES (108, 'Kelly', 'Kapoor', 2, 45000);"
+  ]
+}

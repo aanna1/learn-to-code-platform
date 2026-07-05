@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "\"Never sold\" means the book_id never appears in order_line. That's an absence -- filter for it with a subquery.",
+    "The subquery is the set of sold book_ids: (SELECT book_id FROM order_line). Keep the books whose book_id is NOT IN that set.",
+    "Full query: SELECT title FROM book WHERE book_id NOT IN (SELECT book_id FROM order_line) ORDER BY title;."
+  ]
+}

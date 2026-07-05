@@ -17,11 +17,18 @@ const crossOriginIsolationHeaders = [
 // assets and routes need to be prefixed. Toggle off by setting GITHUB_PAGES=""
 // in the environment (e.g. for Vercel or local dev), and on (default for the
 // Pages workflow) by leaving it unset/truthy.
-const basePath = process.env.GITHUB_PAGES === "false" ? "" : "/learn-to-code-platform";
+// `next dev` never uses a basePath — otherwise the dev server serves the site
+// under /learn-to-code-platform and http://localhost:3000/ 404s.
+const isDev = process.env.NODE_ENV === "development";
+const basePath =
+  isDev || process.env.GITHUB_PAGES === "false" ? "" : "/learn-to-code-platform";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export",
+  // Build artifacts dir. Overridable via NEXT_DISTDIR so a build can target a writable
+  // location when the default `.next` is locked (e.g. CI/sandbox); defaults to `.next`.
+  distDir: process.env.NEXT_DISTDIR || ".next",
   reactStrictMode: true,
   pageExtensions: ["ts", "tsx", "js", "jsx", "md", "mdx"],
   basePath,

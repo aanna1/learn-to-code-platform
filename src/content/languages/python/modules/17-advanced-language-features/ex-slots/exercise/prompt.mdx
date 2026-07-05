@@ -1,0 +1,61 @@
+In this exercise you'll work with `__slots__` directly and via `@dataclass(slots=True)`.
+
+## Part 1: Slotted class
+
+Write a class `Vector3` with three float attributes: `x`, `y`, and `z`. Use `__slots__` so that:
+
+- Instances have no `__dict__`.
+- Assigning an undeclared attribute raises `AttributeError`.
+- A method `magnitude(self) -> float` returns `(x**2 + y**2 + z**2) ** 0.5`.
+- A `__repr__` returns a string like `Vector3(1.0, 2.0, 3.0)`.
+
+## Part 2: Slotted dataclass
+
+Write a dataclass `Pixel` with integer attributes `r`, `g`, `b` (all default to `0`). Use `@dataclass(slots=True)` so instances have no `__dict__` and bad attributes are rejected.
+
+## Part 3: Verifying the restrictions
+
+Write a function `try_bad_attr(obj) -> str` that tries to set `obj.nonexistent = True` and returns `"blocked"` if `AttributeError` is raised, or `"allowed"` if it succeeds.
+
+## What to implement
+
+```python
+from dataclasses import dataclass
+
+
+class Vector3:
+    __slots__ = (...)  # fill this in
+
+    def __init__(self, x: float, y: float, z: float) -> None:
+        ...
+
+    def magnitude(self) -> float:
+        ...
+
+    def __repr__(self) -> str:
+        ...
+
+
+@dataclass(slots=True)
+class Pixel:
+    ...
+
+
+def try_bad_attr(obj) -> str:
+    ...
+```
+
+## Checking your work
+
+```python
+v = Vector3(1.0, 2.0, 2.0)
+print(v.magnitude())       # 3.0
+print(repr(v))             # Vector3(1.0, 2.0, 2.0)
+print(hasattr(v, "__dict__"))  # False
+print(try_bad_attr(v))     # blocked
+
+p = Pixel(255, 128, 0)
+print(p.r, p.g, p.b)      # 255 128 0
+print(hasattr(p, "__dict__"))  # False
+print(try_bad_attr(p))     # blocked
+```

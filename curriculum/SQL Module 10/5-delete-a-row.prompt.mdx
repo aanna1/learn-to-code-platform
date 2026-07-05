@@ -1,0 +1,5 @@
+Ryan (employee 107) is leaving the company, so his row should be removed. The starter is `DELETE FROM employee;` — a valid command that deletes **every** row and leaves the table empty. Add a `WHERE` so only Ryan is deleted, then **Submit**.
+
+<Callout type="warning">
+`DELETE` carries the exact same no-`WHERE` danger as `UPDATE`: `DELETE FROM employee;` isn't an error and there's no "are you sure?" — it simply empties the table. The `WHERE` is the only thing standing between "remove one row" and "remove all of them."
+</Callout>

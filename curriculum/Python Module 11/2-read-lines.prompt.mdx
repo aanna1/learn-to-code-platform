@@ -1,0 +1,38 @@
+# Read and Count
+
+Reading a file line by line is the first thing you'll do in almost every file-processing task. Getting it right means remembering one detail: every line comes out of the file with a `\n` at the end, and you usually want to strip it before doing anything with the text.
+
+## Your task
+
+Write two functions that work with a plain text file (one item per line):
+
+**`read_lines(filepath)`** — opens the file at `filepath`, reads it line by line, strips whitespace from each line, discards any empty lines, and returns the remaining lines as a list of strings.
+
+**`count_lines(filepath)`** — returns the number of non-empty lines in the file (reuse `read_lines` if you like).
+
+## Requirements
+
+- Use a `with` statement to open the file (no bare `open()`).
+- Strip each line with `.strip()` before adding it to the list.
+- Skip lines that are empty after stripping.
+- `read_lines` returns a `list` of strings; `count_lines` returns an `int`.
+
+## Example
+
+If `words.txt` contains:
+
+```
+apple
+banana
+
+cherry
+```
+
+Then:
+
+```python
+read_lines("words.txt")   # ["apple", "banana", "cherry"]
+count_lines("words.txt")  # 3
+```
+
+The blank line in the middle is dropped.

@@ -1,0 +1,443 @@
+<Callout type="info">
+No install needed — every example on this page has a **Run** button. Press it to execute the code directly in your browser.
+</Callout>
+
+## Why this matters
+
+Open the source code of `pydantic`. Open `sqlalchemy`. Open `django`. You'll see things you don't recognize: classes that inherit from `type`, attributes that aren't really attributes, methods marked `@abstractmethod`, tiny classes with `__slots__` at the top, class bodies that read like configuration files.
+
+None of that is fundamentals. None of it is Tier 1's polish or Tier 2's composition tools. It's the layer underneath — the machinery Python exposes for building frameworks, the seams the language gives you to bend its own semantics.
+
+Honest framing: you probably won't write a metaclass this year. Most production automation code uses regular classes, dataclasses, and protocols at most. The deep features sit on the shelf.
+
+So why this lecture? Two reasons. First, you read code written by people who use these features heavily. The fields on a `pydantic` model are descriptors. The base class of a Django model is built by a metaclass. When this code surprises you, the surprise should be "I haven't read about that yet" — not "Python is doing something impossible." Second, a few of these (`__slots__`, `Protocol`, `ABC`) earn their place even in ordinary application code.
+
+Each feature gets the same treatment: what problem it solves, what the wrong approach looks like, what the right one looks like, and when you should actually reach for it.
+
+## Abstract base classes: making contracts enforceable
+
+You're building a small reporting library. Different report types share a `render()` method. The naive approach:
+
+<Runnable code={`class Report:
+    def __init__(self, data):
+        self.data = data
+
+    def render(self):
+        raise NotImplementedError("subclasses must implement render()")
+
+
+class CsvReport(Report):
+    def render(self):
+        return "\\n".join(",".join(map(str, row)) for row in self.data)
+
+
+class JsonReport(Report):
+    pass  # forgot to implement render
+
+
+# When does anyone find out?
+r = JsonReport([[1, 2], [3, 4]])
+print(r.render())  # NotImplementedError — but only here, at call time
+`} />
+
+The `JsonReport` author forgot `render`. Python won't complain at class definition time or at instantiation. It complains only when the broken method is called. In production that might mean a customer gets an error.
+
+Abstract base classes move the failure forward:
+
+<Runnable code={`from abc import ABC, abstractmethod
+
+class Report(ABC):
+    def __init__(self, data):
+        self.data = data
+
+    @abstractmethod
+    def render(self) -> str:
+        ...
+
+
+class CsvReport(Report):
+    def render(self) -> str:
+        return "\\n".join(",".join(map(str, row)) for row in self.data)
+
+
+class JsonReport(Report):
+    pass  # still missing render
+
+
+try:
+    r = JsonReport([[1, 2], [3, 4]])
+except TypeError as e:
+    print(e)  # Can't instantiate abstract class JsonReport with abstract method render
+`} />
+
+The error fires at instantiation — the moment someone tries to create a `JsonReport`. In tests that's seconds after writing the class, not later in production.
+
+You can also put shared code in the base class. Only the abstract methods must be implemented by subclasses:
+
+<Runnable code={`from abc import ABC, abstractmethod
+
+class Report(ABC):
+    def __init__(self, data):
+        self.data = data
+
+    def summary(self) -> str:
+        return f"Report with {len(self.data)} rows"
+
+    @abstractmethod
+    def render(self) -> str:
+        ...
+
+
+class CsvReport(Report):
+    def render(self) -> str:
+        return "\\n".join(",".join(map(str, row)) for row in self.data)
+
+
+r = CsvReport([[1, 2], [3, 4]])
+print(r.summary())  # inherited for free
+print(r.render())
+`} />
+
+<Callout type="tip">
+**What could go wrong:** decorating `__init__` with `@abstractmethod`. It works, but the pattern is weird. Put `@abstractmethod` on the methods callers invoke, not on construction.
+</Callout>
+
+## Protocols: duck typing with type checking
+
+ABCs require inheritance. To satisfy the `Report` contract above, a class must inherit from `Report`. That's fine when you control all the classes. It's awkward when you don't.
+
+`Protocol` lets you declare an interface structurally. A class satisfies the protocol if it has the right methods — no inheritance needed:
+
+<Runnable code={`from typing import Protocol
+
+class Renderable(Protocol):
+    def render(self) -> str: ...
+
+
+# CsvReport satisfies Renderable without inheriting from it
+class CsvReport:
+    def __init__(self, data):
+        self.data = data
+    def render(self) -> str:
+        return "\\n".join(",".join(map(str, row)) for row in self.data)
+
+
+def display(obj: Renderable) -> None:
+    print(obj.render())
+
+
+display(CsvReport([[1, 2], [3, 4]]))
+`} />
+
+`CsvReport` doesn't know `Renderable` exists. It just happens to have a `render` method. That's structural typing: "does it fit?" rather than "does it inherit from the right thing?"
+
+<Callout type="tip">
+**ABC vs Protocol:** ABCs win when you also want shared base-class behavior (like `summary` above). Protocols win when you only want to declare an interface, especially for types you don't own. For new code, default to Protocol.
+</Callout>
+
+Try writing your own:
+
+<Runnable code={`from typing import Protocol
+
+class Closeable(Protocol):
+    def close(self) -> None: ...
+
+
+def cleanup(things: list) -> None:
+    for thing in things:
+        thing.close()
+
+
+class FakeConnection:
+    def close(self) -> None:
+        print("connection closed")
+
+class FakeFile:
+    def close(self) -> None:
+        print("file closed")
+
+cleanup([FakeConnection(), FakeFile()])
+`} />
+
+Files, sockets, database connections — anything with `close()` satisfies `Closeable` without inheriting from anything. Most resources you'd want to clean up come from third-party libraries you can't subclass. That's why this matters.
+
+## `__slots__`: cutting memory and tightening contracts
+
+By default, every Python instance carries a `__dict__` mapping attribute names to values. That dict is what makes `instance.anything = value` work at any time. It also makes Python objects heavier than they need to be.
+
+<Runnable code={`import sys
+
+class Point:
+    def __init__(self, x: float, y: float) -> None:
+        self.x = x
+        self.y = y
+
+p = Point(1.0, 2.0)
+print("object size:", sys.getsizeof(p), "bytes")
+print("__dict__ size:", sys.getsizeof(p.__dict__), "bytes")
+print("has __dict__:", hasattr(p, "__dict__"))
+`} />
+
+Each instance costs the object header plus several hundred bytes for the dict. A million Points is hundreds of megabytes. Add `__slots__`:
+
+<Runnable code={`import sys
+
+class Point:
+    __slots__ = ("x", "y")
+
+    def __init__(self, x: float, y: float) -> None:
+        self.x = x
+        self.y = y
+
+p = Point(1.0, 2.0)
+print("object size:", sys.getsizeof(p), "bytes")
+print("has __dict__:", hasattr(p, "__dict__"))
+
+# Try assigning an undeclared attribute
+try:
+    p.color = "red"
+except AttributeError as e:
+    print(e)
+`} />
+
+Per-instance memory drops sharply. And assigning an undeclared attribute now raises `AttributeError` — typos in attribute names become errors at the assignment, not silent bugs that surface two function calls later.
+
+For dataclasses, `@dataclass(slots=True)` (Python 3.10+) generates the slots tuple from your type-annotated fields:
+
+<Runnable code={`from dataclasses import dataclass
+
+@dataclass(slots=True)
+class Point:
+    x: float
+    y: float
+
+p = Point(1.0, 2.0)
+print(p.x, p.y)
+print("has __dict__:", hasattr(p, "__dict__"))
+`} />
+
+Same memory savings, none of the boilerplate.
+
+<Callout type="tip">
+**Restriction to know:** you can't inherit from two slotted classes whose slot layouts conflict, and `weakref.ref(instance)` won't work unless `"__weakref__"` is in the slots tuple. For most automation code, single inheritance with slots works fine.
+</Callout>
+
+## Method resolution order: how `super()` finds the next method
+
+Single inheritance is simple: `super().method()` calls the parent's version. Multiple inheritance gets interesting.
+
+<Runnable code={`class A:
+    def greet(self) -> None:
+        print("A")
+
+class B(A):
+    def greet(self) -> None:
+        print("B")
+        super().greet()
+
+class C(A):
+    def greet(self) -> None:
+        print("C")
+        super().greet()
+
+class D(B, C):
+    def greet(self) -> None:
+        print("D")
+        super().greet()
+
+D().greet()
+print("MRO:", [cls.__name__ for cls in D.__mro__])
+`} />
+
+Most learners predict `D B A` or `D B A C A`. The actual output is `D B C A` — each class appears exactly once. Python computes this with the C3 linearization algorithm and stores it as `__mro__`.
+
+`super()` walks the MRO. In the context of a `D` instance, `super()` inside `B` points to `C` (the next class in D's MRO), not to `A` (B's only parent). That's the part that surprises people: `super()` is context-dependent. When you call `B` directly, `super()` is `A`. When `B` is called as part of `D`, `super()` is `C`.
+
+That property is what makes the **mixin** pattern work. A mixin is a small class that adds one piece of behavior and calls `super()` so the chain flows through every class:
+
+<Runnable code={`class LoggingMixin:
+    def save(self) -> None:
+        print(f"[log] saving {self.__class__.__name__}")
+        super().save()
+
+class TimedMixin:
+    def save(self) -> None:
+        print("[timer] start")
+        super().save()
+        print("[timer] end")
+
+class Record:
+    def save(self) -> None:
+        print(f"Persisting {self.__class__.__name__}")
+
+class TimedLoggedRecord(LoggingMixin, TimedMixin, Record):
+    pass
+
+TimedLoggedRecord().save()
+print("MRO:", [cls.__name__ for cls in TimedLoggedRecord.__mro__])
+`} />
+
+Each mixin contributes its piece. The terminal class (`Record`) does the real work and doesn't call `super()` further.
+
+<Callout type="tip">
+**What could go wrong:** mixing classes where one calls `super().save()` and another doesn't. The chain breaks at the silent one. Mixin classes intended for composition should always call `super()`, even though it looks pointless when you read them in isolation.
+</Callout>
+
+## Descriptors: the machinery under `@property`
+
+You've used `@property`. It looks like magic — `t.fahrenheit` runs a function with no parentheses. The mechanism is the descriptor protocol.
+
+A descriptor is any object with `__get__`, `__set__`, or `__delete__` methods. When an instance attribute lookup finds a descriptor on the *class*, Python calls the descriptor's `__get__` instead of returning it directly. `@property` is itself a descriptor.
+
+<Runnable code={`class Temperature:
+    def __init__(self, celsius: float) -> None:
+        self._celsius = celsius
+
+    @property
+    def fahrenheit(self) -> float:
+        return self._celsius * 9 / 5 + 32
+
+t = Temperature(100)
+print(t.fahrenheit)  # 212.0 — function ran, no parentheses needed
+`} />
+
+You can write your own. Here's a validating descriptor that rejects non-positive numbers:
+
+<Runnable code={`class Positive:
+    def __set_name__(self, owner: type, name: str) -> None:
+        self.private_name = f"_{name}"
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+        return getattr(instance, self.private_name)
+
+    def __set__(self, instance, value):
+        if value <= 0:
+            raise ValueError(f"must be positive, got {value!r}")
+        setattr(instance, self.private_name, value)
+
+
+class Account:
+    balance = Positive()
+
+    def __init__(self, balance: float) -> None:
+        self.balance = balance  # triggers __set__ — validates on construction
+
+
+a = Account(100)
+print(a.balance)     # 100
+a.balance = 50       # ok
+try:
+    a.balance = -10
+except ValueError as e:
+    print(e)         # must be positive, got -10
+`} />
+
+Walk through it. `balance = Positive()` puts a `Positive` instance on the *class*. `__set_name__` tells the descriptor its name (`"balance"`), so it stores the actual value under `_balance` on each instance. Writing `a.balance = 100` calls `Positive.__set__`, which validates and stores. Reading `a.balance` calls `Positive.__get__`, which fetches `a._balance`.
+
+The descriptor instance is shared across all `Account` instances because it lives on the class. That's why we store the actual value on `instance` under a different name. Validation also fires in `__init__`, because `self.balance = balance` goes through `__set__` — you get input validation on construction without writing anything extra there.
+
+<Callout type="tip">
+**The critical rule:** a descriptor must be assigned at class level to activate. `self.balance = Positive()` inside `__init__` produces a plain instance attribute — the descriptor protocol never fires. This is one of the more confusing bugs in the language, because the code looks fine and silently does nothing.
+</Callout>
+
+This is everywhere in libraries. A Django model field is a descriptor. A SQLAlchemy `Column` is a descriptor. A pydantic `Field` is a descriptor with validation, coercion, and serialization wired in.
+
+When to write your own? When you have the same kind of validation or computed-attribute behavior repeated across four or more class attributes. For a one-off, `@property` is simpler.
+
+## Metaclasses: the class of a class
+
+Everything in Python is an object — including classes.
+
+<Runnable code={`class Foo:
+    pass
+
+print(type(Foo()))   # <class '__main__.Foo'>
+print(type(Foo))     # <class 'type'>
+`} />
+
+`Foo()` is an instance of `Foo`. `Foo` is an instance of `type`. `type` is the metaclass: the class whose instances are classes. You can use `type` directly to create classes at runtime:
+
+<Runnable code={`Foo = type("Foo", (), {"x": 42})
+print(Foo.x)        # 42
+print(type(Foo))    # <class 'type'>
+`} />
+
+The `class` statement is sugar for calling `type` with a name, a tuple of bases, and a dict of attributes.
+
+A custom metaclass subclasses `type` and overrides class creation. The textbook use case is auto-registration:
+
+<Runnable code={`class PluginMeta(type):
+    registry: dict = {}
+
+    def __new__(mcs, name, bases, namespace):
+        cls = super().__new__(mcs, name, bases, namespace)
+        if name != "Plugin":
+            PluginMeta.registry[name] = cls
+        return cls
+
+
+class Plugin(metaclass=PluginMeta):
+    def run(self) -> None: ...
+
+
+class AuthPlugin(Plugin):
+    def run(self) -> None:
+        print("authenticating")
+
+
+class LogPlugin(Plugin):
+    def run(self) -> None:
+        print("logging")
+
+
+print(PluginMeta.registry)
+`} />
+
+Every class that uses `PluginMeta` is automatically added to a registry as it's defined. No call to `register()`, no decorator, no import-side-effect plumbing. You define the class and it's registered. That's what Django does when you write `class MyModel(models.Model):`.
+
+Should you write a metaclass? Almost never. `__init_subclass__` (Python 3.6+) covers most of what custom metaclasses used to do:
+
+<Runnable code={`class Plugin:
+    registry: dict = {}
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        Plugin.registry[cls.__name__] = cls
+
+
+class AuthPlugin(Plugin):
+    pass
+
+class LogPlugin(Plugin):
+    pass
+
+print(Plugin.registry)  # same result, no metaclass needed
+`} />
+
+`__init_subclass__` runs whenever the class is subclassed. Same registration effect, half the conceptual weight.
+
+<Callout type="tip">
+Tim Peters wrote: "Metaclasses are deeper magic than 99% of users should ever worry about. If you wonder whether you need them, you don't." Recognize them when you see them. Use `__init_subclass__` when you can.
+</Callout>
+
+## Common pitfalls
+
+**`@abstractmethod` only fires at instantiation, not at import.** If someone instantiates a complete subclass and never touches the broken method, they won't find out in tests — only when that path runs in production. ABCs cut the window from "at call time" down to "at object creation time," which is usually enough. But they're not a substitute for a type checker.
+
+**Inheriting from `Protocol` is not required.** The whole point is structural: a class satisfies the protocol if it has the right methods. Subclassing a Protocol only makes sense when you also want those methods inherited — a narrower use case.
+
+**Don't write `__slots__` manually inside a `@dataclass` body.** Writing `__slots__ = ("x", "y")` inside a `@dataclass` fights the decorator. Use `@dataclass(slots=True)` and let the decorator generate the tuple.
+
+**Multiple inheritance is usually the wrong answer.** Most situations that feel like multiple inheritance are better solved with composition (the class owns an instance that does the work). The MRO and `super()` chain are hard to reason about with three or four parents.
+
+**Descriptors must live on the class, not on `self`.** `self.x = SomeDescriptor()` inside `__init__` produces a plain instance attribute. The descriptor protocol doesn't activate. Always assign the descriptor at class level.
+
+**Don't write a metaclass when `__init_subclass__` or a class decorator will do.** A class can have only one metaclass, so they interact poorly with anything else that uses one. If you can phrase the problem without one, do.
+
+## How this connects
+
+`@dataclass` uses descriptors for default factories. `@property` is a descriptor. ABCs use a metaclass behind the scenes (`ABCMeta`). Slots interact with inheritance via the MRO. The features in this lecture are how Python builds the features you use daily.
+
+Most Phase 2 modules touch this material lightly — you'll recognize it in libraries rather than write it from scratch. `__slots__`, `Protocol`, and ABC are worth reaching for in application code. The rest is for when you cross from writing application code to writing libraries.

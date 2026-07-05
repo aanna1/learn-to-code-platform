@@ -1,0 +1,451 @@
+<Callout type="info">
+The exercises on this page let you practice writing test code directly in the browser. The environment tools — `uv`, `ruff`, `mypy`, `pre-commit` — only run in a real terminal on your machine. This lecture explains both: what the tools do and why you'll reach for them, plus the Python test-writing mechanics you can practice right now.
+</Callout>
+
+## Why this matters
+
+Write a script that imports `requests` and prints something. Run it. It works on your machine. Send it to a colleague. Does it work on theirs?
+
+Probably not. They don't have `requests` installed at the version you have. Or they have a different Python version. Or they ran your script and it polluted their system Python with the same package a different project of theirs is pinned to a different version of, and now both projects are broken.
+
+These are not Python problems. They are operations problems on top of Python. The fundamentals taught you to write code. Tiers 1 through 4 taught you to write good code. Tier 5 is about everything around the code: how it gets installed, how it gets tested, how it gets formatted consistently, how it gets shipped to other people.
+
+This is also the tier that separates "I write scripts on my laptop" from "I ship software." For automation and DevOps work the difference is load-bearing. The scripts you write at work will run on infrastructure you don't fully control, get edited by people who aren't you, and live longer than your tenure on the project. Tests catch regressions when the next person changes your code. Linters catch the bug class you make most often before code review wastes anyone's time. Lockfiles ensure that the script that worked in CI yesterday still works today. Type checkers catch the bug you'd otherwise find at 3am.
+
+Honest framing: most of this tooling exists because the people who use it got tired of debugging the same class of problem repeatedly. Each tool is a calcified lesson. You can ignore the tools at the cost of relearning the lessons yourself.
+
+## pytest: tests as plain functions
+
+`unittest` came with Python from the start. It works. The API was modeled on Java's JUnit, which is why everything is a method on a class that inherits from `TestCase`. The class is a container, not behavior. The assertion methods (`assertEqual`, `assertAlmostEqual`, `assertRaises`) replace Python operators that already exist.
+
+`pytest` removed the ceremony. Tests are functions whose names start with `test_`. Assertions use the `assert` keyword you already know. You run `pytest` in a terminal and it discovers them automatically.
+
+<Runnable code={`def is_even(n):
+    return n % 2 == 0
+
+
+# These are pytest-style test functions.
+# In a real project, pytest discovers and runs them automatically.
+# Here, we call them directly so you can see the pattern.
+
+def test_even_number():
+    assert is_even(4)
+
+def test_odd_number():
+    assert not is_even(3)
+
+def test_zero():
+    assert is_even(0)
+
+
+# Run the tests manually
+for test in [test_even_number, test_odd_number, test_zero]:
+    try:
+        test()
+        print(f"PASS  {test.__name__}")
+    except AssertionError as e:
+        print(f"FAIL  {test.__name__}: {e}")
+`} />
+
+A test fails by raising. `assert 1 + 1 == 3` raises `AssertionError`, and pytest shows the full expression and both sides. No `assertEqual(a, b, msg=...)` ceremony.
+
+### Checking that code raises an exception
+
+Use `pytest.raises` as a context manager. The block must raise an exception of that type, or the test fails. Since `pytest` is not in the browser runtime, you can replicate the same check with a small helper:
+
+<Runnable code={`import contextlib
+
+@contextlib.contextmanager
+def raises(exc_type, match=None):
+    """Stand-in for pytest.raises — use this in the browser exercises."""
+    try:
+        yield
+        raise AssertionError(f"Expected {exc_type.__name__} but no exception was raised")
+    except exc_type as e:
+        if match and match not in str(e):
+            raise AssertionError(f"Expected message to contain {match!r}, got {str(e)!r}")
+
+
+def divide(a, b):
+    if b == 0:
+        raise ValueError("cannot divide by zero")
+    return a / b
+
+
+def test_divide_by_zero():
+    with raises(ValueError, match="cannot divide by zero"):
+        divide(10, 0)
+
+
+def test_normal_division():
+    assert divide(10, 2) == 5.0
+
+
+for test in [test_divide_by_zero, test_normal_division]:
+    try:
+        test()
+        print(f"PASS  {test.__name__}")
+    except AssertionError as e:
+        print(f"FAIL  {test.__name__}: {e}")
+`} />
+
+<Callout type="tip">
+In a real pytest project, replace the `raises` helper with `pytest.raises` — the API is identical. Everything you write in the exercises ports over directly.
+</Callout>
+
+### Fixtures: shared setup
+
+Many tests need the same setup — a configured object, a temporary file, a seeded dataset. Repeating the setup in every test gets messy fast.
+
+In pytest, a fixture is a function decorated with `@pytest.fixture`. Tests that take a parameter with that name receive the fixture's return value. Fixtures live in `conftest.py`, a pytest-special file, so any test file in the project can use them.
+
+The pattern maps to a plain helper function in pure Python:
+
+<Runnable code={`# In pytest: @pytest.fixture  /  def make_account(): ...
+# Here: just a regular helper function.
+
+class BankAccount:
+    def __init__(self, balance=0):
+        self.balance = balance
+
+    def deposit(self, amount):
+        if amount <= 0:
+            raise ValueError("deposit must be positive")
+        self.balance += amount
+
+    def withdraw(self, amount):
+        if amount > self.balance:
+            raise ValueError("insufficient funds")
+        self.balance -= amount
+
+
+def make_account():
+    """Fixture: a fresh account with balance 100."""
+    return BankAccount(balance=100)
+
+
+def test_deposit():
+    account = make_account()
+    account.deposit(50)
+    assert account.balance == 150
+
+def test_withdraw():
+    account = make_account()
+    account.withdraw(30)
+    assert account.balance == 70
+
+def test_overdraft():
+    account = make_account()
+    try:
+        account.withdraw(200)
+        assert False, "should have raised"
+    except ValueError:
+        pass  # expected
+
+
+for test in [test_deposit, test_withdraw, test_overdraft]:
+    try:
+        test()
+        print(f"PASS  {test.__name__}")
+    except AssertionError as e:
+        print(f"FAIL  {test.__name__}: {e}")
+`} />
+
+Fixtures can also do teardown. In pytest you use `yield` instead of `return`: setup code before the `yield`, teardown code after. That pattern is the `@contextmanager` shape from Tier 2 — setup, yield, teardown.
+
+### Parametrize: one test, many inputs
+
+You have a function to test. You want to run it against ten inputs. Without parametrize:
+
+```python
+def test_palindrome_racecar():
+    assert is_palindrome("racecar")
+
+def test_palindrome_empty():
+    assert is_palindrome("")
+
+def test_not_palindrome_hello():
+    assert not is_palindrome("hello")
+```
+
+Three functions, mostly copy-paste. `pytest.mark.parametrize` collapses them into one function with a list of cases, and reports each case separately — when one fails you know exactly which input triggered it.
+
+<Runnable code={`def is_palindrome(s: str) -> bool:
+    return s == s[::-1]
+
+
+# Parametrize as data — same cases a pytest.mark.parametrize call would list.
+cases = [
+    ("racecar", True),
+    ("",        True),
+    ("a",       True),
+    ("hello",   False),
+    ("Aa",      False),  # case-sensitive
+]
+
+def test_palindrome(text, expected):
+    assert is_palindrome(text) == expected, (
+        f"is_palindrome({text!r}) returned {is_palindrome(text)!r}, expected {expected!r}"
+    )
+
+
+for text, expected in cases:
+    try:
+        test_palindrome(text, expected)
+        print(f"PASS  test_palindrome[{text!r}]")
+    except AssertionError as e:
+        print(f"FAIL  test_palindrome[{text!r}]: {e}")
+`} />
+
+<Callout type="tip">
+Adding a new case is one line in the data list. In pytest it's the same — extend the list passed to `@pytest.mark.parametrize`.
+</Callout>
+
+### Mocks: standing in for the outside world
+
+Your function calls an HTTP API. You don't want your test to actually make network requests — the test would be slow, flaky, and dependent on the API being up. You replace the network call with a mock that returns a fixed response.
+
+`unittest.mock` is Python's standard-library mocking tool. It works in the browser and in a real project alike.
+
+<Runnable code={`from unittest.mock import patch, MagicMock
+import json
+
+# Imagine this lives in your app.
+# It calls urllib to fetch a user name by ID.
+def get_user_name(user_id: int) -> str:
+    import urllib.request
+    url = f"https://api.example.com/users/{user_id}"
+    with urllib.request.urlopen(url) as response:
+        data = json.loads(response.read())
+    return data["name"]
+
+
+def test_get_user_name():
+    fake_response = MagicMock()
+    fake_response.__enter__ = lambda s: s
+    fake_response.__exit__ = MagicMock(return_value=False)
+    fake_response.read.return_value = json.dumps({"name": "Alice"}).encode()
+
+    with patch("urllib.request.urlopen", return_value=fake_response) as mock_open:
+        result = get_user_name(42)
+
+    assert result == "Alice"
+    mock_open.assert_called_once()
+    called_url = mock_open.call_args[0][0]
+    assert "42" in called_url
+    print(f"PASS  test_get_user_name (called URL: {called_url})")
+
+
+test_get_user_name()
+`} />
+
+`patch` replaces `urllib.request.urlopen` with a `MagicMock` for the duration of the `with` block. After the test it is itself again.
+
+One gotcha worth memorizing: patch where the name is *used*, not where it was defined. If `myapp.users` does `from urllib.request import urlopen`, then in tests you patch `myapp.users.urlopen`, not `urllib.request.urlopen`. The bound name in the module under test is what matters.
+
+### Coverage
+
+`pytest-cov` measures which lines your tests actually execute. Running `pytest --cov=mypackage --cov-report=term-missing` lists every line that no test touched.
+
+Coverage is a useful diagnostic, not a goal. 100% line coverage tells you every line ran during some test. It doesn't tell you the tests asserted anything meaningful, or that the edge cases were considered. Use it to find code that has no tests at all. Don't game it.
+
+## Virtual environments and dependency management
+
+You install `requests` with `pip install requests`. Where does it go? By default, into your system Python. Every project sharing that Python now shares `requests`. Upgrade one project's pin and the other project that was pinned to a different version breaks silently. The solution is to give every project its own isolated Python environment.
+
+The built-in tool is `venv`:
+
+```
+python -m venv .venv
+source .venv/bin/activate    # Linux / macOS
+.venv\Scripts\activate       # Windows
+pip install requests
+```
+
+The `.venv` directory contains its own Python interpreter and its own `site-packages`. While the venv is active, `python` and `pip` point to the ones inside it. Each project gets its own `.venv`, each can pin different versions, no project pollutes another.
+
+The modern alternative is **`uv`** (from Astral). It is faster and handles everything in one tool:
+
+```
+uv init my_project
+cd my_project
+uv add requests
+uv run python my_script.py
+```
+
+`uv init` creates a project with a `pyproject.toml` and a virtual environment. `uv add` resolves and installs the dependency, updates `pyproject.toml`, and writes `uv.lock` with the exact versions chosen. `uv run` executes inside the project's environment with no manual activation step.
+
+### The two files that matter
+
+`pyproject.toml` declares what your project depends on at the loose level — `"requests>=2.31"`. `uv.lock` records the exact versions the resolver chose, along with every transitive dependency. Commit both.
+
+A colleague who clones the repo runs `uv sync` and gets exactly what you have. Without a lockfile, "works on my machine" is the only guarantee. `requests` might release a patch tomorrow that subtly breaks your code. CI catches it; you don't, because your local environment still has the old version.
+
+### A first `pyproject.toml`
+
+```toml
+[project]
+name = "myproject"
+version = "0.1.0"
+description = "A short description"
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31",
+    "click>=8.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.1.0",
+    "mypy>=1.5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+```
+
+`[project]` is project metadata: name, version, the Python version it requires, what it depends on. `[project.optional-dependencies]` groups extras that are not always installed — here, the development tools. Tool configuration also lives here: ruff's config goes in `[tool.ruff]`, mypy's in `[tool.mypy]`, pytest's in `[tool.pytest.ini_options]`. One file, all settings.
+
+## Code quality tools
+
+Pick a formatter and a linter once, configure them once, and never think about them again.
+
+**`ruff`** is a linter and formatter written in Rust. It's fast — milliseconds where older tools took seconds — and it replaces a whole stack of older tools (`flake8`, `isort`, `black`) in one binary. For new projects it's now the default:
+
+```
+uv add --dev ruff
+uv run ruff check .      # lint
+uv run ruff format .     # format
+```
+
+Configuration in `pyproject.toml`:
+
+```toml
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+```
+
+The `select` list controls which rule families ruff applies — `E` for style errors, `F` for likely bugs, `I` for import sorting, `B` for common bugs, `UP` to modernize old syntax, `SIM` for simplification hints.
+
+**`mypy`** type-checks your annotations:
+
+```
+uv add --dev mypy
+uv run mypy mypackage/
+```
+
+The first run on an untyped codebase produces a lot of errors. Don't try to fix them all at once. Configure mypy to enforce strict typing on new code and stay lenient on legacy code:
+
+```toml
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = "mypackage.new_module"
+strict = true
+```
+
+As old modules get touched, migrate them to strict one at a time.
+
+**`pre-commit`** wires these tools into git so they run on every commit automatically. Without it, you remember to run them most of the time, forget once, push unformatted code, get a CI failure, and push a follow-up commit. With it, the commit refuses to complete if anything fails:
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.5.0
+    hooks:
+      - id: mypy
+```
+
+Install with `pipx install pre-commit` then `pre-commit install` once in the repo. Every `git commit` runs ruff and mypy from that point on. This ends formatting arguments in code review — the tool already decided.
+
+## Project layout: src vs flat
+
+Two conventions:
+
+**Flat layout** puts your package next to your tests:
+
+```
+myproject/
+├── mypackage/
+│   ├── __init__.py
+│   └── core.py
+├── tests/
+│   └── test_core.py
+└── pyproject.toml
+```
+
+**`src/` layout** nests the package one level deeper:
+
+```
+myproject/
+├── src/
+│   └── mypackage/
+│       ├── __init__.py
+│       └── core.py
+├── tests/
+│   └── test_core.py
+└── pyproject.toml
+```
+
+The `src/` layout is more robust. With flat layout, running tests from the project root finds `mypackage` because the current directory is on `sys.path` — tests pass even if your package is not properly installed. With `src/` layout, the only way to import `mypackage` is to install the project (`uv pip install -e .`), so tests run against the installed version and catch packaging mistakes before users do. Default to `src/` for new projects.
+
+## Packaging and publishing
+
+When your code becomes a library someone else will use, you build it into a distributable:
+
+```
+uv build
+ls dist/
+# mypackage-0.1.0-py3-none-any.whl
+# mypackage-0.1.0.tar.gz
+```
+
+Publish to TestPyPI first (the staging server), confirm everything looks right, then publish to real PyPI:
+
+```
+uv publish --publish-url https://test.pypi.org/legacy/
+uv publish
+```
+
+Semantic versioning is the convention: bump the patch number for bug fixes (`1.4.7` to `1.4.8`), minor for new features (`1.5.0`), major for breaking changes (`2.0.0`). Stick to this and users can read the version number to judge whether upgrading is safe.
+
+## Common pitfalls
+
+**No virtual environment.** Installing dependencies globally creates conflicts between projects. Every project gets its own venv. If you don't have one yet, that is the first thing to fix.
+
+**No lockfile.** Pinning ranges in `pyproject.toml` (`requests>=2.31`) is not the same as locking exact versions. Use `uv.lock` and commit it. Without it, "works on my machine" is the only guarantee.
+
+**Tests that hit real external services.** Tests should be hermetic. Mock the network, mock the database, use `tmp_path` for files. Save the real-thing tests for a separate integration suite.
+
+**Coverage as a grade.** A line can be covered by a test that doesn't assert anything useful. Use it to find untested code, not to measure quality.
+
+**Patching the wrong place.** `patch("requests.get")` patches the name in `requests`. If `myapp.users` did `from requests import get`, the patch must be `patch("myapp.users.get")`. Patch where the name is bound, not where it was defined.
+
+**Forgetting `pre-commit install`.** A `.pre-commit-config.yaml` in the repo does nothing until each developer runs `pre-commit install` once. CI should also run `pre-commit run --all-files` so the rule is enforced even when someone forgets.
+
+## Recap
+
+`pytest` replaces `unittest`'s class-based ceremony with plain functions and `assert`. Fixtures share setup. `parametrize` runs one test against many inputs. `pytest.raises` checks for expected exceptions. Patch external systems with `unittest.mock.patch`, and patch where the name is *used*, not where it was defined.
+
+Always work inside a virtual environment. `uv` handles project setup, dependency management, and execution. Commit both `pyproject.toml` and `uv.lock` together so a colleague can `uv sync` and reproduce your environment exactly.
+
+`ruff` lints and formats. `mypy` type-checks. `pre-commit` runs them on every commit. Configure once in `pyproject.toml`.
+
+Prefer `src/` layout for new projects. Build with `uv build`. Publish with `uv publish`. Use semantic versioning.

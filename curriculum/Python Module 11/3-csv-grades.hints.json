@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Import the csv module at the top of your file. Open the CSV with `with open(filepath, \"r\") as f:`, then create a reader with `csv.DictReader(f)` and iterate over it with `for row in reader:`.",
+    "Each row is a dictionary. The score is a string — CSV values are always strings. Cast it before storing: `int(row[\"score\"])`. Build each entry as `{\"name\": row[\"name\"], \"score\": int(row[\"score\"])}` and append it to your list.",
+    "For `average_score`, call `load_grades` to get the list. Guard against an empty list with `if not grades: return 0.0`. Then compute `sum(g[\"score\"] for g in grades) / len(grades)` and wrap it in `round(..., 1)`.",
+    "If you're getting a float like 85.66666... instead of 85.7, you're missing the `round(..., 1)` call. Wrap the division: `return round(total / len(grades), 1)`."
+  ]
+}

@@ -1,0 +1,55 @@
+CPU-bound work — pure Python computation that doesn't wait on the network or disk — doesn't benefit from threads because the GIL only lets one thread run Python code at a time. To use multiple CPU cores you need multiple *processes*, each with their own GIL.
+
+In this exercise you'll write two CPU-bound helper functions and wire them up with `ProcessPoolExecutor`.
+
+<Callout type="warning">
+`ProcessPoolExecutor` spawns real OS subprocesses, which aren't available in the browser runtime. Press **Submit** here to check your logic; to see the actual parallel speedup, run the solution file locally with `python solution.py`.
+</Callout>
+
+## Part 1: a picklable task function
+
+Write a top-level function `count_factors(n: int) -> int` that returns how many integers in the range `[1, n]` divide `n` evenly. For example, `count_factors(12)` returns `6` (factors 1, 2, 3, 4, 6, 12).
+
+The function must be defined at module level (not inside another function or class) so that `ProcessPoolExecutor` can pickle and ship it to worker processes.
+
+## Part 2: parallel execution
+
+Write a function `factor_counts(numbers: list[int], max_workers: int) -> dict[int, int]` that uses `ProcessPoolExecutor(max_workers=max_workers)` to call `count_factors` on every number and returns a dict mapping each number to its factor count.
+
+## Part 3: the __main__ guard
+
+Add a `if __name__ == "__main__":` block at the bottom of your file that calls `factor_counts` on a short list and prints the result. This guard is required on Windows and macOS — without it, each worker process re-imports the module and spawns more workers recursively.
+
+## What to implement
+
+```python
+from concurrent.futures import ProcessPoolExecutor
+
+
+def count_factors(n: int) -> int:
+    # your code here
+    pass
+
+
+def factor_counts(numbers: list[int], max_workers: int) -> dict[int, int]:
+    # your code here
+    pass
+
+
+if __name__ == "__main__":
+    print(factor_counts([12, 13, 36, 100], max_workers=4))
+```
+
+## Checking your work
+
+```python
+print(count_factors(12))   # 6
+print(count_factors(13))   # 2  (prime)
+print(count_factors(1))    # 1
+
+result = factor_counts([12, 13, 36, 100], max_workers=4)
+print(result[12])    # 6
+print(result[13])    # 2
+print(result[36])    # 9
+print(result[100])   # 9
+```

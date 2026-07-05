@@ -1,0 +1,13 @@
+{
+  "id": "10-data-manipulation-and-transactions",
+  "title": "Data Manipulation & Transactions",
+  "description": "The write half of SQL: INSERT (full and column-list forms), UPDATE (one column or several, computed from the old value), the career-ending danger of an UPDATE/DELETE with no WHERE, and DELETE. Then the safety net: transactions (BEGIN, COMMIT, ROLLBACK) and atomicity, autocommit and the sharp Oracle-vs-SQLite split, and how a foreign key governs deleting a referenced row.",
+  "lessons": [
+    { "id": "lecture", "title": "Data Manipulation & Transactions", "type": "lecture", "order": 1 },
+    { "id": "ex-insert-a-new-hire", "title": "INSERT: Add a New Hire", "type": "exercise", "order": 2 },
+    { "id": "ex-update-one-row", "title": "UPDATE: Assign One Employee", "type": "exercise", "order": 3 },
+    { "id": "ex-give-a-raise", "title": "UPDATE: Raise a Whole Branch", "type": "exercise", "order": 4 },
+    { "id": "ex-delete-a-row", "title": "DELETE: Remove One Row", "type": "exercise", "order": 5 },
+    { "id": "ex-rollback-a-mistake", "title": "ROLLBACK: Undo a Disaster", "type": "exercise", "order": 6 }
+  ]
+}

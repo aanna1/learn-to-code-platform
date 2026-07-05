@@ -6,11 +6,14 @@ import { mdxComponents } from "@/components/lesson/mdxComponents";
 import { LessonLanguageProvider } from "@/components/lesson/LessonLanguageProvider";
 import { LectureFooter } from "@/components/lesson/LectureFooter";
 import { ExercisePane } from "@/components/lesson/ExercisePane";
+import { StructuredExercise } from "@/components/lesson/StructuredExercise";
+import type { StructuredAnswer, StructuredQuestion } from "@/lib/structured/types";
 import {
   getExercise,
   getLecture,
   getLessonNeighbors,
   getLessonRef,
+  getModeling,
   listLessonParams,
   type LessonNavLink,
 } from "@/lib/content/loader";
@@ -103,6 +106,44 @@ export default async function LessonPage({ params }: PageProps) {
           lessonId={lessonId}
           quiz={lecture.quiz}
         />
+
+        <PrevNext
+          languageId={language}
+          prev={prev}
+          next={next}
+          className="mt-12 border-t border-border pt-6"
+        />
+      </main>
+    );
+  }
+
+  if (ref.type === "modeling") {
+    const modeling = getModeling(language, moduleId, lessonId);
+    const Prompt = await compileMdx(modeling.promptMdxSource);
+
+    return (
+      <main className="mx-auto max-w-3xl px-6 py-10">
+        <Link href={`/learn/${language}`} className="text-sm text-muted hover:text-text">
+          ← {moduleManifest.title}
+        </Link>
+
+        <article className="mt-6">
+          <h1 className="text-3xl font-bold tracking-tight">{ref.title}</h1>
+          <LessonLanguageProvider languageId={language}>
+            <Prompt components={mdxComponents} />
+          </LessonLanguageProvider>
+        </article>
+
+        <div className="mt-8 border-t border-border pt-8">
+          <StructuredExercise
+            languageId={language}
+            moduleId={moduleId}
+            lessonId={lessonId}
+            question={modeling.question as StructuredQuestion}
+            answer={modeling.answer as StructuredAnswer}
+            hints={modeling.hints.hints}
+          />
+        </div>
 
         <PrevNext
           languageId={language}

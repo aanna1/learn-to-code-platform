@@ -1,0 +1,79 @@
+{
+  "questions": [
+    {
+      "question": "What does this print?\n\ndef test_add():\n    assert 1 + 1 == 3\n\ntry:\n    test_add()\n    print('passed')\nexcept AssertionError:\n    print('failed')",
+      "options": [
+        {
+          "text": "failed",
+          "correct": true,
+          "explanation": "Correct. `assert 1 + 1 == 3` evaluates `2 == 3`, which is False, so Python raises AssertionError. The except block catches it and prints 'failed'. This is the core mechanic of a test: a failing assertion raises AssertionError, and pytest (or a manual runner like this) catches it and reports the failure."
+        },
+        {
+          "text": "passed",
+          "correct": false,
+          "explanation": "The assert evaluates `1 + 1 == 3`, which is `2 == 3`, which is False. A False assertion raises AssertionError — it does not silently pass. The test fails, not passes."
+        },
+        {
+          "text": "Nothing — assert statements are stripped at runtime.",
+          "correct": false,
+          "explanation": "Python only strips assert statements when run with the -O (optimize) flag. In normal execution, assert works exactly as written. The CLAUDE.md notes this edge case too: don't use assert for control flow in production code precisely because -O could strip it, but in test files it is the right tool."
+        },
+        {
+          "text": "AssertionError",
+          "correct": false,
+          "explanation": "An AssertionError is raised, but the except block catches it and prints 'failed' — so 'failed' is what actually appears as output. The exception is handled, not propagated to the top level."
+        }
+      ]
+    },
+    {
+      "question": "You have a module `myapp/fetcher.py` that contains:\n\n    from requests import get\n\n    def fetch(url):\n        return get(url).text\n\nYou want to test `fetch` without making a real HTTP request. Which patch target is correct?",
+      "options": [
+        {
+          "text": "patch('myapp.fetcher.get')",
+          "correct": true,
+          "explanation": "Correct. The rule is: patch where the name is bound, not where it was defined. `fetcher.py` imported `get` with `from requests import get`, so the name `get` now lives in the `myapp.fetcher` namespace. Patching `requests.get` would replace the original, but `myapp.fetcher.get` already points to the old object — so the patch would have no effect on calls inside `fetcher.py`. You must patch `myapp.fetcher.get`."
+        },
+        {
+          "text": "patch('requests.get')",
+          "correct": false,
+          "explanation": "This patches `get` inside the `requests` module, but `fetcher.py` already imported and bound the name `get` in its own namespace with `from requests import get`. That local reference doesn't update when you patch the original. The test would call the real `requests.get` anyway. You need to patch where the name is *used*: `myapp.fetcher.get`."
+        },
+        {
+          "text": "patch('myapp.fetcher.requests.get')",
+          "correct": false,
+          "explanation": "`fetcher.py` used `from requests import get`, not `import requests`. There is no `requests` attribute in the `myapp.fetcher` namespace — only `get`. `myapp.fetcher.requests.get` would raise AttributeError when the patch tries to resolve it."
+        },
+        {
+          "text": "No patching needed — `unittest.mock` intercepts HTTP automatically.",
+          "correct": false,
+          "explanation": "`unittest.mock` does not intercept anything automatically. You have to explicitly tell it what to replace and with what. Nothing happens to network calls unless you patch the specific name your code is using."
+        }
+      ]
+    },
+    {
+      "question": "You commit `pyproject.toml` to a shared repo but not `uv.lock`. A colleague clones the repo and runs `uv sync`. What is the most likely outcome?",
+      "options": [
+        {
+          "text": "They get a different set of dependency versions than you have.",
+          "correct": true,
+          "explanation": "Correct. `pyproject.toml` lists version ranges (`requests>=2.31`), not exact versions. Without a lockfile, `uv sync` resolves those ranges fresh and picks the latest versions that satisfy the constraints at that moment. If any package released a new version between your install and your colleague's, they get a different environment. That's exactly the 'works on my machine' problem the lockfile exists to prevent. Commit `uv.lock` alongside `pyproject.toml`."
+        },
+        {
+          "text": "The install fails because `uv.lock` is required for `uv sync` to work.",
+          "correct": false,
+          "explanation": "`uv sync` does not require a lockfile to exist — it creates or updates one when run. The problem isn't that it fails; the problem is that it resolves dependencies fresh, potentially picking different versions than you have. The install succeeds, but reproducibility is lost."
+        },
+        {
+          "text": "They get exactly the same versions you have, because `pyproject.toml` fully specifies versions.",
+          "correct": false,
+          "explanation": "`pyproject.toml` specifies ranges or lower bounds (`>=2.31`), not exact pinned versions. Multiple versions can satisfy a range. The exact version chosen depends on what is available at resolution time. Only `uv.lock` records the specific version that was actually resolved."
+        },
+        {
+          "text": "uv downloads your local packages directly from your machine.",
+          "correct": false,
+          "explanation": "`uv` installs from PyPI (or a configured package index), not from another developer's machine. There is no mechanism that transfers your local packages to a colleague. Each developer's environment is built independently from the index."
+        }
+      ]
+    }
+  ]
+}

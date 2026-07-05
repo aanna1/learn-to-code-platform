@@ -1,0 +1,372 @@
+# Module 03 — Entity-Relationship Modeling
+
+> Tags: `[27200]`
+
+In Module 02 you learned to *read* a database that already exists — tables, primary keys, and
+the foreign keys that tie them together. This module is about the step that comes *before* any
+of that: deciding what tables you need in the first place, and how they connect, from nothing
+but a description of the business. That blueprint is called an **entity-relationship diagram**,
+or **ERD** — and drawing one by hand from a plain-English scenario is exactly what the CNIT
+27200 exam asks you to do.
+
+Design is also where security starts. The decisions you make here — what counts as its own
+entity, which attributes are sensitive, how strictly two tables are tied together — are what
+decide how well you can lock the data down later. We'll flag that consequence at every step, not
+just at the end.
+
+## Prerequisites
+
+Module 02 — tables, primary keys, and especially foreign keys (an ERD is mostly a picture of
+the foreign keys you're about to create). It also helps to remember Module 01's **CIA triad** —
+confidentiality, integrity, availability — because most modeling choices push on one of those
+three.
+
+## What you'll learn
+
+- Entities and attributes, and how they become tables and columns
+- Relationships, and how to draw and read them in **crow's foot** notation
+- Cardinality: one-to-one, one-to-many, and many-to-many
+- Why a many-to-many relationship needs an **associative entity**
+- The **identifying vs. non-identifying** distinction the exam loves to test
+- How to turn a paragraph of business requirements into a finished ERD
+- (woven throughout) how each modeling decision changes the security of your data
+
+## Entities and attributes
+
+An **entity** is a kind of thing you need to store data about — an employee, a branch, a
+project. On paper it's a box; in the finished database it becomes a **table**. An **attribute**
+is a single fact that every one of those things has — an employee's first name, hire date,
+salary. Attributes become the **columns** of that table.
+
+```
+    employee
++----------------+
+| employee_id PK |
+| first_name     |
+| last_name      |
+| salary         |
+| branch_id   FK |
++----------------+
+```
+
+One attribute is special: the one that uniquely identifies each instance — the **primary key**
+you met in Module 02. In an ERD you mark it (here, `PK`). Everything you learned about surrogate
+versus natural keys applies when you pick it.
+
+Keep two words straight, because the exam will try to trip you on them. The **entity** is the
+type — "employee," the box. An **instance** (or entry) is one actual employee — Michael Scott.
+The box describes the shape every employee will share; the rows come later.
+
+> **Security lens:** The moment you list an entity's attributes is the moment to notice which
+> ones are sensitive — `salary` here, or an `ssn`, or a password hash. Confidentiality (the C in
+> the CIA triad) is far easier to enforce when you've spotted the sensitive attributes at design
+> time. In a minute you'll see that pulling the most sensitive attributes into their *own* entity
+> is one of the cleanest ways to protect them.
+
+## Relationships
+
+A list of boxes on their own doesn't say much. A **relationship** is a line between two entities
+that says they're connected. "An employee *works in* a branch" is a relationship between the
+`employee` entity and the `branch` entity:
+
+```
+    employee                    branch
++----------------+          +--------------+
+| employee_id PK |          | branch_id PK |
+| first_name     |--------->| name         |
+| branch_id   FK |          | city         |
++----------------+          +--------------+
+```
+
+This is the same foreign key from Module 02, now drawn as a picture. The `branch_id` attribute
+on `employee` is what physically *implements* the line — it stores the `branch_id` of the branch
+that employee works in. More than anything else, an ERD is a map of your foreign keys, drawn
+before you write a single `CREATE TABLE`.
+
+> **Security lens:** A foreign key isn't only an arrow — it's an **integrity** control (the I in
+> CIA). Once the database knows `employee.branch_id` must match a real `branch`, it will refuse
+> to store an employee pointing at a branch that doesn't exist, and refuse to delete a branch out
+> from under employees who reference it. That "no dangling references" guarantee is something a
+> careless bulk delete — or an attacker poking at your data — can't easily corrupt. Referential
+> integrity is a security property, not just a tidiness one.
+
+## Cardinality: how many relate to how many
+
+A line says two entities are connected. **Cardinality** says *how many* of one connect to *how
+many* of the other — and it's usually the difference between a correct design and a broken one.
+There are three shapes.
+
+Crow's foot notation shows cardinality with small symbols at each *end* of the line. Read the
+symbol nearest an entity as "for one of the other entity, how many of *this* one." The pieces:
+
+```
+--||    exactly one    (one bar for "one", a second bar for "and only one")
+--o|    zero or one     (the o means "optional")
+--|<    one or many     (the < is the "crow's foot": three prongs = many)
+--o<    zero or many
+```
+
+**One-to-many (1:N)** is by far the most common. One branch has many employees; each employee
+works in exactly one branch:
+
+```
+branch  ||---------------|<  employee
+        ^^               ^^
+   each employee     each branch has
+   has exactly       one or many
+   one branch        employees
+```
+
+Read it slowly, because beginners flip it constantly: the `||` sits at the branch end, so *each
+employee has exactly one branch*; the `|<` sits at the employee end, so *each branch has one or
+many employees*. (If a branch is allowed to have zero employees, you'd use `o<` instead — whether
+the "many" side can be empty is a real design choice, but we'll use `|<` for readability unless
+zero matters.)
+
+**One-to-one (1:1)** — exactly one on each side. Rarer, but real. Suppose every employee has one
+login account, and each account belongs to one employee:
+
+```
+employee  ||--------------||  user_account
+```
+
+Why bother splitting those into two tables if it's one-to-one? Security is the best reason.
+Keeping `password_hash` and `failed_login_count` in a separate `user_account` table means you can
+give the payroll clerk read access to `employee` without handing them the credentials table at
+all. A one-to-one split is one of the sharpest tools you have for confidentiality: isolate the
+crown-jewel attributes in their own entity, then lock that one table down harder than the rest.
+
+**Many-to-many (N:M)** — the interesting one. An employee can work on many projects, and a
+project can have many employees. Neither side is "one":
+
+```
+employee  >|--------------|<  project      (you can't build this directly!)
+```
+
+You *cannot* store a many-to-many relationship with a single foreign key. Where would it even
+go? An `employee` row can't hold a list of project IDs in one column, and a `project` row can't
+hold a list of employee IDs — a column stores one value, not a list. That limitation is what the
+next section is about.
+
+## Resolving many-to-many: the associative entity
+
+The fix for a many-to-many is to invent a new entity that sits *between* the two — an
+**associative entity** (you'll also hear "junction" or "bridge" entity). Each of its rows records
+exactly one pairing.
+
+Give the employee–project relationship an `assignment` entity:
+
+```
+   employee              assignment              project
++-------------+       +----------------+     +--------------+
+| employee_id |       | employee_id FK |     | project_id   |
+|   PK        |       | project_id  FK |     |   PK         |
+| first_name  |       | assigned_date  |     | name         |
++-------------+       | hours          |     +--------------+
+                      +----------------+
+
+  employee  ||====< assignment    +    assignment >====|| project
+```
+
+The single many-to-many line is now *two* one-to-many lines: one employee has many assignments,
+and one project has many assignments. Each `assignment` row is one employee on one project —
+"Michael on the Scranton-website project, assigned March 3rd, 40 hours." That's also why the
+associative entity is the natural home for facts about the *pairing itself* (`assigned_date`,
+`hours`) — facts that belong neither to the employee alone nor the project alone.
+
+> **Security lens:** Associative entities are where auditing lives. "Which employees can touch
+> which projects" is an *access* question, and the `assignment` table is precisely the record of
+> the answer — a natural place to bolt on a `granted_by` or `granted_at` column, and later to
+> audit who had access to what and when. When you resolve a many-to-many, you've usually just
+> discovered an audit log waiting to happen.
+
+## Identifying vs. non-identifying relationships
+
+Now the distinction the exam cares about most. Look again at two of the foreign keys we've drawn:
+
+- `employee.branch_id` points at `branch`
+- `assignment.employee_id` points at `employee`
+
+They *feel* the same, but they're not, and the difference has a name.
+
+A **non-identifying** relationship is one where the child can exist and be identified on its own,
+without the parent. An employee has its own `employee_id`; it's a complete, identifiable thing
+whether or not it has a branch. `branch_id` is just an ordinary attribute that happens to point
+elsewhere — it is **not** part of the employee's primary key. Employee 101 is employee 101 no
+matter which branch it sits in.
+
+An **identifying** relationship is one where the child *can't* be identified without the parent —
+the parent's key is *part of* the child's own primary key. Look at `assignment`: what makes one
+of its rows unique? Not `employee_id` alone (an employee has many assignments), and not
+`project_id` alone (a project has many). It takes *both together* — the composite key
+`(employee_id, project_id)` — to identify one assignment. The parents' keys are baked into the
+child's key. Remove either parent and the assignment row has no identity left; it can't exist.
+That's an identifying relationship, and `assignment` is what's called a **weak entity** — one
+that borrows part of its identity from its parents.
+
+Crow's foot shows the difference with the line *style*. **The real convention — the one a
+handwritten exam expects — is a solid line for an identifying relationship and a dashed line for a
+non-identifying one.** A true dashed line is awkward to draw in plain text, so this module
+substitutes a **doubled line `====` for the solid (identifying) line** and a **single line `----`
+for the dashed (non-identifying) line**. When you draw one by hand, don't carry the doubled line
+onto the page — use a plain solid line for identifying and a dashed line for non-identifying:
+
+```
+non-identifying (dashed on paper):   branch    ||----------|<  employee
+identifying     (solid on paper):    employee  ||==========|<  assignment
+```
+
+> **Notation note:** the real CNIT 27200 course models in **Oracle Data Modeler** (Barker
+> notation), so the diagrams you're graded on may not look exactly like these ASCII sketches — the
+> solid-line-vs-dashed-line *meaning* is identical, but the precise symbols, and how crow's-foot
+> cardinality is drawn alongside them, can vary by tool. Learn the distinction and the
+> solid/dashed rule; treat the ASCII art here as a stand-in for whatever notation your exam uses.
+
+Here's the one-question test you can apply on the exam: **"Is the parent's key part of the
+child's primary key?"** Yes → identifying (doubled line). No → non-identifying (single line). An
+associative entity is almost always identifying on both sides; a plain reference like
+`employee.branch_id` is non-identifying.
+
+> **Security lens:** This distinction decides what happens on delete, which is an availability and
+> integrity question. Delete a branch that employees reference (non-identifying): you have to
+> *choose* — block the delete, or set those employees' `branch_id` to NULL? Delete an employee
+> that has assignments (identifying): those assignment rows can't survive without their parent, so
+> they cascade-delete along with the employee. Getting this backwards is how a "routine" cleanup
+> either orphans data or destroys far more than anyone intended — both of which have bitten real
+> systems.
+
+## Putting it together: model the Dunder Mifflin database
+
+Here's a business description, the way you'd get one on the exam:
+
+> Dunder Mifflin has several **branches**, each in a city. Each **employee** works at exactly one
+> branch. Employees are assigned to **clients**: a client can be handled by several employees, and
+> an employee can handle several clients. We track the date each employee–client assignment
+> started.
+
+Work it in the same four steps every time:
+
+1. **Find the entities** — the nouns you store data about: `branch`, `employee`, `client`.
+2. **Give each some attributes and a primary key:** `branch(branch_id PK, city)`,
+   `employee(employee_id PK, first_name, last_name, branch_id FK)`, `client(client_id PK, name)`.
+3. **Find the relationships and their cardinality:**
+   - branch–employee: one branch, many employees → **1:N**, non-identifying (an employee has its
+     own id and doesn't need a branch to be identified).
+   - employee–client: **many-to-many** ("several" in both directions).
+4. **Resolve every many-to-many into an associative entity:** invent
+   `assignment(employee_id FK, client_id FK, start_date)` with primary key
+   `(employee_id, client_id)` — identifying on both sides.
+
+The finished ERD:
+
+```
+branch      (branch_id PK, city)
+employee    (employee_id PK, first_name, last_name, branch_id FK)
+client      (client_id PK, name)
+assignment  (employee_id FK, client_id FK, start_date,  PK = employee_id + client_id)
+
+relationships (crow's foot):
+  branch    ||----------|<  employee      1:N   non-identifying (single line)
+  employee  ||==========|<  assignment    1:N   identifying     (doubled line)
+  client    ||==========|<  assignment    1:N   identifying     (doubled line)
+```
+
+That's a complete design — three real-world entities, one associative entity to carry the
+many-to-many, cardinalities marked, and every foreign key accounted for — produced from a single
+paragraph of English. Do this enough times and it turns mechanical, which is exactly what a
+two-hour handwritten exam rewards.
+
+> **Security lens:** Notice the finished design already hands you your access boundaries. The
+> `assignment` table *is* the answer to "which employee may see which client," so it's what you'd
+> audit and what you'd protect. If `client` later grows sensitive fields — contract value, private
+> contacts — you'd reach straight for the one-to-one trick and split those into a locked-down
+> `client_private` entity. Security wasn't bolted on at the end; it fell out of modeling the data
+> honestly.
+
+## Try it: predict the design
+
+```
+A warehouse stores many products. Each product is stored in exactly one
+warehouse. Separately, suppliers ship products: one supplier ships many
+different products, and one product can come from many different suppliers.
+```
+
+Two relationships are hiding in there. Name the cardinality of each, and say which one needs an
+associative entity.
+
+<details>
+<summary>Work it out, then click to check</summary>
+
+**warehouse–product is one-to-many (1:N).** "Each product is stored in exactly one warehouse"
+means a single `warehouse_id` foreign key on `product` does the job. It's non-identifying: a
+product has its own `product_id` and doesn't need a warehouse to be identified.
+
+**supplier–product is many-to-many (N:M).** "One supplier ships many products, one product comes
+from many suppliers" — neither side is "one," so a single foreign key can't fit. Resolve it with
+an associative entity, say `supply(supplier_id FK, product_id FK, ...)` with primary key
+`(supplier_id, product_id)` — an identifying relationship on both sides. That table is also where
+the facts about the pairing live, like the price *this* supplier charges for *that* product.
+
+If you answered that supplier–product was one-to-many, re-read the sentence: the tell is "many …
+many," once on each side.
+
+</details>
+
+## Recap
+
+An ERD is the blueprint you draw before building tables: **entities** (things, which become
+tables), **attributes** (facts, which become columns), and **relationships** (the lines that
+become foreign keys). **Cardinality** — read off the crow's foot symbols — says whether a
+relationship is one-to-one, one-to-many, or many-to-many. A many-to-many can't be stored with a
+single foreign key, so you resolve it into an **associative entity** whose rows are the pairings.
+A relationship is **identifying** (doubled line) when the parent's key is part of the child's
+primary key — the child can't exist without the parent, as with an associative entity — and
+**non-identifying** (single line) when the foreign key is just an ordinary attribute, as with
+`employee.branch_id`. And every one of these choices carries a security consequence: which
+attributes to isolate for confidentiality, foreign keys as integrity controls, associative
+entities as audit points, and identifying relationships as the thing that decides what a delete
+takes down with it.
+
+## Quiz seeds
+
+- Q: In ER modeling, what's the difference between an entity and an attribute?
+  - ✅ An entity is a kind of thing you store data about (it becomes a table); an attribute is a
+    single fact about that thing (it becomes a column)
+  - ❌ An entity is a single row and an attribute is a single column — an entity is the whole
+    type, not one row; a specific row is called an instance
+  - ❌ An entity is a number and an attribute is text — the data type has nothing to do with the
+    distinction
+
+- Q: An employee can work on many projects, and a project can have many employees. How do you
+  store this many-to-many relationship?
+  - ✅ Create an associative (junction) entity whose rows each record one employee–project pairing
+  - ❌ Put a list of project IDs in a single column on the employee table — a column holds one
+    value, not a list, which is exactly why the associative entity is needed
+  - ❌ Add a foreign key to whichever table is more important — a single foreign key can only
+    capture one-to-many; it can't represent "many" on both sides
+
+- Q: The `assignment` table's primary key is `(employee_id, project_id)`, both borrowed from its
+  parents. Is its relationship to `employee` identifying or non-identifying?
+  - ✅ Identifying — the parent's key is part of the child's own primary key, so the assignment
+    can't be identified (or exist) without the parent
+  - ❌ Non-identifying — that would mean the foreign key is just an ordinary attribute, but here
+    it's part of the primary key
+  - ❌ It depends on the rows in the table — identifying vs. non-identifying is fixed by the
+    design (is the parent's key in the child's PK?), not by the data
+
+- Q: You split employee credentials into a separate `user_account` table with a one-to-one
+  relationship to `employee`. What's the security benefit?
+  - ✅ You can grant access to `employee` without exposing the credentials, keeping the most
+    sensitive attributes in a separately lockable entity (confidentiality)
+  - ❌ It makes every query run faster — performance isn't the point here; isolating sensitive
+    data for access control is
+  - ❌ It prevents SQL injection entirely — table structure alone doesn't stop injection; that's
+    about how queries are built (Module 11)
+
+## Up next
+
+Module 04 takes the schema you can now *draw* and asks whether it's actually *well-designed*:
+**normalization**. You'll learn the rules — first, second, and third normal form — that catch the
+redundancy problems Module 02 warned about (repeating a branch's phone number on every employee
+row) and turn "this feels messy" into a precise, checkable process. The ERD gives you the shape;
+normalization is the quality check.

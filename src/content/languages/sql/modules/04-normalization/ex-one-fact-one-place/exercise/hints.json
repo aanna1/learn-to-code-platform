@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The fact you want to see stored once is the city — it lives in the branch table.",
+    "You want two columns from branch: branch_id and city, in that order.",
+    "List them separated by a comma: SELECT branch_id, city FROM branch;"
+  ]
+}

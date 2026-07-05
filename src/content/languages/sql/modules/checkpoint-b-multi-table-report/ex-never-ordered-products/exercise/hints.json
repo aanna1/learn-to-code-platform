@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "You can't find products with no orders using an INNER JOIN — it only keeps products that DID match an order_item. You need the unmatched ones, which is what an outer join surfaces.",
+    "LEFT JOIN product to order_item. Products that were never ordered still produce a row, but with all the order_item columns NULL. Filter to exactly those: WHERE oi.product_id IS NULL.",
+    "Full shape: SELECT p.name FROM product p LEFT JOIN order_item oi ON oi.product_id = p.product_id WHERE oi.product_id IS NULL ORDER BY p.name; This 'LEFT JOIN ... IS NULL' pattern is the anti-join — finding rows on one side with no partner on the other."
+  ]
+}

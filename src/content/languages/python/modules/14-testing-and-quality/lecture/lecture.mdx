@@ -1,0 +1,308 @@
+## Why this matters
+
+You wrote a `square` function:
+
+```python
+def square(n):
+    return n * n
+```
+
+You ran it. `square(2)` gave you `4`. `square(3)` gave you `9`. Looks good. You ship it.
+
+Two weeks later, a colleague reports your function "doesn't work." They passed in `-5` and got `25` — correct, but they expected `-25` because they misunderstood squaring. You explain. They move on. The next week, someone passes in `"4"` (a string) and gets `"44"` (string repetition). That one is a real bug. You patch the function. In patching it, you accidentally break the negative-number case. Now `square(-5)` returns `5`. You ship the patch. The original colleague's code, which depended on `square(-5) == 25`, starts producing wrong results in a corner of the codebase nobody has looked at for weeks.
+
+This is the problem testing solves. Running your function once with a couple of inputs tells you it works *today*. A test suite tells you it still works *after every change you make for the rest of its life*.
+
+This module also wraps up the curriculum. We will cover testing, style conventions, and the paradigms you have already used without naming them. Then a tour of the libraries that will define the next chapter of your Python work.
+
+## What you'll be able to do by the end
+
+- Use `assert` for quick sanity checks and explain when it is the wrong tool.
+- Write a unit test in `unittest` with the arrange/act/assert pattern.
+- Recognize `pytest`'s simpler syntax and know when to reach for it.
+- Apply PEP 8 conventions and use `ruff` to catch issues automatically.
+- Use list/dict comprehensions and `lambda` confidently.
+- Pick a credible next step based on what you want to build.
+
+<Callout type="info">
+No installation needed. Every code block on this platform has a **Run** button — press it and your code executes instantly in the browser. You don't need Python on your machine, and you don't need a terminal.
+</Callout>
+
+## Core concepts
+
+### Manual testing and why it stops scaling
+
+The way most beginners test code is to run the program and eyeball the output:
+
+```python
+def square(n):
+    return n * n
+
+print(square(2))   # expect 4
+print(square(3))   # expect 9
+```
+
+A few problems. First, your eyes are checking the output, not the code. If you mistype the expected value in the comment, you won't notice. Second, when you change `square` next month, will you remember to re-run this script? Probably not. Third, what about `square(0)`? `square(-5)`? `square(1.5)`? You tested two cases; there are infinite inputs.
+
+The first upgrade is to stop printing and start asserting.
+
+### `assert`: the simplest test
+
+`assert` is a Python keyword. It takes a boolean expression. If the expression is true, nothing happens. If it is false, Python raises `AssertionError`.
+
+<Runnable code={`def square(n):
+    return n * n
+
+assert square(2) == 4
+assert square(3) == 9
+assert square(0) == 0
+assert square(-5) == 25
+print("All assertions passed!")
+`} />
+
+Run it. If everything is right, the script ends with the confirmation message. If something is wrong, you get a traceback pointing at the failing line. Add a message after the condition and you get more context when it fails:
+
+```python
+assert square(-5) == 25, f"square(-5) should be 25, got {square(-5)}"
+```
+
+This is already a big step up. You can re-run it any time. It checks behavior, not output. And it tests four cases instead of two.
+
+But `assert` has limits. It is a single line, so it cannot group related tests. When one fails, the script halts and you do not see whether the rest would have passed. And there is a sharp edge: Python's `-O` ("optimize") flag strips out `assert` statements at runtime, so anything you depend on for correctness can silently vanish in production. Use `assert` for tests and sanity checks, never for control flow or input validation in real code.
+
+### `unittest`: tests with structure
+
+Python ships with a testing framework called `unittest`. It is built on the same `TestCase` class pattern Java's JUnit popularized.
+
+Suppose you have a `calculator.py` with these functions. In a real project, your tests live in a separate file; here, we put everything together so you can run it directly:
+
+<Runnable code={`import unittest
+
+def square(n):
+    return n * n
+
+def divide(a, b):
+    return a / b
+
+
+class TestCalculator(unittest.TestCase):
+    def test_square_positive(self):
+        self.assertEqual(square(3), 9)
+
+    def test_square_zero(self):
+        self.assertEqual(square(0), 0)
+
+    def test_square_negative(self):
+        self.assertEqual(square(-4), 16)
+
+    def test_divide_basic(self):
+        self.assertEqual(divide(10, 2), 5)
+
+    def test_divide_by_zero_raises(self):
+        with self.assertRaises(ZeroDivisionError):
+            divide(10, 0)
+
+
+unittest.main(argv=[""], exit=False, verbosity=2)
+`} />
+
+Each test method gets its own result. If something fails, you see which one and why — without the others stopping.
+
+A few things to lock in. The test class inherits from `unittest.TestCase` — that base class is what gives you `self.assertEqual`, `self.assertRaises`, and the rest. Method names that start with `test_` are auto-discovered; anything else is a helper and only runs if you call it yourself. Each test method should check one thing and have a name that says what. `test_square_negative` tells you what broke; `test_1` and `test_stuff` don't. And `self.assertRaises(SomeError)` used as a `with` block lets you verify that the code inside raises a specific exception — handy for testing error paths.
+
+### Arrange, act, assert
+
+A clean test has three phases. *Arrange* the inputs and any state. *Act*: call the function. *Assert*: check the result.
+
+```python
+def test_deposit_increases_balance(self):
+    # Arrange
+    account = BankAccount("Alice", balance=100)
+    # Act
+    account.deposit(50)
+    # Assert
+    self.assertEqual(account.balance, 150)
+```
+
+You won't always label the phases with comments, but they should be visually present. If a test crams all three together or has multiple act/assert pairs, it is testing too much. Split it.
+
+A common mistake is testing too many things in one test method. If `deposit` is broken, you never get to check `withdraw`. The test name does not tell you what failed. Split tests into focused methods — when one fails, the name of the failing method tells you exactly which behavior broke.
+
+### `pytest`: less ceremony, same job
+
+The community has largely shifted to `pytest`, a third-party library. The same tests look like this:
+
+```python
+from calculator import square, divide
+import pytest
+
+
+def test_square_positive():
+    assert square(3) == 9
+
+
+def test_square_zero():
+    assert square(0) == 0
+
+
+def test_divide_by_zero_raises():
+    with pytest.raises(ZeroDivisionError):
+        divide(10, 0)
+```
+
+No class, no `self`, no `assertEqual` — just plain functions and plain `assert` statements. When a test fails, `pytest` shows you the values on both sides of the assertion. The convention is the same as `unittest`: files named `test_*.py`, functions named `test_*`.
+
+<Callout type="note">
+`pytest` is a third-party package (`pip install pytest`) and cannot be installed in this browser environment. You will use it once you move to a local Python setup. For in-browser exercises here, we use `unittest` — it is part of the standard library and runs everywhere.
+</Callout>
+
+<Callout type="warning">
+A test that does not check anything passes silently. `def test_foo(): pass` runs and reports success. So does `def test_foo(): square(2) == 4` (note the missing `assert`). That comparison runs, produces `True`, and gets thrown away. If you ever see a suspiciously clean test run, check that each test ends in an `assert` or a `self.assert*` call.
+</Callout>
+
+### What makes a good test
+
+Test behavior, not implementation. `test_account_has_attribute_named_balance` is brittle — rename the attribute and the test fails for a reason nobody cares about. `test_deposit_increases_balance` tests what callers actually depend on.
+
+One assertion per concept. Some tests need several `assert` lines to check one idea (a class with multiple attributes, say). That is fine. Checking three unrelated behaviors in one method is not — when it fails, the name tells you nothing useful.
+
+Keep tests fast. Slow tests get skipped. If something takes more than a second, it is probably doing too much.
+
+Do not let tests depend on each other. Each test sets up its own state. If `test_b` only passes when `test_a` ran first, the suite breaks the moment someone runs them in a different order. Use a `setUp` method to create fresh state before each test.
+
+A test that has never failed is suspicious. Write the test, then deliberately break the code and confirm the test catches it. If it does not, the test was not checking what you thought.
+
+### Code style: PEP 8 and `ruff`
+
+Python has an official style guide called PEP 8. It covers naming, spacing, line length, import ordering, and many smaller decisions. Read it once, then rely on tools to enforce it.
+
+`ruff` is a fast linter and formatter that reads your code and flags suspicious patterns, unused imports, undefined names, and stylistic violations. It replaces a dozen older tools.
+
+<Callout type="tip">
+This platform already runs `ruff` on your code in the exercise editor. Those red underlines and margin markers are ruff findings — the same tool you would use locally.
+</Callout>
+
+`black` is an opinionated formatter. You run `black myfile.py` and it reformats the file in place to a single canonical style. Inconsistent quotes get normalized, long lines get broken. You stop arguing about style because `black` decided.
+
+Style tools won't catch logic bugs. `black`-formatted code looks clean; `ruff`-passing code is free of common smells. Neither one checks whether your code is *correct*. Tests do that. Run both, but don't read a clean linter output as a correctness certificate.
+
+Names matter more than any tool can enforce. `def get_data():` is useless. `def fetch_active_users():` tells you something. `x` is fine for a loop counter; as the variable holding a user's email address, it is lazy. Read your code aloud — if a name needs a comment to explain it, pick a better name.
+
+### Paradigms you have already used
+
+You have written code in three styles without naming them.
+
+**Procedural** is the style of Modules 1–5. A program is a sequence of statements that run top to bottom. Functions group related statements, but the structure is the order in which things happen.
+
+**Object-oriented** is Module 13. Data and the operations on that data are bundled into classes. The structure is *what objects exist* and *what they can do*.
+
+**Functional** style emphasizes pure functions and treating functions as values you can pass around. You have used pieces of it already.
+
+<Runnable code={`# map applies a function to every element
+numbers = [1, 2, 3, 4]
+doubled = list(map(lambda n: n * 2, numbers))
+print("map:", doubled)
+
+# filter keeps only elements where the function returns True
+evens = list(filter(lambda n: n % 2 == 0, numbers))
+print("filter:", evens)
+
+# The same things, written as comprehensions
+doubled_c = [n * 2 for n in numbers]
+evens_c = [n for n in numbers if n % 2 == 0]
+print("comprehensions:", doubled_c, evens_c)
+`} />
+
+`lambda n: n * 2` is an anonymous one-line function: takes `n`, returns `n * 2`. It is equivalent to `def double(n): return n * 2`. Use `lambda` for one-shot anonymous functions, especially as arguments to other functions. When the lambda would be more than one line, give it a name with `def`.
+
+Most Python programmers reach for a comprehension first. Try transforming this loop into a comprehension, then into a `filter` + `lambda`:
+
+<Runnable code={`words = ["apple", "banana", "kiwi", "grape", "fig"]
+short_words = []
+for w in words:
+    if len(w) <= 4:
+        short_words.append(w)
+print(short_words)
+`} />
+
+<Callout type="tip">
+Comprehension version: `[w for w in words if len(w) <= 4]`
+
+`filter` version: `list(filter(lambda w: len(w) <= 4, words))`
+
+Most Python readers prefer the comprehension — it reads almost like plain English. Real codebases mix all three paradigms; pick the one that fits the problem.
+</Callout>
+
+### The `if __name__ == "__main__":` idiom
+
+You will see this at the bottom of well-organized Python files:
+
+```python
+def main():
+    # the actual program
+    ...
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Every Python file has a built-in variable called `__name__`. When you *run* a file directly, Python sets `__name__` to `"__main__"`. When you *import* the file from another module, Python sets `__name__` to the module's name instead.
+
+So `if __name__ == "__main__":` means "run this block only when this file is the entry point, not when it is imported." The benefit: your test file can `from calculator import square` without accidentally triggering the calculator script's main program.
+
+<Runnable code={`def greet(name):
+    return f"Hello, {name}!"
+
+def main():
+    print(greet("world"))
+
+# In the browser runner, this file IS the entry point,
+# so __name__ == "__main__" is True and main() runs.
+if __name__ == "__main__":
+    main()
+`} />
+
+Get in the habit of putting your script's entry point inside a `main()` function and guarding it with this pattern.
+
+### Where to go next
+
+You have covered the fundamentals. From here, the language splits by what you want to build.
+
+**Web.** *Flask* is small and great for learning — a working web server in ten lines. *FastAPI* is the modern choice for JSON APIs, leaning on type hints. *Django* is the all-in-one for full-stack apps with databases, admin panels, and authentication built in.
+
+**Data.** *pandas* is the workhorse for tabular data — a programmable spreadsheet. *NumPy* provides fast numerical arrays and is the foundation under pandas. *matplotlib* and *seaborn* handle plotting.
+
+**Automation.** *Selenium* and *Playwright* drive web browsers programmatically. The standard-library `subprocess` module runs shell commands. *schedule* and *APScheduler* run jobs on a timer.
+
+**Machine learning.** *scikit-learn* is the entry point: classical algorithms with a consistent API. *PyTorch* is the default deep-learning framework in research. *Hugging Face's `transformers`* is where most language-model work happens.
+
+**GUIs.** *Tkinter* ships with Python and is enough for small desktop tools. *PyQt* and *PySide* produce more polished native-feeling apps.
+
+**Security and systems.** *Scapy* for packet manipulation, *paramiko* for SSH automation, *cryptography* for cryptographic operations, *yara-python* for malware classification.
+
+Pick one, build something with it, and the next one becomes easier. The skill you have built in this curriculum — read the docs, write small experiments, debug from error messages, test your work — transfers to every library.
+
+## Common pitfalls
+
+Don't use `assert` for input validation in real code. Run with `python -O` and every `assert` vanishes silently. For runtime checks that must always run, use `if b == 0: raise ValueError(...)` instead.
+
+Don't forget the `assert`. The expression `square(2) == 4` evaluates to `True` and gets thrown away; the test "passes" but checked nothing. Always end with an `assert` or a `self.assert*` call.
+
+Don't write tests that depend on each other. `unittest` does not guarantee execution order. Each test should create its own state, typically in a `setUp` method.
+
+Don't use bare `except:`. It catches `KeyboardInterrupt` and `SystemExit`, which means the program can not even be stopped cleanly. Always name the exception you mean to catch, or at minimum use `except Exception:`.
+
+Don't assign a lambda to a variable. If you are giving a function a name, just use `def` — you get proper tracebacks and the option to add a docstring later.
+
+## Recap
+
+- Manual testing (eyeballing output) stops working as your code grows. Automated tests catch regressions before users do.
+- `assert` is the simplest test. Use it for sanity checks, never for input validation — the `-O` flag strips it out.
+- `unittest` ships with Python: test classes inherit from `TestCase`, methods named `test_*` get auto-discovered, helpers like `assertEqual` and `assertRaises` make checks readable.
+- `pytest` is what most real codebases use — plain functions, plain `assert`, better error output. It requires installation and runs outside the browser.
+- A good test follows arrange/act/assert, checks one behavior, runs fast, and sets up its own state.
+- PEP 8 defines Python's style. `ruff` flags issues (it is already running in this platform's editor). `black` formats code automatically.
+- The three paradigms: procedural, object-oriented, and functional (`map`, `filter`, `lambda`, comprehensions). Real code mixes all three.
+- `if __name__ == "__main__":` lets a file act as both a script and an importable module.
+- Where to go next: web (Flask/FastAPI/Django), data (pandas/NumPy), automation (Selenium/Playwright), ML (scikit-learn/PyTorch), or security (Scapy/paramiko/cryptography).

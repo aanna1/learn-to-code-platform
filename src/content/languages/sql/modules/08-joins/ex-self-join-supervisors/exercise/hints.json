@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Both aliases, e and s, point at the same employee table — that's expected for a self-join. The bug is in the ON condition, not the FROM/JOIN lines.",
+    "You want to match each employee's supervisor_id to the OTHER copy's employee_id — that's what finds the supervisor's row.",
+    "Full shape: SELECT e.first_name AS employee, s.first_name AS supervisor FROM employee e JOIN employee s ON e.supervisor_id = s.employee_id ORDER BY e.employee_id; Jan won't appear as an 'employee' row — her supervisor_id is NULL, so she matches nothing."
+  ]
+}

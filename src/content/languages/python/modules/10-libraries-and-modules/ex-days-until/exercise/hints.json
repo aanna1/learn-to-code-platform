@@ -1,0 +1,6 @@
+[
+  "Start with `from datetime import date`. Then inside `days_between`, create the target: `target = date(year, month, day)`. Subtract today: `(target - date.today()).days`.",
+  "The subtraction `date_a - date_b` returns a `timedelta` object. To get the integer number of days, use `.days` on it: `(target - date.today()).days`.",
+  "For `is_future`, you already have `days_between`. A date is in the future when `days_between(year, month, day) > 0`. Return that comparison directly.",
+  "If `days_between` returns 0 (today) or a negative number (past), `is_future` should return `False`. Only return `True` when the result is strictly positive."
+]

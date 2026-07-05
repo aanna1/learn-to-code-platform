@@ -1,0 +1,63 @@
+`asyncio` runs many tasks cooperatively on a single thread. Tasks yield control at `await` points, so other tasks can run while one waits. In this exercise you'll write async functions, run them concurrently with `asyncio.gather`, and handle per-task errors.
+
+## Part 1: a basic async task
+
+Write an `async def slow_task(task_id: int) -> str` that awaits `asyncio.sleep(0.05)` and then returns `f"done-{task_id}"`.
+
+## Part 2: running tasks concurrently
+
+Write an `async def run_all(task_ids: list[int]) -> list[str]` that uses `asyncio.gather` to run `slow_task` on every ID concurrently and returns the results as a list, preserving order.
+
+## Part 3: per-task error handling
+
+Some tasks fail. Write an `async def run_with_errors(task_ids: list[int]) -> dict[int, str]` that:
+
+- Runs all tasks concurrently.
+- For any task that raises an exception, stores `"error"` in the result dict rather than letting the exception propagate.
+- Returns a `dict` mapping each task ID to its result string or `"error"`.
+
+A task raises `ValueError` if `task_id % 7 == 0 and task_id != 0`. This is handled inside `slow_task_maybe_fail`, which is provided in the starter.
+
+Use `asyncio.gather(..., return_exceptions=True)` to collect results without raising — then check each result: if it's an `Exception` instance, store `"error"`; otherwise store the string.
+
+## What to implement
+
+```python
+import asyncio
+
+
+async def slow_task(task_id: int) -> str:
+    # your code here
+    pass
+
+
+async def slow_task_maybe_fail(task_id: int) -> str:
+    await asyncio.sleep(0.05)
+    if task_id % 7 == 0 and task_id != 0:
+        raise ValueError(f"task {task_id} is unlucky")
+    return f"done-{task_id}"
+
+
+async def run_all(task_ids: list[int]) -> list[str]:
+    # your code here
+    pass
+
+
+async def run_with_errors(task_ids: list[int]) -> dict[int, str]:
+    # your code here
+    pass
+```
+
+## Checking your work
+
+```python
+import asyncio
+
+print(asyncio.run(run_all(list(range(5)))))
+# ['done-0', 'done-1', 'done-2', 'done-3', 'done-4']
+
+results = asyncio.run(run_with_errors(list(range(10))))
+print(results[0])   # 'done-0'
+print(results[7])   # 'error'
+print(results[1])   # 'done-1'
+```

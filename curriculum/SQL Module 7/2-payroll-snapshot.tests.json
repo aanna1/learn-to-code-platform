@@ -1,0 +1,10 @@
+[
+  {
+    "name": "returns one row summarizing headcount, total payroll, average, lowest, and highest salary",
+    "orderMatters": false,
+    "expected": {
+      "columns": ["headcount", "total_payroll", "avg_salary", "lowest", "highest"],
+      "rows": [[8, 525000, 65625, 42000, 110000]]
+    }
+  }
+]

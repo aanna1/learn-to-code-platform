@@ -1,0 +1,7 @@
+Management wants a **total-spend report for every customer** — and crucially, customers who've never bought anything must still appear, showing `0`. That "still appear" is the whole point: the starter uses `INNER JOIN`s, so Dave (who has no orders) silently drops off the report entirely. In a real business report, a missing customer is worse than a customer showing zero.
+
+Fix it so all four customers appear, each with their `total_spent` (`0` for anyone who hasn't ordered), ordered by name. **Run**, then **Submit**.
+
+<Callout type="tip">
+Two moves, both from Module 08's outer-join lesson: use `LEFT JOIN` from `customer` outward so unmatched customers survive, and wrap the total in `COALESCE(SUM(...), 0)` so their `NULL` sum reads as a true `0`. This is the same "true zero" idea as counting an empty branch's headcount.
+</Callout>

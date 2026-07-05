@@ -1,0 +1,7 @@
+[
+  "The `_balance` attribute is already set in `__init__`. Your methods just need to read and modify `self._balance`.",
+  "For `deposit`, check `if amount <= 0: raise ValueError(...)` before adding to the balance.",
+  "For `withdraw`, you need two checks: is the amount positive, and does the account have enough? Raise `ValueError` for either failure.",
+  "For the `balance` property, put `@property` on the line above `def balance(self):` and return `self._balance` — no parens when accessing it from outside.",
+  "For `__str__`, use an f-string: `f\"BankAccount(owner={self.owner!r}, balance={self._balance})\"`."
+]

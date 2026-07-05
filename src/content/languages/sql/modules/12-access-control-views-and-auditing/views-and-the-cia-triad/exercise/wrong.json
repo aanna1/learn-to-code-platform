@@ -1,0 +1,10 @@
+{
+  "team-lead": "Delete the salary column from the employee table",
+  "view-boundary": "It makes the query run faster by caching the result set on disk",
+  "auditing": "It blocks unauthorized users before they can run a query",
+  "cia": {
+    "Views and access control": "Availability",
+    "Auditing": "Confidentiality",
+    "Backup and recovery": "Integrity"
+  }
+}

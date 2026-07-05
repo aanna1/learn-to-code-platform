@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "LIKE 'S' with no wildcard matches only the exact string 'S'. You want a pattern.",
+    "The % wildcard stands for any run of characters, so put it after the S.",
+    "The clause is WHERE last_name LIKE 'S%'."
+  ]
+}

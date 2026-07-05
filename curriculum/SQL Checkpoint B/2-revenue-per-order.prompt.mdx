@@ -1,0 +1,7 @@
+Now a money question: **how much is each order worth?** An order's revenue is the sum of `quantity × price` across its line items — but `order_item` only stores the quantity and a `product_id`. The price lives in `product`, so you'll join the two, then aggregate.
+
+Write a query returning each `order_id` with its total `revenue`, ordered by `order_id`. **Run**, then **Submit**.
+
+<Callout type="tip">
+This is a join *and* an aggregate: `JOIN` `order_item` to `product` to bring `price` alongside `quantity`, then `SUM(oi.quantity * p.price)` with `GROUP BY oi.order_id` to collapse each order's line items into one number.
+</Callout>

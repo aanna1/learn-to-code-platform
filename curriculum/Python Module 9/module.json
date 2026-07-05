@@ -1,0 +1,13 @@
+{
+  "id": "09-exceptions",
+  "title": "Exceptions & Defensive Coding",
+  "description": "Read tracebacks, catch specific errors with try/except, raise your own exceptions, and write the input-validation loop that keeps real programs from crashing on bad user input.",
+  "order": 9,
+  "lessons": [
+    { "id": "lecture",           "title": "Exceptions & Defensive Coding", "type": "lecture",  "order": 1 },
+    { "id": "ex-safe-divide",    "title": "Safe Divide",                   "type": "exercise", "order": 2 },
+    { "id": "ex-validate-input", "title": "Validate Input",                "type": "exercise", "order": 3 },
+    { "id": "ex-bank-account",   "title": "Bank Account",                  "type": "exercise", "order": 4 },
+    { "id": "ex-robust-parser",  "title": "Robust Parser",                 "type": "exercise", "order": 5 }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "13-object-oriented-programming",
+  "title": "Object-Oriented Programming",
+  "description": "Bundle data and behavior into classes — and use inheritance, dunder methods, and properties to write code that's easier to read, extend, and reuse.",
+  "order": 13,
+  "lessons": [
+    { "id": "lecture",            "title": "Classes, Methods & Dunder Magic",  "type": "lecture",  "order": 1 },
+    { "id": "ex-bank-account",    "title": "Bank Account",                     "type": "exercise", "order": 2 },
+    { "id": "ex-student-roster",  "title": "Student Roster",                   "type": "exercise", "order": 3 },
+    { "id": "ex-shape-hierarchy", "title": "Shape Hierarchy",                  "type": "exercise", "order": 4 },
+    { "id": "ex-book-catalog",    "title": "Book Catalog",                     "type": "exercise", "order": 5 }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "questions": [
+    {
+      "question": "What does this print?\n\ndef gen():\n    yield 1\n    yield 2\n\ng = gen()\nprint(next(g))\nprint(next(g))\nprint(next(g))",
+      "options": [
+        {
+          "text": "1\n2\nStopIteration (raises an exception)",
+          "correct": true,
+          "explanation": "Correct. The generator yields 1, then 2, then falls off the end of the function — which raises StopIteration. The third next(g) call is not caught, so the exception propagates."
+        },
+        {
+          "text": "1\n2\nNone",
+          "correct": false,
+          "explanation": "When a generator runs out of values, it raises StopIteration — it does not return None. None would appear only if the function ended with an explicit 'return None', and even then StopIteration is what's raised, not a printed value."
+        },
+        {
+          "text": "1\n1\n1",
+          "correct": false,
+          "explanation": "Each call to next() advances the generator to the *next* yield. It doesn't restart from the top. The first call yields 1, the second yields 2, the third raises StopIteration because the function has no more yields."
+        },
+        {
+          "text": "1\n2\n1",
+          "correct": false,
+          "explanation": "Generators don't loop automatically. Once the function runs past its last yield, the generator is exhausted and raises StopIteration on the next call to next()."
+        }
+      ]
+    },
+    {
+      "question": "A decorator is applied like this:\n\n@my_decorator\ndef add(a, b):\n    return a + b\n\nWhich statement is true after this runs?",
+      "options": [
+        {
+          "text": "add now refers to whatever my_decorator(add) returned.",
+          "correct": true,
+          "explanation": "Correct. The @decorator syntax is exactly equivalent to add = my_decorator(add). The name 'add' is rebound to the return value of calling my_decorator with the original function. That return value is usually a wrapper function."
+        },
+        {
+          "text": "add is unchanged; my_decorator runs only when add is called.",
+          "correct": false,
+          "explanation": "The decorator runs at definition time, not call time. When Python reaches @my_decorator, it immediately calls my_decorator(add) and rebinds the name 'add' to the result. By the time add is called, the decoration has already happened."
+        },
+        {
+          "text": "add.__wrapped__ holds the decorator so it can be removed later.",
+          "correct": false,
+          "explanation": "functools.wraps does set __wrapped__ on the wrapper, but that's a reference to the original function, not the decorator itself. And this only happens if you use @functools.wraps — it's not automatic Python behavior."
+        },
+        {
+          "text": "Calling add(1, 2) raises TypeError because my_decorator changed the signature.",
+          "correct": false,
+          "explanation": "A decorator doesn't inherently change the callable signature. If the wrapper uses *args, **kwargs, it accepts any arguments the original did. A TypeError would only happen if the decorator was written incorrectly."
+        }
+      ]
+    },
+    {
+      "question": "What does this print?\n\nfuncs = []\nfor i in range(3):\n    funcs.append(lambda: i)\n\nprint([f() for f in funcs])",
+      "options": [
+        {
+          "text": "[2, 2, 2]",
+          "correct": true,
+          "explanation": "Correct. Each lambda captures the *variable* i, not its value at the moment of definition. By the time the lambdas are called, the for loop has finished and i is 2. All three lambdas look up the same variable and find the same value. The fix is lambda i=i: i, which captures the current value as a default argument."
+        },
+        {
+          "text": "[0, 1, 2]",
+          "correct": false,
+          "explanation": "This is what most people expect, but closures capture variables, not values. All three lambdas share the same 'i' variable. When you call them after the loop, i is 2, so all three return 2."
+        },
+        {
+          "text": "TypeError: lambda takes 0 positional arguments",
+          "correct": false,
+          "explanation": "There's no TypeError here. Each lambda takes zero arguments and returns the value of i from the enclosing scope. The call f() with no arguments is correct. The surprising part is the value of i, not the call."
+        },
+        {
+          "text": "[0, 0, 0]",
+          "correct": false,
+          "explanation": "If closures captured values at definition time, this would make sense (the value at the first iteration). But they capture the variable. The loop ends with i=2, so all three lambdas return 2."
+        }
+      ]
+    }
+  ]
+}

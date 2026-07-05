@@ -1,0 +1,630 @@
+<Callout type="info">
+No install needed — every example on this page has a **Run** button. Press it to execute the code directly in your browser.
+</Callout>
+
+## Why this matters
+
+You finished the fundamentals. Your code runs and you can read most Python you encounter. You've probably built a small CLI or two.
+
+Now open a real Python project. Browse the source of `requests` on GitHub. Look at a teammate's automation script that has been in production for two years. Then look at one of your own scripts from the fundamentals. The gap you notice has little to do with algorithms. The professional code uses `pathlib` where yours uses string concatenation on file paths. It logs to a real logger where yours sprinkles `print()`. A dataclass in three lines replaces the thirty lines of `__init__` and `__repr__` you wrote by hand.
+
+None of this requires a new mental model. It is the same Python with the rough edges sanded off. Each piece takes an afternoon to learn. Put them together and you close the gap between knowing Python and writing Python that other people want to maintain.
+
+For automation work the polish is load-bearing. Code that runs unattended at 3am has to survive a handoff to whoever is on-call after you leave. Your `print()` calls vanish into `/dev/null` when `systemd` runs your script. A logger configured to write to syslog does not. Your hardcoded path breaks on Windows. `Path.home() / "data.txt"` does not.
+
+By the end you should be able to write list, set, dict, and generator comprehensions and know when a regular `for` loop is the better call. You will add type hints to functions and dataclasses and catch bugs with `mypy`. You will replace dictionary-as-pseudo-object code with `@dataclass`, use `pathlib` for filesystem work, format numbers and percentages inside f-strings without helper functions, replace string constants with `Enum`, use `match`/`case` for structured data, and configure `logging` for scripts that run unattended.
+
+## The motivating example
+
+Here is code that works:
+
+```python
+import os
+
+def find_python_files(directory):
+    result = []
+    for filename in os.listdir(directory):
+        full_path = directory + "/" + filename
+        if os.path.isfile(full_path) and filename.endswith(".py"):
+            result.append(full_path)
+    return result
+
+files = find_python_files("./src")
+print("Found " + str(len(files)) + " Python files")
+for f in files:
+    print(f)
+```
+
+Nothing is wrong with it, exactly. It runs. Given a `src/` directory with some `.py` files, it does what the name promises.
+
+But every line here is the kind of thing experienced Python programmers stopped writing years ago. Over the next nine sections we will rewrite this function piece by piece, and by the end you will see the same behavior in twelve cleaner lines — with type hints, cross-platform paths, a logger, and output that other people can read. None of those changes adds capability. They make the code something you would not mind a coworker reviewing.
+
+Start with the path handling.
+
+## pathlib: stop concatenating strings
+
+Look at `directory + "/" + filename`. On Linux and macOS, that `"/"` works fine. On Windows, paths use backslashes, so that string produces something some tools misinterpret. The old fix was `os.path.join`:
+
+```python
+import os
+full_path = os.path.join(directory, filename)
+```
+
+It works, but `os.path` is a flat module of functions. Anything composite turns into `os.path.dirname(os.path.basename(os.path.splitext(filename)[0]))`. Every operation takes a string and returns a string.
+
+`pathlib` replaces the whole approach with `Path` objects:
+
+```python
+from pathlib import Path
+
+directory = Path("./src")
+full_path = directory / "main.py"
+```
+
+The `/` operator on `Path` means "append this segment." What you gain are the methods that come along with the path object:
+
+<Runnable code={`from pathlib import Path
+
+# Path objects carry rich metadata — no string slicing needed
+p = Path("/var/log/myapp/2024-01-15.log")
+
+print("name:   ", p.name)
+print("stem:   ", p.stem)
+print("suffix: ", p.suffix)
+print("parent: ", p.parent)
+print("parts:  ", p.parts)
+
+# The / operator joins segments safely on any OS
+config = Path("/home/user") / ".config" / "app.json"
+print("config: ", config)
+`} />
+
+You stop reaching for `os.path.basename(p)` followed by `os.path.splitext(...)`. The path knows what it is.
+
+Reading and writing collapses to one line each:
+
+```python
+config_path = Path.home() / ".myapp" / "config.json"
+config_path.parent.mkdir(parents=True, exist_ok=True)
+
+config_path.write_text('{"theme": "dark"}')
+content = config_path.read_text()
+```
+
+`Path.home()` returns the user's home directory on any platform. `mkdir(parents=True, exist_ok=True)` is the equivalent of `mkdir -p`: create the directory and any missing parents, without raising if it already exists.
+
+For walking a tree:
+
+```python
+for py_file in Path("src").rglob("*.py"):
+    print(py_file, py_file.stat().st_size)
+```
+
+`rglob` is recursive glob — it walks the entire tree under `src/` and yields every file matching `*.py`. Non-recursive is `glob`. Use `iterdir()` for one level only.
+
+<Callout type="note">
+`rglob` and filesystem traversal require real files on disk. In the browser you can construct and inspect `Path` objects, but walking a directory tree only works when you run Python locally.
+</Callout>
+
+**Watch out:** `Path("/foo") / "/bar"` does not produce `/foo/bar`. The second segment starts with `/`, which `pathlib` treats as absolute, so the result is `Path("/bar")`. Strip leading slashes first if you need to be defensive: `directory / segment.lstrip("/")`.
+
+Now rewrite the opening example's first half:
+
+```python
+from pathlib import Path
+
+def find_python_files(directory: Path) -> list[Path]:
+    return [p for p in Path(directory).rglob("*.py") if p.is_file()]
+```
+
+Two changes landed at once: `pathlib` replaced the string surgery, and a comprehension replaced the explicit loop. The comprehension deserves its own section.
+
+## Comprehensions: four flavors
+
+You met list comprehensions in the fundamentals. Refresher:
+
+```python
+squares = [x ** 2 for x in range(10)]
+```
+
+The basic shape is `[expression for variable in iterable]`. Add a filter with `if`:
+
+```python
+even_squares = [x ** 2 for x in range(10) if x % 2 == 0]
+```
+
+The same syntax produces sets, dicts, and generators — depending only on the brackets:
+
+<Runnable code={`# List — square brackets
+squares_list = [x ** 2 for x in range(5)]
+print("list:", squares_list)
+
+# Set — curly braces (duplicates removed automatically)
+squares_set = {x ** 2 for x in [-2, -1, 1, 2]}
+print("set: ", squares_set)
+
+# Dict — curly braces with key: value
+word_lengths = {w: len(w) for w in ["a", "bb", "ccc"]}
+print("dict:", word_lengths)
+
+# Generator — parentheses (lazy, builds nothing upfront)
+squares_gen = (x ** 2 for x in range(5))
+print("gen: ", list(squares_gen))
+`} />
+
+The generator expression is the one worth pausing on. A list comprehension builds the whole list in memory before you can use it. A generator stores instructions, and each value is computed only when you ask for it. That matters at scale:
+
+```python
+# This would allocate gigabytes and freeze your machine:
+# squares = [x ** 2 for x in range(10 ** 9)]
+
+# This uses constant memory:
+squares = (x ** 2 for x in range(10 ** 9))
+
+for sq in squares:
+    if sq > 1000:
+        break
+    print(sq)
+```
+
+Generators suit large or streaming data. Reading every line of a 50 GB log file and counting errors? Generator. Building a 200-element list of formatted strings for a report? List comprehension. Pick the shape that matches the size of the data.
+
+**A rule for when to stop:** comprehensions express transformations. The moment you find yourself nesting two filters, adding an `if`/`else`, or wrapping onto a third line, write a regular `for` loop. Comprehensions are at their best when the intent is obvious at a glance.
+
+**Try it:** given `words = ["alpha", "beta", "gamma", "delta", "epsilon"]`, build a dict mapping each word to its length, but only for words longer than 4 characters. Edit the code below and press Run.
+
+<Runnable code={`words = ["alpha", "beta", "gamma", "delta", "epsilon"]
+
+# Replace this with a dict comprehension
+result = {}
+
+print(result)
+`} />
+
+<Callout type="tip">
+The answer: `{w: len(w) for w in words if len(w) > 4}` — which gives `{'alpha': 5, 'gamma': 5, 'delta': 5, 'epsilon': 7}`.
+</Callout>
+
+## F-strings beyond interpolation
+
+You have written f-strings like `f"Hello, {name}!"`. That is interpolation. F-strings also carry a format mini-language after a colon, and it eliminates a whole category of helper functions you would otherwise write.
+
+```python
+price = 3.14159
+print(f"Price: {price}")       # Price: 3.14159
+print(f"Price: {price:.2f}")   # Price: 3.14
+```
+
+`:.2f` is a format spec. The `f` means "fixed-point" and `.2` means "two digits after the decimal."
+
+<Runnable code={`price = 3.14159
+population = 1234567
+ratio = 0.847
+n = 255
+
+# Fixed-point decimal
+print(f"price:      {price:.2f}")
+
+# Comma separators for large numbers
+print(f"population: {population:,}")
+print(f"with cents: {population + price:,.2f}")
+
+# Percentage (Python multiplies by 100 automatically)
+print(f"ratio:      {ratio:.1%}")
+
+# Hex and binary
+print(f"hex:        {n:#x}")
+print(f"binary:     {n:08b}")
+
+# Debug printing — prints both the expression and its value
+x = 42
+y = [1, 2, 3]
+print(f"{x=}")
+print(f"{y=}")
+`} />
+
+The trailing `=` in `f"{x=}"` prints both the expression and its value. It replaces every `print("x is", x)` line you have ever written, added in Python 3.8 for exactly this case.
+
+You can also pad and align numbers in a fixed-width field:
+
+```python
+print(f"|{price:>10.2f}|")   # |      3.14|  right-aligned in 10 chars
+print(f"|{price:<10.2f}|")   # |3.14      |  left-aligned
+print(f"|{price:^10.2f}|")   # |   3.14   |  centered
+```
+
+**Watch out:** `f"Total: {total:.2f}"` raises `ValueError` if `total` is a string. Format specs apply to the type of the value — `.2f` requires a number. Cast or fix the source first.
+
+## Type hints: documentation that gets checked
+
+Python is dynamically typed. Pass a string to a function expecting an integer and you find out at runtime when something explodes. Type hints annotate the expected types and let a tool verify them:
+
+```python
+def greet(name: str, times: int = 1) -> str:
+    return f"Hello, {name}! " * times
+```
+
+Read that as: `greet` takes a `name` that is a string, a `times` that is an integer defaulting to 1, and returns a string. The annotations are not enforced at runtime — Python will let you call `greet(42, "three")` and produce gibberish. The point is that `mypy` will not.
+
+<Callout type="note">
+`mypy` is a tool you run on your own machine. Install it with `pip install mypy` and run `mypy yourfile.py` to check types statically. It is the single highest-leverage addition you can make to a Python codebase — it catches bugs that integration tests would otherwise have to cover.
+</Callout>
+
+The basics you will use every day:
+
+```python
+from typing import Optional
+
+# A value that might be None — Python 3.10+ shorthand:
+def find_user(user_id: int) -> dict | None:
+    ...
+
+# Before 3.10 you wrote Optional[dict] from the typing module:
+def find_user_old(user_id: int) -> Optional[dict]:
+    ...
+
+# Lists and dicts:
+def parse_lines(lines: list[str]) -> dict[str, int]:
+    ...
+```
+
+Use `dict | None` on Python 3.10+ and skip the older `Optional` syntax. When do you add types? On every function signature and every dataclass field. On local variables, only when the type is non-obvious — `count: int = 0` is noise, but `connections: dict[str, list[str]] = {}` is worth annotating.
+
+**Try it:** add type hints to this function and decide whether `count` should accept `None`.
+
+<Runnable code={`def repeat_word(word, count):
+    if count is None:
+        return ""
+    return word * count
+
+print(repeat_word("ha", 3))
+print(repeat_word("ha", None))
+`} />
+
+<Callout type="tip">
+`def repeat_word(word: str, count: int | None) -> str:` — because the function handles `None`, the right annotation is `int | None`. If `count` were never `None`, you would drop that part.
+</Callout>
+
+**Watch out:** `name: str` declares the type of `name`; it does not give it a value. Writing `name: str` at the top of a function body and never assigning to it produces a `NameError` when you try to read it. The annotation is not enough — you still need `name: str = "default"` or an assignment somewhere.
+
+## Dataclasses: classes for data
+
+Here is a pattern from the fundamentals — grouping related fields into an object:
+
+```python
+class User:
+    def __init__(self, name, email, age):
+        self.name = name
+        self.email = email
+        self.age = age
+
+    def __repr__(self):
+        return f"User(name={self.name!r}, email={self.email!r}, age={self.age})"
+
+    def __eq__(self, other):
+        if not isinstance(other, User):
+            return NotImplemented
+        return (self.name, self.email, self.age) == (other.name, other.email, other.age)
+```
+
+You wrote three methods. All three are mechanical. `@dataclass` writes them for you:
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class User:
+    name: str
+    email: str
+    age: int
+```
+
+That is the entire class. The decorator generates `__init__`, `__repr__`, and `__eq__` from the annotated attributes.
+
+<Runnable code={`from dataclasses import dataclass, field
+
+@dataclass
+class User:
+    name: str
+    email: str
+    age: int
+
+u1 = User("Alice", "alice@example.com", 30)
+u2 = User("Alice", "alice@example.com", 30)
+
+print(u1)           # __repr__ for free
+print(u1 == u2)     # __eq__ for free — True
+
+# Mutable defaults need field(default_factory=...)
+@dataclass
+class ServerConfig:
+    host: str
+    port: int = 8080
+    tags: list[str] = field(default_factory=list)
+
+cfg1 = ServerConfig("localhost")
+cfg2 = ServerConfig("remotehost")
+cfg1.tags.append("web")
+
+print(cfg1)
+print(cfg2)  # cfg2.tags is its own empty list — not shared with cfg1
+`} />
+
+Two things to notice. First, writing `tags: list[str] = []` would be a bug — default values are shared across all instances, so every `ServerConfig` would share the same list. `field(default_factory=list)` builds a fresh list per instance. The dataclass decorator catches the naive form and raises an error if you try it.
+
+Second, `frozen=True` makes instances immutable:
+
+```python
+from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class Coordinate:
+    latitude: float
+    longitude: float
+```
+
+Assigning `coord.latitude = 5` raises `FrozenInstanceError`. Use this for values that should never change after construction — configuration, coordinates, anything you will use as a dict key (frozen dataclasses are hashable).
+
+**Watch out:** fields with defaults must come after fields without defaults. `@dataclass class C: x: int = 0; y: int` raises `TypeError`. Reorder so `y` comes before `x`, or give `y` a default.
+
+When not to reach for a dataclass: if your class has real behavior beyond storing data — methods that mutate state, complex business logic — a regular class is clearer. Dataclasses are for data.
+
+## Enum: stop using string constants
+
+```python
+def update_order(order, status):
+    if status == "pending":
+        ...
+    elif status == "approved":
+        ...
+    elif status == "rejcted":  # typo — silent until this branch runs
+        ...
+```
+
+That typo in `"rejcted"` will not surface until the rejection branch actually runs. It could be in production for months. It could be never, because that branch only triggers on the third Tuesday of the month.
+
+`Enum` fixes it:
+
+```python
+from enum import Enum
+
+class Status(Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+def update_order(order, status: Status):
+    if status is Status.PENDING:
+        ...
+    elif status is Status.REJCTED:  # AttributeError the moment Python loads the file
+        ...
+```
+
+There is no `Status.REJCTED`. The bug surfaces immediately, at import time, not on the third Tuesday.
+
+Use `is` to compare enum members rather than `==`. Both work for `Enum`, but `is` is idiomatic — you are asking "is this the same singleton object?", which is the truer question.
+
+For integer-valued enums:
+
+```python
+from enum import IntEnum
+
+class HttpStatus(IntEnum):
+    OK = 200
+    NOT_FOUND = 404
+    SERVER_ERROR = 500
+```
+
+`IntEnum` members are real integers. Use this when you need to interoperate with code that produces or consumes plain integers — HTTP status codes, file modes, signal numbers.
+
+## Pattern matching with match/case
+
+Python 3.10 added `match`/`case`. The shallow read is "Python finally got a switch statement." That sells it short. `match` deconstructs values.
+
+The boring case first, just to build the syntax:
+
+```python
+def describe(value):
+    match value:
+        case 0:
+            return "zero"
+        case 1:
+            return "one"
+        case _:
+            return "other"
+```
+
+`_` is the wildcard — equivalent to `else`. Not yet interesting.
+
+<Runnable code={`def classify(value):
+    match value:
+        case int(n) if n < 0:
+            return f"negative integer: {n}"
+        case int(n):
+            return f"non-negative integer: {n}"
+        case [x, y]:
+            return f"pair: {x}, {y}"
+        case [x, *rest]:
+            return f"list starting with {x}, then {rest}"
+        case {"type": "user", "name": name}:
+            return f"user named {name}"
+        case _:
+            return "something else"
+
+print(classify(-3))
+print(classify(7))
+print(classify([10, 20]))
+print(classify([1, 2, 3, 4]))
+print(classify({"type": "user", "name": "Alice", "id": 42}))
+print(classify("hello"))
+`} />
+
+Read those cases one at a time:
+
+- `case int(n) if n < 0` — matches if the value is an `int`, binds it to `n`, and requires the guard `n < 0` to hold.
+- `case [x, y]` — matches a list or tuple with exactly two elements, binding them to `x` and `y`.
+- `case [x, *rest]` — matches a list with at least one element. `x` is the first, `rest` is everything else.
+- `case {"type": "user", "name": name}` — matches a dict containing those keys; the dict can have other keys.
+
+For dispatch on the shape of structured data — JSON-like payloads, message types, command objects — `match` is cleaner than chains of `isinstance` and dict lookups. For simple value comparison, `if`/`elif` is the right choice.
+
+**Watch out:** in `match`, a bare name like `case foo:` binds the matched value to a new variable `foo`. It does not check whether the value equals an existing variable named `foo`. To compare against a named constant, qualify it: `case Status.PENDING:`. Linters catch this trap; if you hit it without a linter, the bug is very hard to diagnose.
+
+## The walrus operator :=
+
+The walrus operator assigns inside an expression. It exists for one common pattern:
+
+```python
+# Without walrus:
+while True:
+    chunk = file.read(1024)
+    if not chunk:
+        break
+    process(chunk)
+
+# With walrus:
+while chunk := file.read(1024):
+    process(chunk)
+```
+
+The expression `chunk := file.read(1024)` reads a chunk, assigns it to `chunk`, and the whole expression evaluates to that chunk. The loop runs while the value is truthy.
+
+Two other places it earns its keep:
+
+```python
+# Avoiding a function call twice in a comprehension:
+results = [y for x in data if (y := transform(x)) is not None]
+
+# Reading lines until a sentinel:
+while (line := input("> ")) != "quit":
+    print(f"You said: {line}")
+```
+
+Where it is not useful:
+
+```python
+# Avoid:
+if (n := len(items)) > 0:
+    print(f"Got {n} items")
+
+# Prefer:
+n = len(items)
+if n > 0:
+    print(f"Got {n} items")
+```
+
+Both run. The second reads faster. The walrus earns its place when it removes a duplicated call or eliminates a `while True / break` pattern. It hurts when it saves one line at the cost of denser code.
+
+## Logging: stop using print for anything serious
+
+For an interactive script — output meant for a human reading the terminal — `print` is fine. For scripts that run unattended, `print` falls apart for four reasons:
+
+1. **No timestamps.** When something failed three hours ago, "Error: connection refused" tells you nothing.
+2. **No levels.** Debug noise and critical errors look identical.
+3. **No routing.** Everything goes to stdout. You cannot send errors to a file and info to syslog without rewriting every call.
+4. **No tracebacks.** When an exception fires, you printed a string. The traceback that would have told you which line is gone.
+
+The `logging` module handles all four. Minimal setup for any non-trivial script:
+
+<Runnable code={`import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+log = logging.getLogger(__name__)
+
+host = "db.example.com"
+count = 42
+pct = 94
+
+log.debug("This will not print — DEBUG is below the INFO threshold")
+log.info("Processed %d records", count)
+log.warning("Disk usage at %d%%", pct)
+log.error("Failed to connect to %s", host)
+`} />
+
+Five levels in order of severity: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`. `basicConfig(level=logging.INFO)` sets a threshold — `DEBUG` messages are filtered out, `INFO` and above print. Bump to `DEBUG` when troubleshooting and you get more detail without changing any code.
+
+Notice the `%s` and `%d` style — not f-strings. Logger methods use lazy formatting: the string is only interpolated if the message will actually be emitted. With f-strings you pay the formatting cost on every call regardless of level, which adds up when `DEBUG` calls are scattered through a hot loop.
+
+When you catch an exception, log it with the traceback:
+
+```python
+try:
+    do_risky_thing()
+except Exception:
+    log.exception("Risky thing failed")
+```
+
+`log.exception` includes the full traceback in the log output. This is the difference between "Error: something went wrong" and a usable bug report.
+
+**Watch out:** always call `logging.getLogger(__name__)` and call methods on that logger. The module-level `logging.info(...)` function configures a default handler on first use and may not produce what you want. Named loggers also let callers control logging behavior per-module from outside.
+
+**Also:** never call `basicConfig` inside a library. It configures the root logger, which means you are hijacking the logging setup of any application that imports your code. Libraries call only `getLogger(__name__)` and emit logs. Applications own `basicConfig`.
+
+## Putting it together
+
+Here is the function from the start of this lecture, rewritten with every idea applied:
+
+<Runnable code={`import logging
+from pathlib import Path
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+log = logging.getLogger(__name__)
+
+
+def find_python_files(directory: Path) -> list[Path]:
+    """Return every .py file under directory, recursively."""
+    return [p for p in directory.rglob("*.py") if p.is_file()]
+
+
+def main() -> None:
+    # Simulating results since rglob needs real files on disk
+    files = [Path("src/main.py"), Path("src/utils/helpers.py")]
+    log.info("Found %d Python files", len(files))
+    for f in files:
+        log.info("  %s", f)
+
+
+main()
+`} />
+
+Same behavior. With timestamps, cross-platform paths, a return type `mypy` can check, and logging output you can pipe or silence with a flag. None of the individual changes is dramatic. The aggregate is what readable Python looks like.
+
+## Common pitfalls
+
+**Reaching for a comprehension when a loop is clearer.** If you have added a nested `for`, an `if`/`else`, and the line wraps, write a loop. Code other people have to read is not a place to flex.
+
+**Comparing enum members with `==`.** It works, but every Python codebase that uses enums uses `is Status.PENDING`. Do not fight the idiom.
+
+**Forgetting that mutable default arguments are shared.** `def f(items=[]):` reuses the same list across calls. The dataclass equivalent `tags: list[str] = []` is so wrong the decorator refuses it outright. Use `field(default_factory=list)`.
+
+**Writing type hints without running `mypy`.** Hints are a contract. Unchecked annotations drift — the types slowly disagree with what the code does and you cannot tell. Run `mypy` (or `pyright`) in pre-commit or CI. Otherwise the annotations are decoration.
+
+**Catching `Exception` and logging without the traceback.** `except Exception as e: log.error(e)` prints the message but throws away the traceback. Use `log.exception("...")` instead. The traceback is the most valuable line in your log.
+
+**Joining paths with `+` after importing `pathlib`.** `Path("/var/log") + "/" + "app.log"` raises `TypeError`. You have to use `/`. The muscle memory takes a week to retrain.
+
+## Recap
+
+`pathlib.Path` replaces `os.path`. Build with `/`, read with `.read_text()`, walk with `rglob`. Forget string concatenation on paths.
+
+Comprehensions come in four shapes: list `[...]`, set `{...}`, dict `{k: v ...}`, generator `(...)`. Use generators for large or streaming data. Drop back to a `for` loop when the comprehension stops fitting on one line.
+
+F-strings have a format mini-language: `:.2f`, `:,`, `:.1%`, `:08b`, `:#x`. Use `f"{var=}"` for debug prints.
+
+Type hints are documentation `mypy` can verify. Annotate function signatures and dataclass fields. Use `dict | None` syntax on Python 3.10+.
+
+`@dataclass` generates `__init__`, `__repr__`, and `__eq__` from annotated fields. Use `field(default_factory=list)` for mutable defaults. Use `frozen=True` for value types you want to hash.
+
+`Enum` replaces string constants. Compare with `is`. Use `IntEnum` when integer interop matters.
+
+`match`/`case` shines for destructuring structured data. Use `if`/`elif` for plain value comparison. Watch out for bare-name capture patterns.
+
+The walrus `:=` belongs in `while`-read patterns and a few comprehensions. Skip it when a normal assignment is clearer.
+
+`logging` replaces `print` for anything that runs unattended. Set up `log = logging.getLogger(__name__)`, then call `log.info(...)` and `log.exception(...)`. Configure `basicConfig` once at the entry point, never in a library.

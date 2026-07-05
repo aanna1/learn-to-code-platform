@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Read the attacker's input the way the database does. The leading single quote closes the empty username string; then OR '1'='1' is a condition that is true for every row.",
+    "The trailing -- turns the rest of the line into a comment, so the whole AND password = '...' check disappears. What survives is just: WHERE username = '' OR '1'='1'.",
+    "Replace the WHERE clause with  WHERE username = '' OR '1'='1'  and press Run. Every account comes back -- no password required."
+  ]
+}

@@ -1,0 +1,78 @@
+You have two implementations of the same function. One is slow. Your job is to use `cProfile` to find the hot spot, compare implementations with `timeit`, and write the faster version yourself.
+
+## Part 1: profile a workload
+
+Write a function `profile_workload(fn, *args) -> str` that:
+
+- Runs `fn(*args)` under `cProfile.Profile`.
+- Returns the profiler stats as a string, sorted by cumulative time, showing the top 10 lines.
+
+Use `pstats.Stats` with a `io.StringIO` stream to capture the output as a string rather than printing it. Here's the shape:
+
+```python
+import cProfile, pstats, io
+
+profiler = cProfile.Profile()
+profiler.enable()
+fn(*args)
+profiler.disable()
+
+buf = io.StringIO()
+pstats.Stats(profiler, stream=buf).sort_stats("cumulative").print_stats(10)
+return buf.getvalue()
+```
+
+## Part 2: compare with timeit
+
+Write a function `compare(snippet_a: str, snippet_b: str, number: int) -> tuple[float, float]` that:
+
+- Times each snippet with `timeit.timeit(snippet, number=number)`.
+- Returns `(time_a, time_b)` as a tuple of floats.
+
+## Part 3: write the fast version
+
+`slow_search(target: str, items: list[str]) -> bool` checks membership by iterating with a loop. Write `fast_search(target: str, items: list[str]) -> bool` that does the same check in O(1) by converting `items` to a `set` first.
+
+## What to implement
+
+```python
+import cProfile
+import io
+import pstats
+import timeit
+
+
+def profile_workload(fn, *args) -> str:
+    # your code here
+    pass
+
+
+def compare(snippet_a: str, snippet_b: str, number: int) -> tuple[float, float]:
+    # your code here
+    pass
+
+
+def slow_search(target: str, items: list[str]) -> bool:
+    for item in items:
+        if item == target:
+            return True
+    return False
+
+
+def fast_search(target: str, items: list[str]) -> bool:
+    # your code here
+    pass
+```
+
+## Checking your work
+
+```python
+output = profile_workload(slow_search, "z", ["a"] * 10_000)
+print(output[:200])   # shows cProfile stats
+
+ta, tb = compare("sum(range(1000))", "500 * 999 // 2", number=10_000)
+print(f"loop: {ta:.4f}s  arithmetic: {tb:.4f}s")
+
+print(fast_search("b", ["a", "b", "c"]))   # True
+print(fast_search("z", ["a", "b", "c"]))   # False
+```

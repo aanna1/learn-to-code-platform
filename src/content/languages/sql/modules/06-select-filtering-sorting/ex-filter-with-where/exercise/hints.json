@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "You need a second condition on salary, joined to the first with AND.",
+    "'More than 55000' is salary > 55000 — a strict greater-than, so 55000 itself is excluded.",
+    "The full clause is WHERE branch_id = 2 AND salary > 55000."
+  ]
+}

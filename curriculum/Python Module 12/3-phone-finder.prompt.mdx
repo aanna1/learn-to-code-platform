@@ -1,0 +1,33 @@
+# Phone Number Finder
+
+Real text rarely uses a single phone number format. People write `512-555-0102`, `(800) 555-0199`, `212.555.0123`, or even drop the separators entirely. Your task is to find them all.
+
+## Your task
+
+Write a function `find_phones(text)` that returns a list of every phone number found in the given string.
+
+A phone number is three digits, an optional separator, three digits, an optional separator, four digits — where a separator is a hyphen, dot, or space. Parentheses around the area code are also optional.
+
+## Requirements
+
+- Use `re.findall` with no capture groups so the function returns a list of full matched strings.
+- The separator between digit groups must be optional — some numbers have none.
+- The area code may optionally be wrapped in parentheses: `(800)` or just `800`.
+- Return results in the order they appear in the text. Duplicates are fine (if the same number appears twice, return it twice).
+
+## Example
+
+```python
+text = "Call us at 512-555-0102, (800)555-0199, or 212.555.0123."
+print(find_phones(text))
+# ['512-555-0102', '(800)555-0199', '212.555.0123']
+```
+
+## Formats your function must handle
+
+```
+512-555-0102     (hyphen separators)
+(800)555-0199    (area code in parens, no space after)
+212.555.0123     (dot separators)
+9005550100       (no separators at all)
+```

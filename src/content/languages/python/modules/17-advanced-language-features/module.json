@@ -1,0 +1,12 @@
+{
+  "id": "17-advanced-language-features",
+  "title": "Advanced Language Features",
+  "description": "Abstract base classes, Protocols, __slots__, descriptors, MRO and mixins — the machinery Python uses to build its own features, and that real libraries expose.",
+  "lessons": [
+    { "id": "lecture",          "title": "Advanced Language Features",   "type": "lecture",  "order": 1 },
+    { "id": "ex-interfaces",    "title": "Interfaces: ABC and Protocol", "type": "exercise", "order": 2 },
+    { "id": "ex-slots",         "title": "Slots and Memory",             "type": "exercise", "order": 3 },
+    { "id": "ex-descriptors",   "title": "Validating Descriptors",       "type": "exercise", "order": 4 },
+    { "id": "ex-mixins",        "title": "MRO and Mixins",               "type": "exercise", "order": 5 }
+  ]
+}

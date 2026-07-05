@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "The pattern is r\"(\\d{4})-(\\d{2})-(\\d{2})\". Three capture groups, in order: year (group 1), month (group 2), day (group 3).",
+    "In the replacement string, \\1 refers to group 1 (year), \\2 to group 2 (month), \\3 to group 3 (day). To produce MM/DD/YYYY, the replacement is r\"\\2/\\3/\\1\".",
+    "Use DATE_PATTERN.sub(r\"\\2/\\3/\\1\", text) — sub replaces every match in the string and returns the result. Make sure the replacement is also a raw string (r\"...\") so the backslashes aren't eaten by Python.",
+    "If your output has the year first (YYYY/...) you have the group order backwards in the replacement. If month and day are swapped, check whether \\2 is month and \\3 is day in your pattern."
+  ]
+}

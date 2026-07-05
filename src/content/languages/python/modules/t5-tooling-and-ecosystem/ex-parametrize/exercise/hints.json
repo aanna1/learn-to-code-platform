@@ -1,0 +1,7 @@
+[
+  "Fill in the cases list: (0, 32.0), (100, 212.0), (-40, -40.0), (37, 98.6). The formula is c * 9/5 + 32.",
+  "In check_celsius_to_fahrenheit, call celsius_to_fahrenheit(c) and compare with abs(result - expected) < 0.01 to handle floating-point noise.",
+  "In test_celsius_conversions, loop: `for c, expected in cases: check_celsius_to_fahrenheit(c, expected)`",
+  "For test_celsius_to_fahrenheit_invalid: use assert_raises(ValueError, celsius_to_fahrenheit, -300) — the helper is already defined for you.",
+  "For test_parse_temp_invalid: use assert_raises(ValueError, parse_temp, 'hot') — same helper."
+]

@@ -1,0 +1,11 @@
+**Stage 6 — Secure it.** The schema works, but "it works" and "it's safe" are different claims. Inkwell's public catalog page needs titles, authors, and prices — and must *never* be able to reach the customer or staff tables. Make that boundary the database's job with a **view**.
+
+The starter defines `catalog_public` as `SELECT * FROM book`, which leaks `book_id`, `genre`, and `author_id` and shows an author *id* instead of a name. Rebuild it to expose exactly `title`, the author's full name, and `price` — joining `book` to `author`. Press **Run**, then **Submit**.
+
+<Callout type="note">
+Pair this with DCL on a real database — `GRANT SELECT ON catalog_public TO web_public` and `REVOKE` direct access to the base tables — and the storefront can show the catalog while being *structurally incapable* of leaking a customer's email or a staff login. That's confidentiality enforced by the database, not promised by the app. (`GRANT`/`REVOKE` don't run in the browser's SQLite, but the `CREATE VIEW` does — and it's the piece that carries the security.)
+</Callout>
+
+<Callout type="tip">
+The catalog shows an author *name*: build it with `a.first_name || ' ' || a.last_name AS author`, joining `book` to `author`. List only `title`, that author expression, and `price`.
+</Callout>

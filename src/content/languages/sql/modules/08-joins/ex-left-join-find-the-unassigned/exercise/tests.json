@@ -1,0 +1,38 @@
+[
+  {
+    "name": "keeps every employee, ordered by employee_id, with NULL for Ryan's branch",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name", "branch_name"],
+      "rows": [
+        ["Jan", "Corporate"],
+        ["Michael", "Scranton"],
+        ["Dwight", "Scranton"],
+        ["Jim", "Scranton"],
+        ["Pam", "Scranton"],
+        ["Andy", "Stamford"],
+        ["Stanley", "Scranton"],
+        ["Ryan", null]
+      ]
+    }
+  },
+  {
+    "name": "generalizes: a second unassigned employee also survives with a NULL branch",
+    "setup": "INSERT INTO employee (employee_id, first_name, last_name, branch_id, salary, hire_date, supervisor_id) VALUES (108, 'Kevin', 'Malone', NULL, 45000, '2008-01-01', 102);",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name", "branch_name"],
+      "rows": [
+        ["Jan", "Corporate"],
+        ["Michael", "Scranton"],
+        ["Dwight", "Scranton"],
+        ["Jim", "Scranton"],
+        ["Pam", "Scranton"],
+        ["Andy", "Stamford"],
+        ["Stanley", "Scranton"],
+        ["Ryan", null],
+        ["Kevin", null]
+      ]
+    }
+  }
+]

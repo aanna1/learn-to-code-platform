@@ -1,0 +1,297 @@
+# Module 12 — Access Control, Views & Auditing
+
+> Tags: `[SEC]`
+
+Module 11 kept coming back to one phrase: *least privilege*. An injected query that lands on a read-only
+account goes nowhere; an app that can't `DROP` tables can't be tricked into dropping one. But "least
+privilege" is a principle, and a principle is only as good as the mechanism that enforces it. This module
+is that mechanism — the SQL that decides **who** is allowed to do **what**, to which data.
+
+It closes the security track and answers the catalog's last promise, *"practical issues that database
+developers must handle,"* by working through four defensive questions. Who can touch the data? —
+`GRANT`/`REVOKE` and roles. What are they even allowed to *see*? — views. What did they actually do? —
+auditing. And if the worst happens, can we get it back? — backup and recovery. Together these map cleanly
+onto the **CIA triad** from Module 01: access control and views protect **confidentiality**, auditing and
+controlled writes protect **integrity**, and backups protect **availability**.
+
+## Prerequisites
+
+Modules 05 (`CREATE` — a view is a `CREATE` statement, and privileges are granted on the tables you
+defined there), 10 (the privileges you hand out are precisely the DML verbs — `SELECT`, `INSERT`,
+`UPDATE`, `DELETE`), and 11 (which is the reason any of this matters).
+
+## What you'll learn
+
+- Where **DCL** (Data Control Language) fits among SQL's sublanguages
+- **`GRANT`** and **`REVOKE`** — giving and taking specific privileges on specific objects
+- The **principle of least privilege**, made concrete
+- **Roles** — bundling privileges so you manage access by job, not by person
+- **Views** — a saved query that doubles as an access-control boundary, exposing only safe rows and columns
+- **Auditing** and **backup/recovery** as integrity and availability controls
+- (dialect) which of these actually run in the browser engine, and which are Oracle/server-only
+
+## Where this fits: the sublanguages of SQL
+
+You've now met most of SQL, and it helps to see it sorted into families — a favorite exam question:
+
+- **DQL** — Data *Query* Language: `SELECT` (Modules 06–09).
+- **DDL** — Data *Definition* Language: `CREATE`, `ALTER`, `DROP` (Module 05).
+- **DML** — Data *Manipulation* Language: `INSERT`, `UPDATE`, `DELETE` (Module 10).
+- **TCL** — Transaction *Control* Language: `COMMIT`, `ROLLBACK` (Module 10).
+- **DCL** — Data *Control* Language: **`GRANT`, `REVOKE`**. This module.
+
+DCL is the security sublanguage. Where DML changes the *data*, DCL changes *who's permitted to run that
+DML in the first place*.
+
+## GRANT: handing out precise permissions
+
+In a real database, every user connects as an *account*, and by default a new account can do almost
+nothing. `GRANT` gives an account a specific privilege on a specific object:
+
+```sql
+GRANT SELECT ON employee TO hr_clerk;
+```
+
+Now `hr_clerk` can read the `employee` table — and *only* read it. They still can't insert, update, or
+delete. You grant several privileges at once by listing them:
+
+```sql
+GRANT SELECT, UPDATE ON employee TO hr_clerk;
+```
+
+That lets the HR clerk read and change employee rows, but pointedly **not** `DELETE` them — removing an
+employee is a bigger decision than editing one, so you simply don't grant it. This is least privilege in
+action: you enumerate exactly what a role needs and stop there. Compare it to the lazy option:
+
+```sql
+GRANT ALL PRIVILEGES ON employee TO hr_clerk;   -- convenient, and a mistake
+```
+
+`GRANT ALL` hands over every privilege — insert, update, delete, and the right to alter the table itself.
+It's the access-control equivalent of giving every employee a master key because cutting individual ones
+is annoying. Avoid it. A couple more pieces you'll see:
+
+- `GRANT SELECT ON employee TO PUBLIC;` grants to **everyone** — occasionally right for truly public
+  reference data, usually a leak waiting to happen.
+- `... WITH GRANT OPTION` lets the grantee re-grant the privilege to others. Powerful and easy to lose
+  track of, so hand it out sparingly.
+
+## REVOKE: taking it back
+
+`REVOKE` is the mirror image — it removes a privilege you previously granted:
+
+```sql
+REVOKE DELETE ON employee FROM hr_clerk;
+```
+
+If the clerk never had `DELETE`, this changes nothing; if they did, it's gone. `GRANT` and `REVOKE`
+together are how permissions evolve as people change jobs — and revoking promptly when someone leaves or
+moves on is itself a security control (dormant over-privileged accounts are a favorite way in).
+
+> **Security lens:** now Module 11's advice becomes concrete. The account your web app connects with
+> should be created and then granted the *bare minimum* — often just `GRANT SELECT, INSERT ON ... ` on the
+> handful of tables it uses, and nothing on the `users` credentials table beyond what login strictly
+> needs. Then when (not if) an injection slips through, the attacker inherits that account's puny
+> privileges: they can't `DROP` a table they have no rights to, can't read a table they were never
+> granted, can't `GRANT` themselves more. Least privilege doesn't prevent the break-in; it makes sure the
+> burglar finds most of the doors already locked.
+
+## Roles: permissions for a job, not a person
+
+Granting privileges to each user by hand doesn't scale — twenty analysts, five tables, four privileges is
+hundreds of grants, and a nightmare to keep straight. A **role** is a named bundle of privileges you grant
+*to the role once*, then hand the whole role to people:
+
+```sql
+CREATE ROLE analyst;
+GRANT SELECT ON employee TO analyst;
+GRANT SELECT ON branch   TO analyst;
+
+GRANT analyst TO jim, pam;      -- Jim and Pam now have everything 'analyst' has
+```
+
+Manage access by job function: when a new analyst is hired, `GRANT analyst TO newperson` and they're set;
+when the analyst team should lose access to a table, `REVOKE` it from the role *once* and every member
+loses it together. Roles are how least privilege stays maintainable instead of decaying into a mess of
+one-off grants nobody dares touch.
+
+## Views: showing only what's safe to see
+
+Sometimes the problem isn't which *table* a user can touch, but which *columns and rows within it*. HR can
+see salaries; a team lead browsing the directory should not — but it's the same `employee` table. A
+**view** solves this. A view is a stored `SELECT` that behaves like a table you can query, but it holds no
+data of its own — it's a saved window onto the real tables:
+
+```sql
+CREATE VIEW employee_public AS
+SELECT employee_id, first_name, last_name, branch_id
+FROM employee;
+```
+
+Query `employee_public` and you get employees back — but there is no `salary` column, because the view
+never selected it. Now pair it with DCL and it becomes an access-control boundary:
+
+```sql
+REVOKE ALL ON employee FROM team_lead;      -- no direct access to the real table
+GRANT SELECT ON employee_public TO team_lead;   -- only the safe window
+```
+
+The team lead can read names and branches all day and *cannot* reach salary — not because they're asked
+nicely, but because the column isn't in anything they're allowed to query. A view can filter **rows** just
+as easily as columns, by putting a `WHERE` in its definition:
+
+```sql
+CREATE VIEW scranton_roster AS
+SELECT first_name, last_name, branch_id
+FROM employee
+WHERE branch_id = 2;
+```
+
+Grant someone access to `scranton_roster` and they see the Scranton branch and nothing else — the perfect
+tool for "each manager can view only their own team." This is why the curriculum insists a view is an
+*access-control boundary, not just a convenience*: yes, views also tidy up repetitive complex joins (a
+real perk), but their security job is to expose a curated slice of the data and hide the rest.
+
+> **Dialect note:** views are *updatable* only when they're simple enough for the database to map a change
+> back to one underlying row unambiguously — a single-table view with no aggregation, roughly. Views built
+> on joins, `GROUP BY`, or `DISTINCT` are read-only, and in SQLite (the browser engine) **all** views are
+> read-only by default (`cannot modify ... because it is a view`). For access control that's usually
+> exactly what you want anyway: a reporting view should be look-but-don't-touch.
+
+## Auditing and recovery: integrity and availability
+
+Access control decides who *can* act. **Auditing** records who actually *did*. An audit log answers "who
+changed this salary, from which account, at what time?" — the accountability that makes integrity
+enforceable rather than hopeful. It's not optional in regulated worlds: healthcare (HIPAA), payment
+(PCI-DSS), and financial reporting (SOX) all mandate audit trails on sensitive data. Databases provide
+this through built-in audit facilities (Oracle's unified auditing, for instance) or, more simply, through
+triggers that write a row to a history table on every change. The link back to Module 10 is direct: writes
+change state, so integrity depends on being able to reconstruct *who* changed *what*.
+
+**Backup and recovery** cover the last leg of the CIA triad — **availability**. Regular backups plus the
+database's transaction log (the same durable record of committed transactions from Module 10) allow
+*point-in-time recovery*: restoring the database to how it looked at, say, 2:59 p.m., right before someone
+ran a `DELETE` without a `WHERE` — or before ransomware encrypted the volume. A control you never test
+isn't a control, so backups are verified by periodically *restoring* them. Confidentiality and integrity
+keep the data correct and private; availability makes sure it's still *there* to be correct and private.
+
+> **Dialect note (important):** almost nothing in the access-control half of this module runs in the
+> browser IDE. SQLite is a serverless, single-file database with **no user accounts at all** — so `GRANT`,
+> `REVOKE`, and `CREATE ROLE` aren't just unused, they're **syntax errors** there; SQLite's "access
+> control" is the operating system's file permissions on the `.db` file. The exam's Oracle database (and
+> MySQL, PostgreSQL, SQL Server) all have the full DCL you see here, and it's standard enough to be worth
+> knowing cold for the handwritten exam. **Views are the exception** — `CREATE VIEW` works everywhere,
+> including the IDE, so that's the one piece of this module you can actually run.
+
+## Try it: predict the grid
+
+Views run in the browser engine, so this one you *can* execute. Given the row-and-column-filtering view
+from earlier:
+
+```sql
+CREATE VIEW scranton_roster AS
+SELECT first_name, last_name, branch_id
+FROM employee
+WHERE branch_id = 2;
+
+SELECT * FROM scranton_roster;
+```
+
+Against the seeded `employee` table (Jan in branch 1, five people in branch 2, Andy in branch 3, Ryan
+unassigned), what does `SELECT *` on the view return — and what two things does it *not* show?
+
+<details>
+<summary>Predict, then check</summary>
+
+**Five rows — the Scranton branch only:**
+
+```
++------------+-----------+-----------+
+| first_name | last_name | branch_id |
++------------+-----------+-----------+
+| Michael    | Scott     | 2         |
+| Dwight     | Schrute   | 2         |
+| Jim        | Halpert   | 2         |
+| Pam        | Beesly    | 2         |
+| Stanley    | Hudson    | 2         |
++------------+-----------+-----------+
+```
+
+The two things it *doesn't* show are the whole point. **No other branches:** Jan (1), Andy (3), and Ryan
+(unassigned) are filtered out by the view's `WHERE branch_id = 2`, so a user with access only to this view
+can't even tell they exist. **No salary:** the view never selected that column, so it's simply not
+reachable through `scranton_roster`, no matter what the user types — `SELECT salary FROM scranton_roster`
+errors, because as far as this window is concerned, there is no such column. That's the access-control
+boundary: grant someone `SELECT` on this view and `REVOKE` it on `employee`, and you've handed them
+exactly the Scranton names — no salaries, no other teams — enforced by the database itself.
+
+</details>
+
+## Recap
+
+Access control is **DCL** — `GRANT` and `REVOKE` — which decides who may run which DML on which objects.
+`GRANT SELECT, UPDATE ON employee TO hr_clerk` gives precise privileges; enumerate exactly what's needed
+and avoid `GRANT ALL`, because that's **least privilege**, the control that caps the damage of any
+injection or stolen account. **Roles** bundle privileges for a job so you grant and revoke once for a whole
+group instead of per person. **Views** — stored `SELECT`s — are an access-control boundary as much as a
+convenience: by choosing which columns and (via `WHERE`) which rows they expose, then granting access to
+the view instead of the base table, you show each user only their safe slice and the database enforces it.
+**Auditing** records who did what (integrity and accountability, and a legal requirement for regulated
+data), while **backup and recovery** protect availability through point-in-time restores — together
+completing the CIA triad from Module 01. And mind the engine: the browser's SQLite has no users, so
+`GRANT`/`REVOKE`/roles are Oracle/server concepts you learn for the exam, while `CREATE VIEW` is the one
+part that actually runs in the IDE.
+
+## Quiz seeds
+
+- Q: Which SQL sublanguage do `GRANT` and `REVOKE` belong to, and what do they control?
+  - ✅ DCL (Data Control Language) — they control *who is permitted* to run operations on database objects,
+    as opposed to DML, which changes the data itself
+  - ❌ DML, because they change the database — DML (`INSERT`/`UPDATE`/`DELETE`) changes data; `GRANT`/
+    `REVOKE` change *permissions*, which is DCL
+  - ❌ DDL, because they define structure — DDL (`CREATE`/`ALTER`/`DROP`) defines objects; granting
+    privileges on those objects is DCL
+
+- Q: Why is `GRANT SELECT, INSERT ON orders TO app_user` better than `GRANT ALL PRIVILEGES ON orders TO
+  app_user` for a web application's account?
+  - ✅ It follows least privilege — the app gets only the two rights it needs, so a successful injection on
+    that account still can't `DELETE`, `DROP`, or alter the table
+  - ❌ They're equivalent; `ALL` is just shorter — `ALL` grants every privilege including destructive ones,
+    dramatically widening what an attacker who hijacks the account can do
+  - ❌ `GRANT ALL` isn't valid SQL — it's valid; it's just a security anti-pattern because it over-grants
+
+- Q: A team lead should see employee names and branches but never salaries, all from the one `employee`
+  table. What's the standard way to enforce that?
+  - ✅ Create a view that selects only the safe columns (`employee_id`, `first_name`, `last_name`,
+    `branch_id`), grant `SELECT` on the view, and revoke access to the base table
+  - ❌ Ask the application to hide the salary column in its UI — that's cosmetic; anyone who queries the
+    table directly still sees salary. The control must be in the database
+  - ❌ Delete the salary column from the `employee` table — that destroys data HR legitimately needs; a
+    view exposes a *subset* without removing anything
+
+- Q: You define `CREATE ROLE analyst; GRANT SELECT ON employee TO analyst; GRANT analyst TO jim, pam;`.
+  Later you `REVOKE SELECT ON employee FROM analyst;`. What happens?
+  - ✅ Both Jim and Pam immediately lose `SELECT` on `employee`, because they held it through the role, not
+    as a direct grant — revoking from the role revokes for every member at once
+  - ❌ Nothing changes for Jim and Pam; they keep the privilege — they inherited it via the role, so
+    revoking it from the role removes it from all members
+  - ❌ Only Jim loses it — a role-level revoke applies to every account that holds the role, not just one
+
+- Q: You try `GRANT SELECT ON employee TO hr_clerk` in the course's browser IDE and get a syntax error.
+  Why?
+  - ✅ SQLite is a serverless, single-file database with no user accounts, so it has no `GRANT`/`REVOKE` at
+    all — access control there is the OS file permissions; the exam's Oracle engine does support DCL
+  - ❌ The syntax is wrong; it should be `GRANT SELECT TO hr_clerk ON employee` — the clause order is
+    correct; SQLite simply doesn't implement `GRANT` because it has no users
+  - ❌ You must `CREATE USER hr_clerk` first, then it works — SQLite has no users or `GRANT` whatsoever;
+    creating a user isn't possible there either
+
+## Up next
+
+That's the whole course — you can design a schema, define it, query it every way there is, change it
+safely, and now lock it down. The **Capstone** ties it all together end to end: take a short business
+scenario, model it into an ERD, normalize it, write the `CREATE TABLE` statements with the right
+constraints, seed it with data, answer real questions with joins and subqueries, and then do a deliberate
+security pass — spotting injection risk and setting least-privilege access. It's the "design, build, and
+secure a small database" project that mirrors the real CNIT 27200 lab work and doubles as something you can
+show off. Then you sit the exam.

@@ -1,0 +1,26 @@
+{
+  "id": "04-normalization",
+  "title": "Normalization",
+  "description": "The checkable process for removing redundancy: functional dependencies, the insert/update/delete anomalies, first through third normal form (\"the key, the whole key, and nothing but the key\"), and when denormalization is a deliberate tradeoff rather than a mistake.",
+  "order": 4,
+  "lessons": [
+    {
+      "id": "lecture",
+      "title": "Normalization",
+      "type": "lecture",
+      "order": 1
+    },
+    {
+      "id": "ex-see-the-redundancy",
+      "title": "See the Redundancy",
+      "type": "exercise",
+      "order": 2
+    },
+    {
+      "id": "ex-one-fact-one-place",
+      "title": "One Fact, One Place",
+      "type": "exercise",
+      "order": 3
+    }
+  ]
+}

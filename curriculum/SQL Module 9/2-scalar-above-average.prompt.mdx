@@ -1,0 +1,7 @@
+"Who earns more than the company average?" You know how to get the average (`SELECT AVG(salary) FROM employee`) and how to filter (`WHERE salary > ...`). The trick is filling that `...` *without* pasting a number by hand — because the moment a salary changes, a pasted number is wrong.
+
+The starter hardcodes `60000`. Replace it with a **scalar subquery** so the threshold is always the live average, then order by salary from highest to lowest. Press **Run** to see the grid and **Submit** to check it.
+
+<Callout type="tip">
+A scalar subquery must return exactly **one value** — one row, one column. `SELECT AVG(salary) FROM employee` does, so it's safe here. The parentheses are what mark it as a subquery; the database evaluates the inside first.
+</Callout>

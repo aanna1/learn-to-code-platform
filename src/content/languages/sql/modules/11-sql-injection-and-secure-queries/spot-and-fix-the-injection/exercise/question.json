@@ -1,0 +1,49 @@
+{
+  "draft": "Before you answer, do what a code reviewer does: read the vulnerable login template, substitute the attacker's input by hand, and simplify the resulting SQL on paper. The graded answers should just be reading off that work.",
+  "fields": [
+    {
+      "id": "root-cause",
+      "type": "single-select",
+      "label": "What is the root cause of SQL injection?",
+      "options": [
+        "User input is concatenated straight into the query string, so the database can't tell the developer's SQL from the attacker's input and parses all of it as code",
+        "SQL is an inherently insecure language that should be avoided",
+        "A bug in the database engine lets attackers run their own commands",
+        "The database's password storage is too weak to protect credentials"
+      ]
+    },
+    {
+      "id": "bypass-input",
+      "type": "single-select",
+      "label": "A login runs WHERE username = '<input>' AND password = '<input>'. Which value, typed into the username box, logs an attacker in as the first user without knowing any password?",
+      "options": [
+        "' OR '1'='1' --",
+        "admin",
+        "' AND '1'='1' --",
+        "OR 1=1"
+      ]
+    },
+    {
+      "id": "why-dashes",
+      "type": "single-select",
+      "label": "Why does the payload ' OR '1'='1' -- log the attacker in, but a bare ' OR '1'='1 (no --) does not?",
+      "options": [
+        "The -- comments out the leftover AND password = '...' so only the always-true OR survives; without it, AND (which binds tighter than OR) still enforces the password and the stray quote breaks the syntax",
+        "They are identical; the -- is only a stylistic choice",
+        "The -- is needed because OR is not valid inside a WHERE clause",
+        "The -- deletes the users table before the password is checked"
+      ]
+    },
+    {
+      "id": "the-fix",
+      "type": "multi-select",
+      "label": "Which of these actually REMOVES the vulnerability? Select every option that genuinely works — and only those.",
+      "options": [
+        "Rewrite it as a parameterized query (prepared statement) with ? placeholders and pass the input as a separate value",
+        "Strip the word UNION out of the input before running it",
+        "Escape the quote characters in the input",
+        "Reject any input that contains two dashes"
+      ]
+    }
+  ]
+}

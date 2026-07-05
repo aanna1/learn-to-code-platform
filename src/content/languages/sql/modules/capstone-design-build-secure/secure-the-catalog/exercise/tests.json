@@ -1,0 +1,36 @@
+[
+  {
+    "name": "the view exposes exactly title, author name, and price -- nothing else",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["title", "author", "price"],
+      "rows": [
+        ["1984", "George Orwell", 10],
+        ["A Wizard of Earthsea", "Ursula Le Guin", 12],
+        ["Animal Farm", "George Orwell", 9],
+        ["Beloved", "Toni Morrison", 13],
+        ["Dune", "Frank Herbert", 18],
+        ["Kindred", "Octavia Butler", 15],
+        ["The Left Hand of Darkness", "Ursula Le Guin", 14]
+      ]
+    }
+  },
+  {
+    "name": "generalizes: a newly stocked book shows through the catalog view too",
+    "setup": "INSERT INTO book VALUES (8, 'Parable of the Sower', 'SciFi', 16.00, 5);",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["title", "author", "price"],
+      "rows": [
+        ["1984", "George Orwell", 10],
+        ["A Wizard of Earthsea", "Ursula Le Guin", 12],
+        ["Animal Farm", "George Orwell", 9],
+        ["Beloved", "Toni Morrison", 13],
+        ["Dune", "Frank Herbert", 18],
+        ["Kindred", "Octavia Butler", 15],
+        ["Parable of the Sower", "Octavia Butler", 16],
+        ["The Left Hand of Darkness", "Ursula Le Guin", 14]
+      ]
+    }
+  }
+]

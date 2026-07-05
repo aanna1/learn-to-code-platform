@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "A correlated subquery references a column from the outer query, so it re-runs for each outer row. Here the outer row is an employee (aliased e); you want the inner AVG to cover only that employee's branch.",
+    "Inside the subquery, add WHERE x.branch_id = e.branch_id. The e.branch_id reaches back to the current outer row, so each employee is measured against their own branch's average.",
+    "Full shape: SELECT first_name, salary, branch_id FROM employee e WHERE salary > (SELECT AVG(salary) FROM employee x WHERE x.branch_id = e.branch_id) ORDER BY employee_id; Only Michael (90000 vs Scranton's 62400) clears his branch's bar."
+  ]
+}

@@ -1,0 +1,11 @@
+**Stage 5 (continued).** Next question: **which books have never sold?**
+
+That's an *absence* — you want the books whose `book_id` never shows up in `order_line` — and absence is exactly what a `NOT IN` subquery expresses cleanly (Module 09). The starter lists every book; narrow it to just the unsold ones. Press **Run**, then **Submit**.
+
+<Callout type="note">
+`NOT IN` misbehaves if its subquery can return `NULL` — but here `order_line.book_id` is `NOT NULL`, so it's safe. When a subquery column *might* be nullable, `NOT EXISTS` is the sturdier form (you used it in Module 09).
+</Callout>
+
+<Callout type="tip">
+The subquery is the set of book_ids that *have* sold: `(SELECT book_id FROM order_line)`. Keep the books whose `book_id` is `NOT IN` that set.
+</Callout>

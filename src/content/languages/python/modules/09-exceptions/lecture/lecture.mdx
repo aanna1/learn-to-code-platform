@@ -1,0 +1,347 @@
+## Why this matters
+
+Every program you've written so far assumes the world is well-behaved. The user types a number when you ask for one. The file exists. The list has enough items. The dictionary has the key you want.
+
+Run any of those programs against a real person for thirty seconds and they'll crash. Watch:
+
+```python
+age = int(input("Age: "))
+```
+
+You ask for an age. They type "twenty-five." Python raises `ValueError: invalid literal for int() with base 10: 'twenty-five'`, your program ends mid-conversation, and whatever else you planned to do never happens.
+
+The frustrating part is that you *knew* this could happen. You just had no way to handle it. Every error so far has been a wall: the program hits it and stops. This module gives you the tool to wrap a piece of risky code, catch the failure, and decide what to do next. The same tool lets you signal failures from your own code when a caller passes bad inputs.
+
+Defensive coding isn't about anticipating every possible disaster. Code that tries to handle every edge case becomes unreadable and hides real bugs by silently swallowing them. The goal is to handle the failures you *expect* (bad user input, missing files, network hiccups) and let the unexpected ones propagate so you find them. Most of the module is about telling those two apart.
+
+<Callout type="info">
+No installation needed. Every code block on this platform has a **Run** button — press it and your code runs instantly in the browser. You don't need Python on your machine; you don't need a terminal.
+</Callout>
+
+## What you'll be able to do by the end
+
+- Read a Python traceback and identify what failed, where, and why.
+- Wrap risky code in `try` / `except` to catch specific failure types.
+- Pick the right exception class to catch, and explain why bare `except:` is a trap.
+- Use `else` and `finally` for the "ran cleanly" and "always run" cases.
+- Raise your own exceptions when a function's inputs violate its preconditions.
+- Write an input-validation loop that keeps prompting until the input is usable.
+- Recognize the EAFP style ("ask forgiveness, not permission") that Python culture prefers.
+
+## Core concepts
+
+### What an exception actually is
+
+An exception is an event Python raises when it can't continue. The interpreter stops, walks back up through whatever called it, and looks for code prepared to handle that failure. If nothing handles it, the program crashes and prints a traceback.
+
+Watch a traceback up close:
+
+<Runnable code={`def compute_average(numbers):
+    return sum(numbers) / len(numbers)
+
+result = compute_average([])
+print(result)`} />
+
+You get:
+
+```
+Traceback (most recent call last):
+  File "avg.py", line 4, in <module>
+    result = compute_average([])
+  File "avg.py", line 2, in compute_average
+    return sum(numbers) / len(numbers)
+ZeroDivisionError: division by zero
+```
+
+Read it from the bottom up. The actual error: `ZeroDivisionError: division by zero`. Where it happened: line 2, inside `compute_average`. How it got there: from line 4, where you called `compute_average([])`. The empty list had length zero, so the division blew up.
+
+Most error messages tell you exactly what went wrong if you read them carefully. New programmers tend to skim and panic. Slow down and read the last line first. It almost always names the problem.
+
+### The exceptions you'll meet first
+
+A short reference of the common ones, and the code that causes each:
+
+- **`ValueError`**: wrong value for the right type. `int("twenty")` is the textbook case.
+- **`TypeError`**: wrong type entirely. `"3" + 5` (you can't add a string and a number).
+- **`ZeroDivisionError`**: division or modulo by zero.
+- **`IndexError`**: list index out of range. `[1, 2, 3][5]`.
+- **`KeyError`**: dictionary key doesn't exist. `{"a": 1}["b"]`.
+- **`FileNotFoundError`**: opening a file that isn't there.
+- **`AttributeError`**: calling a method the object doesn't have. `"hello".doesnt_exist()`.
+- **`NameError`**: using a variable that's never been defined.
+- **`IndentationError`** / **`SyntaxError`**: these happen *before* the program runs — Python is rejecting your source code. You can't catch them at runtime.
+
+You don't need to memorize all of these. You need to recognize them by name when they appear so you can look them up effectively.
+
+### `try` and `except`: the basics
+
+The shape:
+
+```python
+try:
+    # risky code
+except SomeSpecificError:
+    # what to do if it failed
+```
+
+Concretely:
+
+<Runnable code={`try:
+    age = int(input("Age: "))
+    print(f"Next year you'll be {age + 1}")
+except ValueError:
+    print("That wasn't a number.")`} />
+
+Python runs the body of `try`. If `int(input(...))` raises a `ValueError`, control jumps to the `except` block. If no exception is raised, the `except` block is skipped entirely.
+
+**Does the `try` block stop the moment an exception fires, or does it finish?** It stops. The instant `int()` raises `ValueError`, the `print` line below it never runs. Control jumps straight to `except`.
+
+**Can I have multiple `except` clauses?** Yes, one per exception type:
+
+<Runnable code={`try:
+    a = float(input("Numerator: "))
+    b = float(input("Denominator: "))
+    print(a / b)
+except ValueError:
+    print("Both inputs must be numbers.")
+except ZeroDivisionError:
+    print("Can't divide by zero.")`} />
+
+If `float()` fails, the `ValueError` handler runs. If the division fails because `b` is zero, the `ZeroDivisionError` handler runs. Only one of them fires per pass through the `try`.
+
+**Can one `except` catch multiple types?** Yes, with a tuple:
+
+```python
+try:
+    do_stuff()
+except (ValueError, TypeError):
+    print("Bad input.")
+```
+
+This is fine when the recovery is the same for both. If you'd handle them differently, use two separate clauses.
+
+### What goes wrong without `try`: the naïve version
+
+Here's the kind of bug that makes new programmers reach for `try` too aggressively. Suppose you have a grade calculator:
+
+```python
+score = int(input("Score: "))
+if score >= 90:
+    print("A")
+elif score >= 80:
+    print("B")
+else:
+    print("Below B")
+```
+
+The user types "ninety." Crash. So you wrap it:
+
+```python
+try:
+    score = int(input("Score: "))
+except ValueError:
+    print("That wasn't a number.")
+
+if score >= 90:
+    print("A")
+```
+
+Now the user types "ninety" and you get a *different* crash: `NameError: name 'score' is not defined`. The `try` block raised before `score` got assigned. The `except` block printed a message but didn't assign `score` either. Then the code below tried to use it.
+
+The fix is to put the whole dependent computation inside a loop, and keep retrying until the input is good:
+
+<Runnable code={`while True:
+    try:
+        score = int(input("Score: "))
+        break
+    except ValueError:
+        print("That wasn't a number. Try again.")
+
+if score >= 90:
+    print("A")
+elif score >= 80:
+    print("B")
+else:
+    print("Below B")`} />
+
+`while True:` keeps prompting. When `try` succeeds, `break` exits the loop and `score` is defined. When `try` fails, `except` runs and the loop goes around again. This input-validation pattern is one of the most common shapes in real Python code — memorize it.
+
+### The predict-and-run challenge
+
+What does this print if the user types "abc" the first time and "5" the second? Think it through before pressing Run.
+
+<Runnable code={`while True:
+    try:
+        n = int(input("Number: "))
+        break
+    except ValueError:
+        print("Try again.")
+print(n * 2)`} />
+
+<Callout type="tip">
+First iteration: `int("abc")` raises, "Try again." prints, the loop restarts. Second iteration: `int("5")` succeeds, `break` exits, `print(n * 2)` runs and prints `10`.
+</Callout>
+
+### The bare-`except` trap
+
+A tempting pattern, especially for beginners who just want the crashes to stop:
+
+```python
+try:
+    do_something_risky()
+except:
+    print("Something went wrong.")
+```
+
+Don't. A bare `except:` catches *every* exception, including ones it has no business catching. The worst offender is `KeyboardInterrupt` — what Python raises when the user presses Ctrl+C. With a bare `except`, Ctrl+C gets swallowed by your "something went wrong" handler and the program can't be stopped cleanly.
+
+Worse still: a bare `except` will catch your own bugs. Typos in variable names raise `NameError`. Missing method calls raise `AttributeError`. If you're swallowing those, your program will run "successfully" while producing wrong answers — exactly the kind of bug you spend days hunting down.
+
+Catch only what you're prepared to handle. If the user's input might be bad, catch `ValueError`. If a file might be missing, catch `FileNotFoundError`. Let unknown exceptions propagate. They're trying to tell you something.
+
+The one legitimate use is logging-and-reraising in a top-level handler:
+
+```python
+try:
+    main()
+except Exception as e:
+    log_to_file(e)
+    raise
+```
+
+Even there, `except Exception:` is preferred over bare `except:` because `Exception` doesn't catch `KeyboardInterrupt` or `SystemExit`. The `raise` at the end re-raises after logging, so the program still crashes and you see the traceback.
+
+### Capturing the exception with `as`
+
+You can grab the exception object and use it:
+
+<Runnable code={`try:
+    int("not a number")
+except ValueError as e:
+    print(f"Couldn't parse: {e}")`} />
+
+`e` is the exception object. Printing it gives you the message Python attached. This is handy when you want to log the specific failure or include it in a user-facing message.
+
+### `else` and `finally`
+
+`try` blocks have two optional extras.
+
+`else` runs only if the `try` block succeeded with no exception:
+
+<Runnable code={`try:
+    n = int(input("Number: "))
+except ValueError:
+    print("Not a number.")
+else:
+    print(f"Square: {n ** 2}")`} />
+
+Why not just put `print(n ** 2)` at the end of the `try`? Because `else` is *not* covered by the `except` clauses. If the squaring step somehow raised a `TypeError`, it wouldn't get caught by your `except ValueError:` handler — which is correct, because they're unrelated failures. `else` keeps the success path clean.
+
+`finally` runs always — exception or not, `return` or not. It's for cleanup that must happen regardless:
+
+```python
+def read_user_data(filename):
+    f = open(filename)
+    try:
+        return f.read()
+    finally:
+        f.close()
+```
+
+The `return` inside `try` looks like it should skip `finally`. It doesn't. Python runs `finally` first, then completes the return. The file gets closed no matter what. In practice you'll use the `with` statement (Module 11) for files, which handles this automatically — but `finally` exists for every other kind of resource you might need to release.
+
+### Raising your own exceptions
+
+Catching isn't the only use of exceptions. You can raise them too, which is how you signal that something is wrong with what your caller asked you to do:
+
+<Runnable code={`def withdraw(balance, amount):
+    if amount < 0:
+        raise ValueError("amount must be non-negative")
+    if amount > balance:
+        raise ValueError(f"insufficient funds: {balance} < {amount}")
+    return balance - amount
+
+try:
+    new_balance = withdraw(100, 150)
+except ValueError as e:
+    print(f"Couldn't withdraw: {e}")`} />
+
+Why is `raise` better than returning a sentinel like `None` or `-1`? Return values can be ignored; exceptions can't. If your caller forgets to check `result == -1`, the bad value silently propagates. An uncaught exception crashes loudly. Exceptions also carry a message, so the failure is self-describing. And they cross function boundaries cleanly: a function eight levels deep can raise and the top-level caller can catch it, without every layer in between needing to check and forward the error manually.
+
+Rule of thumb: if a function can't do its job because of bad inputs, raise. Don't return `None` and hope the caller notices.
+
+### LBYL vs. EAFP
+
+Two philosophies for handling things that might fail.
+
+**LBYL** ("Look Before You Leap") checks before acting:
+
+```python
+if "city" in person:
+    print(person["city"])
+else:
+    print("no city on file")
+```
+
+**EAFP** ("Easier to Ask Forgiveness than Permission") just tries it:
+
+```python
+try:
+    print(person["city"])
+except KeyError:
+    print("no city on file")
+```
+
+Both work, but Python culture leans EAFP. The reason is subtle: the LBYL version has a race condition baked in for some operations. Consider opening a file:
+
+```python
+import os
+if os.path.exists(filename):
+    f = open(filename)   # might still fail!
+```
+
+Between the `os.path.exists` check and the `open` call, another process could delete the file. Your "safe" check guaranteed nothing. The EAFP version sidesteps this entirely.
+
+EAFP also cuts down on duplicated logic. The LBYL `if "city" in person:` and the dictionary lookup both reference the same key. The EAFP version mentions it once.
+
+That said, LBYL is fine for simple, fast checks with no concurrency: dictionary keys, list bounds, "is this number positive." Pick whichever is easier to follow.
+
+### Don't use exceptions for control flow
+
+A counterweight to the EAFP enthusiasm: exceptions should describe *exceptional* situations, not the normal control flow of your program.
+
+```python
+# bad: using exceptions to stop a loop
+def first_negative(numbers):
+    try:
+        for n in numbers:
+            if n < 0:
+                raise StopIteration
+    except StopIteration:
+        return n
+```
+
+That works, but it's strange. The normal "found what I wanted, stop" mechanism is `return` or `break`. Using `raise`/`except` here makes the code harder to follow for no benefit. Rough rule: if the situation is something a caller would routinely cause, return a value indicating it. If the situation means the function *couldn't do its job at all*, raise.
+
+## Common pitfalls
+
+**Bare `except:`.** Catches everything including Ctrl+C and your own bugs. Use a specific exception class. If you genuinely need a catch-all, use `except Exception:` and re-raise after logging.
+
+**`try` block too big.** Wrapping fifty lines in one `try` makes it impossible to know which line you were guarding against. Keep `try` blocks short — ideally one or two operations. Move setup and post-processing outside.
+
+**Using a variable from a failed `try`.** If the block didn't finish, the variables it tried to assign don't exist. Either retry until success (the `while True:` pattern) or assign a default before the `try`.
+
+**Catching too much and swallowing it.** `except Exception: pass` is the second-worst thing you can write (after bare `except: pass`). It silently eats every error. If you genuinely don't care, at least log it.
+
+**Forgetting that exceptions cross function boundaries.** If `a` calls `b` calls `c`, and `c` raises, the exception travels back through `b` and `a` until something catches it. You don't need to catch in every function — catch at the level where you actually have enough context to recover.
+
+## Recap
+
+- An exception is an event Python raises when it can't continue. Uncaught, it crashes the program and prints a traceback.
+- Read tracebacks bottom-up: the last line names the failure, the lines above show where it came from.
+- Wrap risky code in `try` / `except SpecificError:`. Skip the bare `except:`.
+- The input-validation loop is `while True:` + `try` + `break` on success.
+- `else` runs only if `try` succeeded. `finally` runs always.
+- `raise ValueError("message")` signals a failure from your own code. Use it when a function can't do its job because of bad inputs.
+- Python culture prefers EAFP ("try and catch") over LBYL ("check then act"). Use whichever is clearer, but reach for `try` more often than you would in other languages.
+- Don't use exceptions for normal control flow. They're for exceptional situations, not for replacing `break` and `return`.

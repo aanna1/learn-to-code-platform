@@ -1,0 +1,13 @@
+Look hard at the starter query's grid: branches 1, 3, and the `NULL` group each have exactly *one* employee. For those groups, "the average salary" isn't a summary at all — it's that one person's exact salary, in plain sight. That's an **inference** attack: reconstructing an individual's protected data from statistics you're technically "allowed" to see.
+
+`HAVING` is the fix. It filters *groups*, after they're formed — the same way `WHERE` filters rows, before grouping. `WHERE` can't test `COUNT(*)` (the count doesn't exist yet when `WHERE` runs); `HAVING` can, because it runs after `GROUP BY`.
+
+## Your task
+
+Add a `HAVING` clause that keeps only branches where `COUNT(*) > 1` — in this data, that's just Scranton. In a real system you'd likely set the threshold higher (`HAVING COUNT(*) >= 5`, say), but the mechanism is the same: refuse to publish a group small enough that its aggregate reveals one person.
+
+Press **Run** to see the grid, then **Submit** to check it.
+
+<Callout type="tip">
+HAVING goes after GROUP BY: `... GROUP BY branch_id HAVING COUNT(*) > 1;`
+</Callout>

@@ -1,0 +1,6 @@
+[
+  "For `deposit`, check `if amount <= 0:` first, then `raise ValueError(\"amount must be positive\")`. Otherwise `return balance + amount`.",
+  "For `withdraw`, check the non-positive amount first (same message), then check `if amount > balance:` and raise with the balance in the message: `f\"insufficient funds: balance is {balance}\"`.",
+  "For `transfer`, just call `new_from = withdraw(from_balance, amount)` and `new_to = deposit(to_balance, amount)`, then `return (new_from, new_to)`. No try/except needed — the exceptions from those functions will naturally propagate to the caller.",
+  "Don't return `None` for the error cases — the tests expect a `ValueError` to be *raised*, not `None` to be returned."
+]

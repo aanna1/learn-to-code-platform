@@ -1,0 +1,33 @@
+Build a `BankAccount` class.
+
+You pass the owner's name and an optional starting balance (defaults to `0`):
+
+```python
+acc  = BankAccount("Alice")
+acc2 = BankAccount("Bob", 500)
+```
+
+Your class needs four things:
+
+**`deposit(amount)`** — adds `amount` to the balance. Raise `ValueError` with a clear message if `amount` is not positive.
+
+**`withdraw(amount)`** — subtracts `amount` from the balance. Raise `ValueError` if `amount` is not positive, or if there isn't enough money.
+
+**`balance`** — a `@property` that returns the current balance. It should work as `acc.balance`, not `acc.balance()`.
+
+**`__str__`** — printing the account should produce something like `BankAccount(owner='Alice', balance=120)`.
+
+Store the balance in `self._balance` (leading underscore) to signal it's internal state. Callers go through `deposit` and `withdraw`, not by reaching into `_balance` directly.
+
+<Runnable code={`class BankAccount:
+    def __init__(self, owner, balance=0):
+        self.owner = owner
+        self._balance = balance
+
+    # Add deposit, withdraw, balance property, and __str__ here
+
+acc = BankAccount("Alice", 100)
+acc.deposit(50)
+acc.withdraw(30)
+print(acc)          # BankAccount(owner='Alice', balance=120)
+print(acc.balance)  # 120`} />

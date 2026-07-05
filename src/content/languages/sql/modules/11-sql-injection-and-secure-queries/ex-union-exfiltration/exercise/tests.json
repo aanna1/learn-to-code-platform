@@ -1,0 +1,28 @@
+[
+  {
+    "name": "the UNION leaks every credential into the product grid",
+    "orderMatters": false,
+    "expected": {
+      "columns": ["name", "price"],
+      "rows": [
+        ["admin", "s3cr3t"],
+        ["jhalpert", "pam4ever"],
+        ["dwight", "beets"]
+      ]
+    }
+  },
+  {
+    "name": "it exfiltrates the whole users table -- a newly added account leaks too",
+    "setup": "INSERT INTO users (username, password) VALUES ('kelly', 'fashion');",
+    "orderMatters": false,
+    "expected": {
+      "columns": ["name", "price"],
+      "rows": [
+        ["admin", "s3cr3t"],
+        ["jhalpert", "pam4ever"],
+        ["dwight", "beets"],
+        ["kelly", "fashion"]
+      ]
+    }
+  }
+]

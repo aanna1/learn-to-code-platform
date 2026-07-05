@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The damage (every salary set to 0) happened inside BEGIN ... but no COMMIT has run, so the change is still pending and can be discarded.",
+    "Add a single line after the UPDATE: ROLLBACK; — it undoes everything since BEGIN, as if the UPDATE never ran.",
+    "Full answer: BEGIN; UPDATE employee SET salary = 0; ROLLBACK; The salaries return to exactly what they were before the transaction opened."
+  ]
+}

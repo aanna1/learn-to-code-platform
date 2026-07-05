@@ -41,3 +41,6 @@ yarn-error.log*
 __pycache__/
 *.pyc
 validate_harness.mjs
+
+# Self-hosted C toolchain (binji/wasm-clang dev bundle, ~60MB) — fetched locally, not committed
+/public/c-toolchain/

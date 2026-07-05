@@ -1,0 +1,26 @@
+{
+  "id": "03-entity-relationship-modeling",
+  "title": "Entity-Relationship Modeling",
+  "description": "Turn a plain-English business description into a database blueprint: entities and attributes, relationships and cardinality (1:1, 1:N, N:M), the associative entity that resolves a many-to-many, and the identifying-vs-non-identifying distinction the exam leans on most.",
+  "order": 3,
+  "lessons": [
+    {
+      "id": "lecture",
+      "title": "Entity-Relationship Modeling",
+      "type": "lecture",
+      "order": 1
+    },
+    {
+      "id": "ex-see-the-associative-table",
+      "title": "See the Junction Table",
+      "type": "exercise",
+      "order": 2
+    },
+    {
+      "id": "ex-read-the-composite-key",
+      "title": "Read the Composite Key",
+      "type": "exercise",
+      "order": 3
+    }
+  ]
+}

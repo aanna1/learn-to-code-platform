@@ -1,0 +1,20 @@
+[
+  {
+    "name": "creates both tables: branch and employee",
+    "orderMatters": true,
+    "probe": "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;",
+    "expected": {
+      "columns": ["name"],
+      "rows": [["branch"], ["employee"]]
+    }
+  },
+  {
+    "name": "employee has a foreign key on branch_id referencing branch(branch_id)",
+    "orderMatters": true,
+    "probe": "SELECT \"table\", \"from\", \"to\" FROM pragma_foreign_key_list('employee');",
+    "expected": {
+      "columns": ["table", "from", "to"],
+      "rows": [["branch", "branch_id", "branch_id"]]
+    }
+  }
+]

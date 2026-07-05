@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The foreign key is a table constraint — add it on its own line inside employee's parentheses, after the branch_id column.",
+    "Remember the comma: once branch_id has a line after it, branch_id INTEGER needs a trailing comma.",
+    "The full line is FOREIGN KEY (branch_id) REFERENCES branch(branch_id). The first name is employee's column; the part after REFERENCES is the table and column it points to."
+  ]
+}

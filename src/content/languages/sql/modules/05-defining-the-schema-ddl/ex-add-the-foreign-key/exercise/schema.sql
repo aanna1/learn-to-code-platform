@@ -1,0 +1,3 @@
+-- No tables are pre-created for this exercise — you build both branch and
+-- employee in the editor below. Press Run to create them and Submit to check the
+-- foreign key. (This fixture block is empty on purpose.)

@@ -1,0 +1,19 @@
+[
+  {
+    "name": "returns the three priciest products, most expensive first",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["name", "price"],
+      "rows": [["Desk", 210], ["Chair", 95], ["Lamp", 40]]
+    }
+  },
+  {
+    "name": "generalizes when a new most-expensive product is added",
+    "setup": "INSERT INTO products (id, name, price, category) VALUES (6, 'Vault', 999, 'home');",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["name", "price"],
+      "rows": [["Vault", 999], ["Desk", 210], ["Chair", 95]]
+    }
+  }
+]

@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The foreign key is the column on employee that stores a branch's primary key — that's branch_id.",
+    "You want two columns from the employee table: first_name and branch_id.",
+    "List them separated by a comma: SELECT first_name, branch_id FROM employee;"
+  ]
+}

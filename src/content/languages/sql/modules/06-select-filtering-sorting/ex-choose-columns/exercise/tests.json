@@ -1,0 +1,19 @@
+[
+  {
+    "name": "returns first_name, last_name, and salary for every employee",
+    "orderMatters": false,
+    "expected": {
+      "columns": ["first_name", "last_name", "salary"],
+      "rows": [
+        ["Jan", "Levinson", 110000],
+        ["Michael", "Scott", 90000],
+        ["Dwight", "Schrute", 62000],
+        ["Jim", "Halpert", 60000],
+        ["Pam", "Beesly", 42000],
+        ["Andy", "Bernard", 55000],
+        ["Stanley", "Hudson", 58000],
+        ["Ryan", "Howard", 48000]
+      ]
+    }
+  }
+]

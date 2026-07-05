@@ -1,0 +1,30 @@
+[
+  {
+    "name": "every customer appears; Dave (no orders) shows 0, not missing",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["name", "total_spent"],
+      "rows": [
+        ["Alice", 46.5],
+        ["Bob", 25],
+        ["Carol", 33],
+        ["Dave", 0]
+      ]
+    }
+  },
+  {
+    "name": "a brand-new customer with no orders also shows 0",
+    "setup": "INSERT INTO customer (customer_id, name, city) VALUES (5, 'Eve', 'Stamford');",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["name", "total_spent"],
+      "rows": [
+        ["Alice", 46.5],
+        ["Bob", 25],
+        ["Carol", 33],
+        ["Dave", 0],
+        ["Eve", 0]
+      ]
+    }
+  }
+]

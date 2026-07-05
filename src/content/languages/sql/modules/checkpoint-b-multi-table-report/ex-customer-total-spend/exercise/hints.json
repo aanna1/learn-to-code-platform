@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "This report must list ALL customers, even ones who never ordered. An INNER JOIN drops unmatched customers — so start from customer and LEFT JOIN outward to sales_order, then order_item, then product.",
+    "With LEFT JOIN, a customer with no orders still produces a row, but the SUM over their (all-NULL) line items comes out NULL. Wrap it: COALESCE(SUM(oi.quantity * p.price), 0).",
+    "Full shape: SELECT c.name, COALESCE(SUM(oi.quantity * p.price), 0) AS total_spent FROM customer c LEFT JOIN sales_order o ON o.customer_id = c.customer_id LEFT JOIN order_item oi ON oi.order_id = o.order_id LEFT JOIN product p ON p.product_id = oi.product_id GROUP BY c.customer_id ORDER BY c.name;"
+  ]
+}

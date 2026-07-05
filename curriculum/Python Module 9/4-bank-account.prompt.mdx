@@ -1,0 +1,35 @@
+# Bank Account
+
+Sometimes your code needs to signal that something went wrong — not by returning `None`, but by raising an exception with a clear message. This exercise practices writing functions that `raise` when their inputs are invalid, and writing callers that catch those raises.
+
+## Your task
+
+Write two functions and one caller.
+
+**`deposit(balance, amount)`** — add `amount` to `balance` and return the new balance. Raise `ValueError` with the message `"amount must be positive"` if `amount` is zero or negative.
+
+**`withdraw(balance, amount)`** — subtract `amount` from `balance` and return the new balance. Raise `ValueError` with the message `"amount must be positive"` if `amount` is zero or negative. Raise `ValueError` with `f"insufficient funds: balance is {balance}"` if `amount` exceeds `balance`.
+
+**`transfer(from_balance, to_balance, amount)`** — call `withdraw` on `from_balance` and `deposit` on `to_balance`, then return a tuple `(new_from, new_to)`. Let any `ValueError` from `withdraw` or `deposit` propagate — don't catch it here.
+
+## Examples
+
+```python
+deposit(100, 50)        # 150
+deposit(100, 0)         # raises ValueError: "amount must be positive"
+deposit(100, -10)       # raises ValueError: "amount must be positive"
+
+withdraw(100, 30)       # 70
+withdraw(100, 100)      # 0  (exactly zero is fine)
+withdraw(100, 150)      # raises ValueError: "insufficient funds: balance is 100"
+withdraw(100, 0)        # raises ValueError: "amount must be positive"
+
+transfer(100, 50, 40)   # (60, 90)
+transfer(100, 50, 200)  # raises ValueError: "insufficient funds: balance is 100"
+```
+
+## Requirements
+
+- Use `raise ValueError("message")` — not `return None`, not `print`.
+- The message text must match exactly (tests check it with `in`).
+- `transfer` must not contain a `try`/`except` — it relies on `withdraw` and `deposit` to raise.

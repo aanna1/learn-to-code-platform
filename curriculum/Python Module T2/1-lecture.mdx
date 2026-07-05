@@ -1,0 +1,478 @@
+<Callout type="info">
+No install needed — every example on this page has a **Run** button. Press it to execute the code directly in your browser.
+</Callout>
+
+## Why this matters
+
+Tier 1 polished what you already wrote. Tier 2 changes what you can write at all.
+
+Consider a 40 GB log file. You want every line that contains `"ERROR"`, with timestamps reformatted, written to a new file. With the fundamentals, you'd reach for:
+
+```python
+with open("huge.log") as f:
+    lines = f.readlines()
+errors = [reformat(line) for line in lines if "ERROR" in line]
+with open("errors.log", "w") as out:
+    out.writelines(errors)
+```
+
+That code crashes. `readlines()` loads the whole file into memory. 40 GB doesn't fit. You need to stream: read one line, decide whether to keep it, write it, throw it away, read the next. You need a generator.
+
+Or consider a function that calls a flaky API — half the time it raises `ConnectionError`. You want it to retry three times with a one-second pause. The naive fix wraps every call site in `try/except` with a loop. The Python fix is one line: `@retry(times=3, delay=1)`. To write that decorator yourself, you need closures.
+
+Iterators, generators, decorators, context managers, closures: they share a common thread. They let you put behavior in one place and reuse it everywhere. The fundamentals taught you to write code. This module teaches you to write code that other code uses.
+
+## The iterator protocol: what `for` actually does
+
+You have written hundreds of `for` loops. What does one actually do?
+
+```python
+for item in [10, 20, 30]:
+    print(item)
+```
+
+How does Python pull values out of a list — or a file, a range, a generator? None of those things are alike. What unifies them?
+
+A protocol. Two methods.
+
+An **iterable** is any object with an `__iter__` method that returns an **iterator**. An **iterator** is any object with a `__next__` method that returns the next value, or raises `StopIteration` when it runs out.
+
+A `for` loop is shorthand for this:
+
+<Runnable code={`items = [10, 20, 30]
+it = iter(items)        # calls items.__iter__()
+while True:
+    try:
+        item = next(it) # calls it.__next__()
+    except StopIteration:
+        break
+    print(item)
+`} />
+
+Try the protocol by hand:
+
+<Runnable code={`it = iter([10, 20, 30])
+print(next(it))   # 10
+print(next(it))   # 20
+print(next(it))   # 30
+# next(it) here would raise StopIteration
+`} />
+
+Here is a class that participates — a countdown from any starting number:
+
+<Runnable code={`class Countdown:
+    def __init__(self, start: int) -> None:
+        self.start = start
+
+    def __iter__(self):
+        n = self.start
+        while n > 0:
+            yield n
+            n -= 1
+
+for x in Countdown(3):
+    print(x)
+
+# Works more than once — each call to __iter__ creates a fresh generator
+print(list(Countdown(5)))
+`} />
+
+The `yield` in `__iter__` makes it a generator. The same `Countdown(3)` instance now iterates correctly multiple times, because each call to `__iter__` builds a new generator from scratch.
+
+<Callout type="tip">
+A list is iterable but not an iterator. You can loop over a list repeatedly. The thing `iter(mylist)` returns is the iterator, and it is one-shot. Strings, files, and ranges follow the same pattern.
+</Callout>
+
+## Generators: iterators without the bookkeeping
+
+Writing `__iter__` and `__next__` by hand and managing state yourself is fiddly. Generator functions handle the bookkeeping.
+
+A generator is a function that contains `yield`. Calling it doesn't run it — it returns a generator object. Each call to `next()` runs the function until the next `yield`, then pauses. Local variables stay alive between pauses.
+
+<Runnable code={`def numbers():
+    yield 1
+    yield 2
+    yield 3
+
+g = numbers()
+print(next(g))  # 1
+print(next(g))  # 2
+print(next(g))  # 3
+# next(g) now raises StopIteration
+
+# Or just iterate:
+for n in numbers():
+    print(n)
+`} />
+
+The payoff is laziness. Here is the log-streaming example from the opening, adapted to run in the browser with an in-memory string:
+
+<Runnable code={`from typing import Iterator
+
+LOG_DATA = """2024-01-15 INFO  Server started
+2024-01-15 ERROR Connection refused: db-host:5432
+2024-01-15 INFO  Retrying...
+2024-01-15 ERROR Timeout after 30s
+2024-01-15 INFO  Switched to fallback
+"""
+
+def errors_only(lines: list[str]) -> Iterator[str]:
+    for line in lines:
+        if "ERROR" in line:
+            yield line
+
+for error_line in errors_only(LOG_DATA.splitlines()):
+    print(error_line)
+`} />
+
+The generator yields one line at a time. Memory use stays flat even over a file that would never fit in RAM.
+
+Two patterns come up often.
+
+**Infinite sequences** — use `islice` to take only what you need:
+
+<Runnable code={`from itertools import islice
+from typing import Iterator
+
+def fibonacci() -> Iterator[int]:
+    a, b = 0, 1
+    while True:
+        yield a
+        a, b = b, a + b
+
+print(list(islice(fibonacci(), 10)))
+# [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+`} />
+
+**Running totals** — the generator holds state across yields:
+
+<Runnable code={`from typing import Iterable, Iterator
+
+def running_sum(numbers: Iterable[int]) -> Iterator[int]:
+    total = 0
+    for n in numbers:
+        total += n
+        yield total
+
+for s in running_sum([1, 2, 3, 4]):
+    print(s)
+# 1, 3, 6, 10
+`} />
+
+<Callout type="tip">
+Calling a generator function returns a generator object — it does not run the body. Pull values with `for`, `next()`, or `list()`. The body runs only as you consume it.
+</Callout>
+
+## Context managers: bracketing setup and teardown
+
+Why does `with open(...)` exist? Try without it:
+
+```python
+f = open("data.txt", "w")
+f.write(generate_content())  # what if this raises?
+f.close()                    # never runs on exception
+```
+
+If `generate_content()` raises, `f.close()` never runs. The file stays open. The `with` statement calls `__enter__` at the start of the block and `__exit__` at the end, even if an exception fires.
+
+Two ways to write your own.
+
+**The easy way: `@contextmanager`** — decorate a generator that yields exactly once:
+
+<Runnable code={`from contextlib import contextmanager
+import time
+
+@contextmanager
+def timed(label: str):
+    start = time.monotonic()
+    try:
+        yield
+    finally:
+        elapsed = time.monotonic() - start
+        print(f"{label}: {elapsed:.4f}s")
+
+with timed("computing"):
+    total = sum(range(1_000_000))
+    print(f"sum = {total}")
+`} />
+
+The code before `yield` runs on entry; the `finally` block runs on exit, whether or not the body raised. Use `time.monotonic()` for measuring durations — unlike `time.time()`, it never jumps backward.
+
+**The class form** — use when you need to track state:
+
+<Runnable code={`from typing import Any
+
+class SuppressErrors:
+    """Silently swallow exceptions of the given types."""
+    def __init__(self, *exc_types) -> None:
+        self.exc_types = exc_types
+
+    def __enter__(self) -> "SuppressErrors":
+        return self
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> bool:
+        return exc_type is not None and issubclass(exc_type, self.exc_types)
+
+with SuppressErrors(ZeroDivisionError):
+    print(1 / 0)   # suppressed
+
+print("still running")
+`} />
+
+`__exit__` receives the exception info (three `None` values on clean exit). Return `True` to suppress; return `None` or `False` to let it propagate.
+
+<Callout type="tip">
+A `@contextmanager` generator must `yield` exactly once. Two yields raise `RuntimeError` — the decorator cannot tell where the `with` body belongs.
+</Callout>
+
+## Closures: functions that remember
+
+Closures are what makes decorators possible, so we need them first.
+
+A closure is a function that uses variables from the scope where it was defined, even after that scope has returned.
+
+<Runnable code={`def make_multiplier(factor: int):
+    def multiply(x: int) -> int:
+        return x * factor   # factor comes from the enclosing scope
+    return multiply
+
+double = make_multiplier(2)
+triple = make_multiplier(3)
+
+print(double(5))   # 10
+print(triple(5))   # 15
+`} />
+
+`make_multiplier(2)` returned a function, then returned. Yet `factor` still exists — the inner function holds a reference to it. Each call to `make_multiplier` creates a fresh enclosing scope, so `double` and `triple` hold different values.
+
+Watch out for this: closures capture *variables*, not *values*.
+
+<Runnable code={`funcs = []
+for i in range(3):
+    funcs.append(lambda: i)
+
+print([f() for f in funcs])   # [2, 2, 2] — not [0, 1, 2]
+
+# Fix: capture the current value as a default argument
+funcs = []
+for i in range(3):
+    funcs.append(lambda i=i: i)
+
+print([f() for f in funcs])   # [0, 1, 2]
+`} />
+
+Each lambda captured the variable `i`, not its value at definition time. By the time you call them, the loop has finished and `i` is 2. The `i=i` trick binds the current value as a default argument — ugly, but standard.
+
+## Decorators: functions that wrap functions
+
+A decorator is a function that takes a function and returns a function. The `@` syntax is shorthand:
+
+```python
+@my_decorator
+def my_function(): ...
+
+# is exactly the same as:
+my_function = my_decorator(my_function)
+```
+
+Here is a decorator that times the wrapped function:
+
+<Runnable code={`import functools
+import time
+
+def timed(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.monotonic()
+        result = func(*args, **kwargs)
+        print(f"{func.__name__} took {time.monotonic() - start:.4f}s")
+        return result
+    return wrapper
+
+@timed
+def slow_add(a, b):
+    """Add two numbers, slowly."""
+    time.sleep(0.05)
+    return a + b
+
+print(slow_add(2, 3))
+print(slow_add.__name__)  # 'slow_add', not 'wrapper'
+print(slow_add.__doc__)   # the original docstring
+`} />
+
+`@functools.wraps(func)` copies the wrapped function's name, docstring, and other metadata onto `wrapper`. Without it, `slow_add.__name__` returns `"wrapper"` and tracebacks point at the wrong function. Always use it.
+
+The `*args, **kwargs` lets one wrapper handle functions with any signature.
+
+**Decorators with arguments** need three levels of nesting:
+
+<Runnable code={`import functools
+
+def repeat(times: int):
+    """Run the decorated function 'times' times."""
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            result = None
+            for _ in range(times):
+                result = func(*args, **kwargs)
+            return result
+        return wrapper
+    return decorator
+
+@repeat(times=3)
+def greet(name: str) -> str:
+    print(f"Hello, {name}!")
+    return name
+
+greet("world")
+`} />
+
+`repeat(times=3)` runs first and returns `decorator`. `decorator(greet)` returns `wrapper`. `greet = wrapper`. When you call `greet("world")`, you are calling `wrapper("world")`.
+
+The structure is always the same: outer function takes configuration, middle function takes the decorated function, inner function takes the call's arguments.
+
+<Callout type="tip">
+If you write `@repeat` instead of `@repeat(times=3)`, Python passes `greet` as the `times` argument. The resulting error is confusing. Decorators that take arguments always need the parentheses.
+</Callout>
+
+## Standard-library highlights
+
+### `functools`
+
+**`lru_cache`** memoizes a pure function. The first call with given arguments runs the function and caches the result. Later calls with the same arguments return the cached value immediately:
+
+<Runnable code={`from functools import lru_cache
+
+@lru_cache(maxsize=None)
+def fib(n: int) -> int:
+    return n if n < 2 else fib(n - 1) + fib(n - 2)
+
+print(fib(40))   # instant; without the cache, exponential recursion
+print(fib.cache_info())
+`} />
+
+Arguments must be hashable (no lists or dicts). The function should be pure — same inputs always produce the same output — because the cache hides any state changes.
+
+**`partial`** pre-fills arguments to a function, producing a new callable with fewer required parameters:
+
+<Runnable code={`from functools import partial
+
+def power(base: float, exponent: float) -> float:
+    return base ** exponent
+
+square = partial(power, exponent=2)
+cube   = partial(power, exponent=3)
+
+print(square(4))   # 16
+print(cube(4))     # 64
+`} />
+
+### `collections`
+
+**`Counter`** tallies anything iterable:
+
+<Runnable code={`from collections import Counter
+
+words = "the cat sat on the mat the cat".split()
+counts = Counter(words)
+print(counts.most_common(3))
+`} />
+
+**`defaultdict`** gives missing keys a default value, generated on demand by a factory callable:
+
+<Runnable code={`from collections import defaultdict
+
+words = ["apple", "ant", "bear", "blue", "cat"]
+by_letter: defaultdict[str, list[str]] = defaultdict(list)
+for word in words:
+    by_letter[word[0]].append(word)
+
+print(dict(by_letter))
+`} />
+
+**`deque`** is a double-ended queue. `append` and `pop` from either end run in constant time — unlike `list.pop(0)`, which is O(n):
+
+<Runnable code={`from collections import deque
+
+queue: deque[int] = deque([1, 2, 3])
+queue.append(4)
+queue.appendleft(0)
+print(queue.popleft())  # 0
+print(list(queue))      # [1, 2, 3, 4]
+`} />
+
+### `itertools`
+
+<Runnable code={`from itertools import chain, islice, groupby
+
+# chain: flatten one level of nesting without a temporary list
+combined = list(chain([1, 2], [3, 4], [5]))
+print(combined)   # [1, 2, 3, 4, 5]
+
+# groupby: group consecutive runs by a key
+# Sort by the same key first — groupby groups *runs*, not all occurrences
+data = ["apple", "ant", "bear", "blue", "cat"]
+for letter, group in groupby(sorted(data), key=lambda w: w[0]):
+    print(letter, list(group))
+`} />
+
+<Callout type="tip">
+`groupby` groups consecutive identical keys, not all occurrences. If you skip sorting first, you get fragmented groups. Sort by the same key you group by.
+</Callout>
+
+### `map`, `filter`, `lambda`
+
+Comprehensions are usually cleaner than `map` and `filter`:
+
+```python
+# map with a lambda — skip this
+list(map(lambda x: x * 2, numbers))
+
+# list comprehension — do this
+[x * 2 for x in numbers]
+```
+
+Use `map` when you already have a named function to apply (`map(str.upper, words)`). Use comprehensions otherwise. `lambda` works well for tiny inline callbacks, mostly `key=` arguments to `sorted`, `min`, and `max`. If a lambda needs multiple statements, write a real function.
+
+## The mutable default argument
+
+Predict what this prints:
+
+<Runnable code={`def add_item(item, items=[]):
+    items.append(item)
+    return items
+
+print(add_item("a"))
+print(add_item("b"))
+`} />
+
+Most people expect `['a']` then `['b']`. The actual output is `['a']` then `['a', 'b']`. The default `[]` is evaluated once, when the function is defined, not on every call. There is one list, shared by every call that omits `items`.
+
+The fix: use `None` as a sentinel and assign a fresh value inside the body.
+
+<Runnable code={`def add_item(item, items=None):
+    if items is None:
+        items = []
+    items.append(item)
+    return items
+
+print(add_item("a"))   # ['a']
+print(add_item("b"))   # ['b']
+`} />
+
+The same rule applies to dicts, sets, and any mutable default. Ruff flags this pattern — add it to your CI and you won't be bitten again.
+
+## Common pitfalls
+
+**Iterating an iterator twice.** A generator or `map` object is one-shot. Once exhausted, it's empty. If you need to iterate twice, call `list(...)` first to materialize it.
+
+**Late binding in closures inside loops.** `[lambda: i for i in range(3)]` gives three lambdas that all return `2`. Use `lambda i=i: i` to capture the current value.
+
+**Forgetting `@functools.wraps`.** The decorator works, but error messages say "wrapper" instead of the real function name. Add it to every wrapper.
+
+**`groupby` without sorting.** It groups consecutive runs. Unsorted data gives fragmented output.
+
+**`lru_cache` on methods.** The `self` argument is part of the cache key, so the cache keeps every instance alive. For per-instance caching, use `functools.cached_property` instead.
+
+**Two yields inside `@contextmanager`.** The decorator raises `RuntimeError`. One yield, always.

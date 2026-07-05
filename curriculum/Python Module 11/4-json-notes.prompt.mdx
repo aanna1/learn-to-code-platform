@@ -1,0 +1,28 @@
+# Notes Keeper
+
+JSON is how Python programs save structured data between runs. The pattern is load the existing data (or start with a default), make a change, save the result.
+
+## Your task
+
+Write two functions that store a list of text notes in a JSON file:
+
+**`save_notes(notes, filepath)`** — writes the list `notes` to `filepath` as a JSON array, with `indent=2` for readability. Overwrites any existing file.
+
+**`load_notes(filepath)`** — reads the file at `filepath` and returns the Python list stored there. If the file does not exist, return an empty list instead of raising an error.
+
+## Requirements
+
+- Use `json.dump` and `json.load` (with file objects), not `json.dumps` / `json.loads`.
+- `save_notes` should always write with `indent=2`.
+- `load_notes` must return `[]` when the file does not exist (check with `pathlib.Path(...).exists()`).
+
+## Example
+
+```python
+save_notes(["buy milk", "call mom"], "notes.json")
+result = load_notes("notes.json")
+print(result)  # ['buy milk', 'call mom']
+
+# File doesn't exist yet — no crash
+print(load_notes("missing.json"))  # []
+```

@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The starter only asks for one column (name). You want all of them.",
+    "SQL has a shorthand for \"every column\": the asterisk, *.",
+    "Replace name with * so the query reads: SELECT * FROM students;"
+  ]
+}

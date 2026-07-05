@@ -1,0 +1,19 @@
+[
+  {
+    "name": "every distinct branch_id that appears anywhere, NULL first then ascending",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["branch_id"],
+      "rows": [[null], [1], [2], [3], [4]]
+    }
+  },
+  {
+    "name": "generalizes: a brand-new branch with no employees yet still appears exactly once",
+    "setup": "INSERT INTO branch (branch_id, branch_name, mgr_id) VALUES (5, 'Nashua', NULL);",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["branch_id"],
+      "rows": [[null], [1], [2], [3], [4], [5]]
+    }
+  }
+]

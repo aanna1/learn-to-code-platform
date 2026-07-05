@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The hole is the same one from Module 11: input glued into the query string. An attacker types x%' UNION SELECT username, password FROM staff_user -- and the UNION staples staff credentials onto the book list.",
+    "The one categorical fix is to parameterize (WHERE title LIKE ? with the value bound separately). Escaping and blocklists are supplements you can get wrong; least privilege and views limit damage but don't remove the hole.",
+    "For the matching: exactly one item removes the vulnerability (parameterizing). Least-privilege GRANTs cap what a compromised account can reach; the view exposes only safe columns and hides the sensitive tables."
+  ]
+}

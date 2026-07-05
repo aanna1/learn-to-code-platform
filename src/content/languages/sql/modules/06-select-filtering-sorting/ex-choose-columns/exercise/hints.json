@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The star (*) means every column — you want just three of them, so replace it.",
+    "List the columns you want by name, separated by commas.",
+    "The query should read: SELECT first_name, last_name, salary FROM employee;"
+  ]
+}

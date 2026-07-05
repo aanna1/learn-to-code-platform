@@ -1,0 +1,9 @@
+{
+  "hints": [
+    "Start by filling in the Status enum values: ACTIVE = 'active' and INACTIVE = 'inactive'. These string values appear in the output via item.status.value.",
+    "For the per-item lines, replace the empty list and loop with a list comprehension: lines = [f\"{item.name}: ${item.value:,.2f} ({item.status.value})\" for item in items]. The :,.2f format spec adds comma separators and two decimal places.",
+    "For the total, use sum() with a generator expression: total = sum(item.value for item in items if item.status is Status.ACTIVE). The 'is' comparison is the idiomatic way to check enum membership.",
+    "After building lines, append the summary: lines.append(f\"Total active: ${total:,.2f}\"). Then return '\\n'.join(lines).",
+    "If the empty-list test fails, check that sum() on an empty generator returns 0.0 (it does). The issue is likely in the summary line format — make sure it uses :,.2f."
+  ]
+}

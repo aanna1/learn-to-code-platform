@@ -1,0 +1,13 @@
+In the last exercise you asked for the whole table with `*`. But a query's real power is that *you* decide the shape of the table that comes back — you can ask for exactly the columns you want and nothing more. This is the everyday version of a serious security idea: only ever pull the data you actually need. A query that grabs `*` when it only needed a name is how extra, sensitive columns end up somewhere they shouldn't.
+
+The same `students` table is set up for you. The starter query returns every column, including the `id`.
+
+## Your task
+
+Change the query so the results grid shows **only** each student's `name` and `major` — leave the `id` column out entirely.
+
+Press **Run** to see the grid, then **Submit** to check it.
+
+<Callout type="tip">
+Instead of `*`, list the columns you want by name, separated by commas: `SELECT name, major FROM students;`. The grid will show just those two columns.
+</Callout>

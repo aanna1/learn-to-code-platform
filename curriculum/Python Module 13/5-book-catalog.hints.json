@@ -1,0 +1,7 @@
+[
+  "For `Book.__repr__`, use `f\"Book({self.title!r}, {self.author!r}, {self.year})\"`. The `!r` wraps strings in quotes automatically.",
+  "For `Book.__eq__`, compare all three attributes: `return self.title == other.title and self.author == other.author and self.year == other.year`.",
+  "For `Book.to_dict`, return a plain dict: `{\"title\": self.title, \"author\": self.author, \"year\": self.year}`.",
+  "For `Book.from_dict`, it's a `@classmethod` — use `cls(d[\"title\"], d[\"author\"], d[\"year\"])` to build the object.",
+  "For `Library.from_dict`, create a new `Library()`, then loop over `d[\"books\"]` and call `self.add(Book.from_dict(book_dict))` for each one."
+]

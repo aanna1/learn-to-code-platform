@@ -1,0 +1,7 @@
+[
+  "For run_all: open a ThreadPoolExecutor with a 'with' block, then call pool.map(slow_task, tasks). Wrap the result in list() — pool.map returns an iterator.",
+  "pool.map preserves order automatically, so you don't need to sort or track indices.",
+  "For run_with_errors: build a dict mapping futures to task IDs — {pool.submit(slow_task, tid): tid for tid in tasks}.",
+  "Iterate over as_completed(future_to_id) to get each future as it finishes. Look up the task ID with future_to_id[future].",
+  "Inside the loop, call future.result() inside a try/except Exception block. On success, store the return value; on exception, store 'error'."
+]

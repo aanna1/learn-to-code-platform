@@ -1,0 +1,6 @@
+[
+  "Wrap `return a / b` in a `try` block and add `except ZeroDivisionError:` below it.",
+  "Inside the `except` block, `return \"undefined\"` — the string, not a number.",
+  "For `safe_divide_message`, call `safe_divide(a, b)` first and store the result. Then check whether it equals `\"undefined\"` to pick the right format string.",
+  "The success message format is `f\"{a} / {b} = {result}\"` and the failure format is `f\"{a} / {b} is undefined\"`."
+]

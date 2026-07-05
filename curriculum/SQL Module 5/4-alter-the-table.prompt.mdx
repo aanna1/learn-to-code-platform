@@ -1,0 +1,12 @@
+Schemas change after they're built. A `student` table already exists (you can see its `CREATE TABLE` at the top of the editor), and the registrar now wants to track two more things about each student: their GPA and their email. You'll add both with `ALTER TABLE` — no need to rebuild the table or touch the rows already in it.
+
+Add two columns to `student`:
+
+- **`gpa`** — a `DECIMAL(3, 2)`
+- **`email`** — `TEXT`
+
+The starter adds `gpa` for you. Add the second `ALTER TABLE` for `email`, press **Run**, then **Submit** — the check confirms the table now has all five columns.
+
+<Callout type="tip">
+Each `ALTER TABLE ... ADD COLUMN` adds one column, so two new columns means two statements. The shape is `ALTER TABLE student ADD COLUMN email TEXT;` — don't forget the semicolon.
+</Callout>

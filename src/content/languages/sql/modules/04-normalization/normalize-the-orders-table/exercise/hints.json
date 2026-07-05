@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "The key is composite: (order_id, product). 2NF is the rule about non-key columns depending on only PART of a composite key — check it before you look at 3NF.",
+    "qty is the only column that needs BOTH order_id and product (it's the quantity of that product on that order). Every other non-key column depends on order_id alone.",
+    "For the FDs, follow each non-key column to what really determines it: emp_id determines emp_name and branch_id; branch_id determines branch_city; client_id determines client_name.",
+    "In 3NF, each descriptive fact lives with the entity it describes: emp_name with employee, branch_city with branch, client_name with client, and only qty stays on order_items."
+  ]
+}

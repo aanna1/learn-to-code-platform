@@ -1,0 +1,9 @@
+{
+  "hints": [
+    "For word_counts: split the text, then for each word call word.lower().strip(PUNCTUATION). Filter out empty strings, then return Counter(cleaned_words).",
+    "For group_by_length: create 'groups = defaultdict(list)', then loop over words and do 'groups[len(word)].append(word)'. After the loop, sort each group: 'for key in groups: groups[key].sort()'.",
+    "For top_n_words: call word_counts(text) to get a Counter, then call .most_common(n) on it. Counter.most_common(n) returns exactly the [(word, count), ...] list you need.",
+    "For safe_append: the signature must be 'def safe_append(item, items=None)'. Inside, write 'if items is None: items = []'. Never use 'items=[]' as the default — that list is shared across all calls.",
+    "The mutable default bug is subtle: 'def f(x, lst=[])' creates one list object when the function is defined. Every call that uses the default gets the *same* list. Using None as a sentinel and creating a fresh list inside the function avoids this."
+  ]
+}

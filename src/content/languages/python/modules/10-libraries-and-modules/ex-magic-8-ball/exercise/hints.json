@@ -1,0 +1,6 @@
+[
+  "Import `random` at the top of your file. Then inside `ask`, call `random.choice(RESPONSES)` and return the result.",
+  "`random.choice(seq)` picks one element at random from a sequence and returns it. You don't need a loop or an index.",
+  "For `positive`, call `ask(question)` and store the result. Then check whether that result is in `RESPONSES[:10]` — that slice gives you the first ten responses.",
+  "The expression `ask(question) in RESPONSES[:10]` evaluates to `True` or `False` on its own. You can return it directly: `return ask(question) in RESPONSES[:10]`."
+]

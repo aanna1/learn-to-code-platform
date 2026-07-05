@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The order rows live in sales_order; the names and cities live in customer. To show columns from both, join them on the column they share: customer_id.",
+    "Add JOIN customer c ON o.customer_id = c.customer_id after FROM sales_order o, then select c.name and c.city instead of o.customer_id.",
+    "Full shape: SELECT o.order_id, c.name, c.city FROM sales_order o JOIN customer c ON o.customer_id = c.customer_id ORDER BY o.order_id;"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "which-nf": "2NF",
+  "partials": ["emp_id", "emp_name", "branch_city", "client_name"],
+  "fds": [
+    "emp_id -> emp_name",
+    "emp_id -> branch_id",
+    "branch_id -> branch_city",
+    "client_id -> client_name"
+  ],
+  "decompose": {
+    "employee": ["emp_name"],
+    "branch": ["branch_city"],
+    "client": ["client_name"],
+    "order_items": ["qty"]
+  }
+}

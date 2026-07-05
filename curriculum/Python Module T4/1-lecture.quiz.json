@@ -1,0 +1,29 @@
+[
+  {
+    "question": "You have 50 URLs to fetch and each request takes about one second. You switch from a sequential loop to `ThreadPoolExecutor(max_workers=50)`. What do you expect?",
+    "options": [
+      { "text": "All 50 fetches run concurrently — total time drops to roughly one second", "correct": true, "explanation": "Network I/O releases the GIL, so all 50 threads can wait on their responses simultaneously. The wall-clock time collapses to the time of a single request." },
+      { "text": "No speedup — the GIL prevents threads from running simultaneously", "correct": false, "explanation": "The GIL is released while threads wait on network I/O, so all 50 can be in-flight at once. The GIL only blocks *Python bytecode execution*, not waiting on the OS." },
+      { "text": "The program crashes — you can't have 50 threads accessing the network at once", "correct": false, "explanation": "Python has no such limit. 50 threads making independent HTTP requests is normal and works fine." },
+      { "text": "Speedup of exactly 50x — each thread runs on its own CPU core", "correct": false, "explanation": "The threads don't run on 50 cores; they all share one process. The speedup comes from overlapping I/O waits, not from parallel CPU execution." }
+    ]
+  },
+  {
+    "question": "You run a CPU-bound task using `ThreadPoolExecutor(max_workers=8)` on an 8-core machine. Compared to running the same task sequentially, what do you observe?",
+    "options": [
+      { "text": "Roughly the same wall-clock time as sequential — no real speedup", "correct": true, "explanation": "The GIL allows only one thread to execute Python bytecode at a time. All 8 threads take turns on one core, so the total work doesn't finish any faster." },
+      { "text": "About 8x speedup — one task runs on each core", "correct": false, "explanation": "Threading doesn't give true parallelism for CPU-bound Python code. For that you need `ProcessPoolExecutor`, where each worker is a separate process with its own GIL." },
+      { "text": "The program raises a RuntimeError because threading is disabled for CPU work", "correct": false, "explanation": "Python doesn't disable threading for CPU-bound work. It just doesn't go faster because of the GIL — no error is raised." },
+      { "text": "Slower than sequential due to thread-creation overhead", "correct": false, "explanation": "Thread creation overhead is small. For long-running CPU tasks the overhead is negligible, and performance is similar to sequential — not noticeably slower, but not faster either." }
+    ]
+  },
+  {
+    "question": "Inside an `async def` function you call `time.sleep(2)` instead of `await asyncio.sleep(2)`. What happens?",
+    "options": [
+      { "text": "The entire event loop blocks for 2 seconds — all other tasks are paused", "correct": true, "explanation": "`time.sleep` is a synchronous blocking call. It holds the OS thread, so the event loop can't run any other task until the sleep finishes." },
+      { "text": "Python automatically converts `time.sleep` to a non-blocking await", "correct": false, "explanation": "Python does no such conversion. `time.sleep` blocks the OS thread regardless of where it's called. You must explicitly use `await asyncio.sleep` to yield control." },
+      { "text": "A RuntimeError is raised immediately when `time.sleep` is called from async code", "correct": false, "explanation": "`time.sleep` in async code raises no error — it silently blocks the loop. That's exactly what makes this bug hard to spot." },
+      { "text": "Only the current task is paused; other tasks continue running", "correct": false, "explanation": "asyncio runs on a single OS thread. If that thread is blocked by `time.sleep`, nothing else runs — the event loop itself is frozen, not just the current coroutine." }
+    ]
+  }
+]

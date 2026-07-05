@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Use re.compile(r\"^\\d{5}(?:-\\d{4})?$\") as the pattern. \\d{5} means exactly five digits; (?:-\\d{4})? makes the hyphen-plus-four-digits part optional.",
+    "re.fullmatch checks the entire string against the pattern — nothing can appear before or after. It's equivalent to re.search with ^ and $ anchors.",
+    "Return bool(ZIP_PATTERN.fullmatch(code)) to get True or False. A match object is truthy, but the tests check isinstance(result, bool), so you need the explicit conversion.",
+    "The non-capturing group (?:-\\d{4}) groups the hyphen and four digits together so the ? applies to both at once. Without the group, the ? would only make the last \\d{4} optional, leaving a dangling hyphen."
+  ]
+}

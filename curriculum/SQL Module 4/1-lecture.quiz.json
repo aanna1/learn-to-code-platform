@@ -1,0 +1,104 @@
+{
+  "questions": [
+    {
+      "question": "What does the functional dependency `emp_id -> emp_name` mean?",
+      "options": [
+        {
+          "text": "If you know an `emp_id`, it determines exactly one `emp_name`.",
+          "correct": true,
+          "explanation": "Correct. A functional dependency A -> B says that knowing A pins down exactly one B — the single idea every normal form is built on."
+        },
+        {
+          "text": "`emp_name` is the primary key and `emp_id` is a foreign key.",
+          "correct": false,
+          "explanation": "A functional dependency is about determination, not about which column is a key. It says knowing emp_id gives you one emp_name — nothing about key roles."
+        },
+        {
+          "text": "`emp_id` and `emp_name` must always be stored in separate tables.",
+          "correct": false,
+          "explanation": "A dependency describes a relationship between columns; it doesn't by itself dictate table layout. In fact emp_id and emp_name belong together in the employee table."
+        },
+        {
+          "text": "Every `emp_name` maps to exactly one `emp_id`.",
+          "correct": false,
+          "explanation": "That's the arrow backwards. emp_id -> emp_name means emp_id determines the name; two different employees could share a name, so emp_name does not determine emp_id."
+        }
+      ]
+    },
+    {
+      "question": "A table `order_items(order_id, product, product_price, qty)` has primary key `(order_id, product)`. Why is it not in 2NF?",
+      "options": [
+        {
+          "text": "`product_price` depends on `product` alone — only part of the composite key — which is a partial dependency.",
+          "correct": true,
+          "explanation": "Correct. 2NF forbids a non-key column depending on part of a composite key. product_price is the price of that product regardless of the order, so it depends on product alone."
+        },
+        {
+          "text": "It has a multi-valued cell, which breaks 1NF.",
+          "correct": false,
+          "explanation": "Every cell here already holds a single value, so 1NF is satisfied. The problem is the partial dependency of product_price, which is a 2NF issue."
+        },
+        {
+          "text": "`qty` depends on the whole key, and that's the violation.",
+          "correct": false,
+          "explanation": "Depending on the whole key is exactly what 2NF requires — qty is fine. The violation is product_price depending on only part of the key."
+        },
+        {
+          "text": "The primary key is composite, and 2NF requires a single-column key.",
+          "correct": false,
+          "explanation": "Composite keys are perfectly allowed. 2NF is precisely the rule you check when the key is composite; it doesn't ban composite keys."
+        }
+      ]
+    },
+    {
+      "question": "In a table keyed by `order_id`, you find `order_id -> branch_id -> branch_city`. What kind of violation is this?",
+      "options": [
+        {
+          "text": "A transitive dependency — `branch_city` depends on `branch_id`, a non-key column — which breaks 3NF.",
+          "correct": true,
+          "explanation": "Correct. A non-key column (branch_city) depending on another non-key column (branch_id) is a transitive dependency, exactly what 3NF removes."
+        },
+        {
+          "text": "A partial dependency, which breaks 2NF.",
+          "correct": false,
+          "explanation": "Partial dependencies are about depending on part of a composite key; this key is a single column (order_id), so it can't be partial. This is transitive — a 3NF issue."
+        },
+        {
+          "text": "Nothing — the table is fully normalized.",
+          "correct": false,
+          "explanation": "A non-key column determining another non-key column is precisely the 3NF violation. branch_city really belongs in a branch table keyed by branch_id."
+        },
+        {
+          "text": "A 1NF violation, because branch_city repeats across rows.",
+          "correct": false,
+          "explanation": "1NF is about atomic cells and a primary key, both satisfied here. Repetition caused by a transitive dependency is a 3NF problem, not 1NF."
+        }
+      ]
+    },
+    {
+      "question": "When is denormalization (deliberately storing redundant data) a reasonable choice?",
+      "options": [
+        {
+          "text": "When you knowingly trade some integrity risk for read performance — e.g., a cached total — and accept the job of keeping the copies in sync.",
+          "correct": true,
+          "explanation": "Correct. Denormalization is a deliberate tradeoff: it's defensible for derived values when read speed matters, as long as you own the cost of keeping duplicates consistent."
+        },
+        {
+          "text": "Never — normalized schemas are always strictly better, so denormalization is always a bug.",
+          "correct": false,
+          "explanation": "It's a valid, deliberate tradeoff when read speed matters more than avoiding duplication. The key is doing it on purpose, knowing the cost."
+        },
+        {
+          "text": "Whenever a query feels slow, duplicate whatever is convenient.",
+          "correct": false,
+          "explanation": "Denormalizing sensitive or freely-drifting data by reflex reintroduces the exact anomalies normalization removes. It's safe for derived aggregates, risky for sensitive fields."
+        },
+        {
+          "text": "Only on tables that have no primary key.",
+          "correct": false,
+          "explanation": "Denormalization has nothing to do with whether a table has a primary key. It's about deliberately storing a redundant copy of a fact for speed."
+        }
+      ]
+    }
+  ]
+}

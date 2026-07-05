@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "A view can filter rows exactly the way a query does -- by putting a WHERE inside the view's definition.",
+    "The Scranton branch is branch_id = 2. Add WHERE branch_id = 2 to the view's SELECT.",
+    "Full definition: CREATE VIEW scranton_roster AS SELECT first_name, last_name, branch_id FROM employee WHERE branch_id = 2;  then SELECT * FROM scranton_roster;."
+  ]
+}

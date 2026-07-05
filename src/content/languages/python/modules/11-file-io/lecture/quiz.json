@@ -1,0 +1,31 @@
+{
+  "questions": [
+    {
+      "question": "You want to add a new line to an existing log file without erasing its contents. Which mode should you pass to open()?",
+      "options": [
+        { "text": "\"a\"", "correct": true, "explanation": "Append mode adds new content to the end of the file, leaving existing content alone." },
+        { "text": "\"w\"", "correct": false, "explanation": "Write mode truncates the file to zero bytes before writing — every existing line is gone." },
+        { "text": "\"r\"", "correct": false, "explanation": "Read mode doesn't allow writing at all. You'd get an io.UnsupportedOperation error on the first write." },
+        { "text": "\"rw\"", "correct": false, "explanation": "\"rw\" is not a valid mode string in Python. The read-write modes are \"r+\" and \"w+\", but neither one is right here — \"w+\" would still erase the file first." }
+      ]
+    },
+    {
+      "question": "You read a file line by line and check if line == \"Alice\". The condition is always False even though \"Alice\" is in the file. What's the most likely cause?",
+      "options": [
+        { "text": "Each line from the file ends with \"\\n\", so line is \"Alice\\n\", not \"Alice\"", "correct": true, "explanation": "File iterators keep the trailing newline on each line. Call line.strip() — or line.rstrip() — before comparing." },
+        { "text": "Python's == operator doesn't work on file data", "correct": false, "explanation": "== works fine on strings from files. The issue is a content mismatch, not the operator." },
+        { "text": "The file must be opened in binary mode to compare strings", "correct": false, "explanation": "Binary mode would give you bytes objects, which would make comparisons harder, not easier." },
+        { "text": "You need to call f.read() first to load the file into memory", "correct": false, "explanation": "Iterating over a file object line by line is correct and efficient. The bug is the forgotten strip, not the iteration method." }
+      ]
+    },
+    {
+      "question": "You have a CSV file where one row is: \"Smith, John\",88. What happens if you parse it with line.strip().split(\",\")?",
+      "options": [
+        { "text": "You get three fields: '\"Smith', ' John\"', and '88' — the name is split across two entries", "correct": true, "explanation": "split(\",\") doesn't understand CSV quoting rules. Use csv.reader or csv.DictReader, which handle quoted fields correctly." },
+        { "text": "You get two fields correctly: 'Smith, John' and '88'", "correct": false, "explanation": "split(\",\") splits on every comma regardless of quoting. The name contains a comma, so it gets split too." },
+        { "text": "Python raises a ValueError because the field contains a comma", "correct": false, "explanation": "split() never raises ValueError — it just splits on every occurrence of the delimiter, with no awareness of quoting." },
+        { "text": "You get one field containing the entire line", "correct": false, "explanation": "split(\",\") would split on the commas, not ignore them. You'd get too many pieces, not one." }
+      ]
+    }
+  ]
+}

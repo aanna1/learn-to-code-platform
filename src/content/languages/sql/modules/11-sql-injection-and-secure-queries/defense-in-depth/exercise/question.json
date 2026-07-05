@@ -1,0 +1,56 @@
+{
+  "draft": "Sketch the layers first: which single control removes the vulnerability, and which ones only reduce the damage if something slips through? Keep the order straight — parameterize first, then validate, then restrict privileges, then fail safely.",
+  "fields": [
+    {
+      "id": "identifiers",
+      "type": "single-select",
+      "label": "You let users sort a report by a column name they choose. Why can't the column name be a ? placeholder, and what do you use instead?",
+      "options": [
+        "Placeholders stand in only for values, never for identifiers like column or table names; validate the chosen column against an allowlist of known-good names and reject anything else",
+        "You can parameterize a column name exactly like a value with a ?",
+        "Escape the column name and concatenate it — escaping makes identifiers safe",
+        "Column names can never come from user input under any circumstances"
+      ]
+    },
+    {
+      "id": "why-parameterize",
+      "type": "single-select",
+      "label": "Why does a parameterized query stop injection where escaping the input is unreliable?",
+      "options": [
+        "The query structure is compiled before the input is ever seen, and the value is then bound as pure data that is never parsed as SQL — so no input can become code",
+        "It automatically deletes any SQL keywords it finds in the input",
+        "It encrypts the user's input before running the query",
+        "It runs the query inside a transaction it can roll back"
+      ]
+    },
+    {
+      "id": "blocklist",
+      "type": "single-select",
+      "label": "Why is a blocklist that strips the word UNION from input a weak defense?",
+      "options": [
+        "Blocklists are trivially bypassed — UNunionION, different casing, and encodings all slip through — so they supplement but never replace parameterizing",
+        "Blocklists are perfectly safe and make parameterized queries unnecessary",
+        "Stripping UNION also breaks every legitimate query, so it can't be used",
+        "The database ignores a blocklist unless least privilege is also set"
+      ]
+    },
+    {
+      "id": "layers",
+      "type": "matching",
+      "label": "Match each defense to the job it actually does.",
+      "help": "Only one of these removes the hole; the rest limit the damage of a successful attack.",
+      "left": [
+        "Parameterized query",
+        "Least privilege",
+        "Safe error handling",
+        "Allowlist validation"
+      ],
+      "options": [
+        "Removes the vulnerability entirely",
+        "Caps the blast radius of a successful injection",
+        "Denies attackers a schema map from leaked error text",
+        "The only safe way to handle identifiers like a sort column"
+      ]
+    }
+  ]
+}

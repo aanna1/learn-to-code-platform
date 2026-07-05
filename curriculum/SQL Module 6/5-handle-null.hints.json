@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "= NULL never matches anything — that's why the grid is empty. You need a different operator.",
+    "SQL tests for a missing value with IS NULL, not =.",
+    "The clause is WHERE branch_id IS NULL."
+  ]
+}

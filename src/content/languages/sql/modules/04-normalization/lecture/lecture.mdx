@@ -1,0 +1,178 @@
+Module 03 taught you to *draw* a schema. But you can draw a schema that's perfectly valid on paper and still quietly broken — the same fact copied into ten rows, waiting for the day they stop agreeing with each other. **Normalization** is the checkable process that catches that before it ships. It turns the vague instinct from Module 02 ("don't repeat the branch's phone number on every employee row") into a precise set of rules you can apply by hand and defend on an exam.
+
+There's a security reason this matters too, and it's not a footnote. Normalization is really the discipline of storing each fact in exactly *one* place — and "one source of truth" is another name for **data integrity** (the I in Module 01's CIA triad). A database that can't contradict itself is one an attacker, or a botched bulk update, can't quietly corrupt. And every duplicate copy of a sensitive value — a client's contact, an SSN — is one more place it can leak or go stale. Fewer copies is a smaller attack surface.
+
+<Callout type="note">
+This module is tagged `[27200]`: it's core test-out material. Normalization (1NF through 3NF) is named directly in the course catalog, and "the key, the whole key, and nothing but the key" is the kind of rule a handwritten exam loves to test.
+</Callout>
+
+## Prerequisites
+
+Module 02 (primary keys, foreign keys, and especially **composite keys** — a primary key made of more than one column) and Module 03 (entities, relationships, associative entities). Keep Module 01's CIA triad handy; normalization leans hardest on integrity.
+
+## What you'll learn
+
+- What a **functional dependency** is — the single idea underneath every normal form
+- The three **anomalies** (insert, update, delete) that redundancy causes
+- **First normal form (1NF):** atomic values, no repeating groups
+- **Second normal form (2NF):** no partial dependencies on part of a composite key
+- **Third normal form (3NF):** no transitive dependencies
+- When **denormalization** is a deliberate, legitimate tradeoff rather than a mistake
+- (woven throughout) why normalization is a data-integrity and confidentiality control, not just tidiness
+
+## The problem: one table that does too much
+
+Here's a table someone built the way you'd build a spreadsheet — everything about a sale crammed into one place:
+
+```
+orders
++----------+----------------------+--------+----------+-----------+-------------+-----------+-------------+
+| order_id | products             | emp_id | emp_name | branch_id | branch_city | client_id | client_name |
++----------+----------------------+--------+----------+-----------+-------------+-----------+-------------+
+| 1001     | Paper x10, Toner x2  | 101    | Michael  | 2         | Scranton    | 50        | Acme Inc    |
+| 1002     | Stapler x1           | 103    | Angela   | 2         | Scranton    | 51        | Blue Co     |
++----------+----------------------+--------+----------+-----------+-------------+-----------+-------------+
+```
+
+It "works" — every fact about each order is right there. But it's carrying three separate design crimes, and normalization is how you find and fix each one in order. Before the rules, though, one tool.
+
+## Functional dependencies: the tool underneath everything
+
+A **functional dependency**, written `A -> B`, means: *if you know A, you know exactly one B.* Knowing an `emp_id` tells you exactly one `emp_name`, so `emp_id -> emp_name`. Knowing a `branch_id` tells you exactly one `branch_city`, so `branch_id -> branch_city`.
+
+That's it — but it's the whole game. Every normal-form rule below is really a rule about *which columns are allowed to functionally determine which others.* Instead of eyeballing a table and feeling that it's messy, you list its functional dependencies and check them mechanically. On a handwritten exam, that's the difference between guessing and knowing.
+
+The dependencies hiding in the `orders` table above:
+
+```
+order_id  -> emp_id, client_id      (each order has one employee and one client)
+emp_id    -> emp_name, branch_id    (each employee has one name and one home branch)
+branch_id -> branch_city            (each branch is in one city)
+client_id -> client_name            (each client has one name)
+```
+
+Hold onto that list. Every fix from here on is just moving columns so that each of these dependencies lives in its own table.
+
+## Why we bother: the three anomalies
+
+Redundancy isn't ugly for its own sake — it actively breaks things. Three classic failures, all visible in the `orders` table:
+
+- **Update anomaly.** Scranton changes its name or city. That fact is copied onto every order from that branch, so you must find and fix *all* of them. Miss one row and your database now disagrees with itself about where Scranton is. (This is the Module 02 phone-number problem, named.)
+- **Insert anomaly.** You open a brand-new branch with no orders yet. There's nowhere to record it — branch facts only exist as a side effect of an order row, so a branch with zero orders simply can't be represented.
+- **Delete anomaly.** Blue Co's only order (1002) gets cancelled and you delete the row. You just erased the fact that Blue Co exists at all, along with the order.
+
+<Callout type="note">
+**Security lens.** Update anomalies are integrity failures in the purest sense — the same question ("what city is Scranton in?") returns two different answers depending on which row you read. Worse, when the duplicated field is sensitive (a client's contact details, a national ID), every copy is an independent thing that can leak, and an independent thing that can silently go stale. Normalization shrinks both problems at once by keeping each fact in exactly one row.
+</Callout>
+
+## First normal form: one value per cell
+
+**1NF rule:** every cell holds a single, atomic value — no lists stuffed into one cell, no repeating groups — and each row is identified by a primary key.
+
+The `products` cell breaks it immediately: `Paper x10, Toner x2` is a list jammed into one column. You can't reliably filter, total, or join on a value like that. Fix it by giving each product its own row:
+
+```
+order_items  (1NF)
++----------+----------+-----+--------+----------+-----------+-------------+-----------+-------------+
+| order_id | product  | qty | emp_id | emp_name | branch_id | branch_city | client_id | client_name |
++----------+----------+-----+--------+----------+-----------+-------------+-----------+-------------+
+| 1001     | Paper    | 10  | 101    | Michael  | 2         | Scranton    | 50        | Acme Inc    |
+| 1001     | Toner    | 2   | 101    | Michael  | 2         | Scranton    | 50        | Acme Inc    |
+| 1002     | Stapler  | 1   | 103    | Angela   | 2         | Scranton    | 51        | Blue Co     |
++----------+----------+-----+--------+----------+-----------+-------------+-----------+-------------+
+PK = (order_id, product)
+```
+
+Now every cell is atomic, and the primary key is the **composite** `(order_id, product)` — you need both to pin down one row (order 1001 has two rows, one per product). This is 1NF. It's also *more* redundant than before: Michael, Scranton, and Acme now repeat on every product line. That's what the next two forms clean up.
+
+## Second normal form: depend on the whole key
+
+**2NF rule:** be in 1NF, *and* every non-key column must depend on the **whole** primary key, not just part of it. This only bites when the key is composite — which ours now is.
+
+Walk the non-key columns against the key `(order_id, product)` and ask what each really depends on:
+
+```
+qty          -> depends on (order_id, product)   both -> OK, this is the quantity of THAT product on THAT order
+emp_id       -> depends on order_id only          part of the key -> PARTIAL DEPENDENCY
+emp_name     -> depends on order_id only          partial
+branch_id    -> depends on order_id only          partial
+branch_city  -> depends on order_id only          partial
+client_id    -> depends on order_id only          partial
+client_name  -> depends on order_id only          partial
+```
+
+Everything except `qty` depends on `order_id` alone — the same for every product line of an order. Those are **partial dependencies**, and they're the 2NF violation. The fix is to split the table so order-level facts live with `order_id`, and only the truly per-line fact (`qty`) stays with the composite key:
+
+```
+orders  (2NF)                                       order_items  (2NF)
++----------+--------+----------+-----------+---...   +----------+----------+-----+
+| order_id | emp_id | emp_name | branch_id | ...     | order_id | product  | qty |
+|   PK     |        |          |branch_city|         |  PK, FK  |   PK     |     |
+|          | client_id | client_name |               +----------+----------+-----+
++----------+-----------+-------------+             PK = (order_id, product)
+```
+
+Now `order_items` is just `(order_id, product, qty)` — every column depends on the full key — and all the once-per-order facts moved to `orders`, keyed by `order_id` alone. The per-line redundancy is gone.
+
+## Third normal form: nothing but the key
+
+**3NF rule:** be in 2NF, *and* no non-key column may depend on *another non-key column*. A chain like key `-> A -> B`, where A and B are both non-key, is a **transitive dependency**.
+
+Look at the `orders` table we just made. Its key is `order_id`, but hidden inside are chains:
+
+```
+order_id -> emp_id -> emp_name        (emp_name really depends on emp_id, a non-key column)
+order_id -> emp_id -> branch_id
+order_id -> branch_id -> branch_city
+order_id -> client_id -> client_name
+```
+
+`emp_name` doesn't depend on the order — it depends on the *employee*, which the order merely points at. That's transitive, and it's why the same employee's name is still copied onto every one of their orders. Fix it by pulling each independently-identified thing into its own table — which is to say, back into the entities from Module 03:
+
+```
+employee (employee_id PK, first_name, last_name, branch_id FK)
+branch   (branch_id PK, city)
+client   (client_id PK, name)
+orders   (order_id PK, employee_id FK, client_id FK)
+order_items (order_id FK, product, qty,  PK = (order_id, product))
+```
+
+Every non-key column now depends on its table's key, the whole key, and nothing but the key — that's 3NF. There's a mnemonic worth memorizing for the exam, usually credited as a joke about E. F. Codd, who invented all this: **"the key, the whole key, and nothing but the key."** 1NF gets you *a* key, 2NF makes columns depend on the *whole* key, 3NF makes them depend on *nothing but* the key.
+
+And here's the payoff: that 3NF schema is *exactly* the multi-table design Module 03's ER process would have produced from scratch. Normalization and ER modeling are two roads to the same well-designed database — one starts from a written requirement and builds up, the other starts from a mess and factors it down. When they agree, you can trust the design.
+
+<Callout type="note">
+**Security lens.** Notice what normalization just did for access control. Once `client` is its own table, you can grant someone read access to `orders` (who bought what, when) without handing over the `client` table's contact details at all — the sensitive data lives in one place you can lock down, instead of being smeared across every order row. A normalized schema doesn't just *store* data more cleanly; it gives you clean *boundaries* to enforce least privilege along in Module 12.
+</Callout>
+
+## When to denormalize on purpose
+
+3NF is a default, not a commandment. Sometimes you deliberately keep a redundant copy for speed — a cached `order_total` on `orders` so a report doesn't re-sum the line items every time, or a flat reporting table built for fast reads. That's fine, on one condition: you're doing it **on purpose, knowing the cost.** The cost is that you now own keeping the copies in sync — the exact update anomaly normalization removed, taken back on deliberately because the read speed is worth it.
+
+The line to hold: denormalize harmless aggregates and derived values; think hard before you duplicate anything sensitive. Every sensitive field you copy back for convenience is a field that can drift out of sync (integrity) and a second place it can be stolen from (confidentiality). Speed is a real reason; "it was easier to write" is not.
+
+## Try it: spot the violation
+
+```
+order_items  (order_id, product, product_price, qty)
+PK = (order_id, product)
+```
+
+This table is in 1NF. Which normal form does it violate, and why — and how would you fix it? Predict before you read on.
+
+<Callout type="note">
+**It violates 2NF** — there's a partial dependency. Check each non-key column against the composite key `(order_id, product)`:
+
+- `qty` depends on both `order_id` and `product` (the quantity of *that* product on *that* order) — full dependency, fine.
+- `product_price` depends on `product` **alone** — the price of Paper is the price of Paper regardless of which order it's on. That's a partial dependency on part of the key, which is exactly what 2NF forbids.
+
+**The fix:** move `product_price` out to a `product` table keyed by the product, and leave `order_items` as `(order_id, product, qty)`. Now `product_price` is stored once per product instead of once per order line — change Paper's price in a single place and every order reflects it. If you guessed 3NF, look again: 3NF is about a non-key column depending on *another non-key* column, but here `product_price` depends on part of the *key*, which is the 2NF test.
+</Callout>
+
+## Recap
+
+Normalization is the process of removing redundancy so each fact lives in exactly one place. Its engine is the **functional dependency** (`A -> B`: knowing A tells you exactly one B), and its motivation is the three **anomalies** — insert, update, and delete — that duplicated data causes. **1NF** demands atomic cells and a primary key. **2NF** adds that every non-key column depend on the *whole* (composite) key, killing partial dependencies. **3NF** adds that no non-key column depend on *another* non-key column, killing transitive dependencies — "the key, the whole key, and nothing but the key." The 3NF result matches what ER modeling would have designed from scratch, which is a good sign both were done right. And **denormalization** is a legitimate, deliberate trade of integrity for read speed — safe for derived values, risky for sensitive ones, never something to do by accident.
+
+## Up next
+
+You've now designed a schema two different ways and cleaned it to 3NF — time to prove it. **Checkpoint A — Design & Normalize** hands you a messy, redundant spreadsheet like the one that opened this module and asks you to produce both an ERD (Module 03) and a normalized 3NF schema (this module) from it. After that, Module 05 stops working on paper: it turns a finished design into real `CREATE TABLE` statements with the constraints that make the database *enforce* everything you just modeled.

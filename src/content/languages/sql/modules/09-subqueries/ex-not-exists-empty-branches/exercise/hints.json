@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Run the starter: zero rows again. Same NULL trap — employee.branch_id contains a NULL (Ryan's), so NOT IN never evaluates true. This time, fix it by switching tools entirely, to NOT EXISTS.",
+    "NOT EXISTS takes a correlated subquery and is true when that subquery finds NO rows. Look, per branch, for an employee in it: SELECT 1 FROM employee e WHERE e.branch_id = b.branch_id. Alias the outer table as b so the inner query can reference b.branch_id.",
+    "Full shape: SELECT branch_name FROM branch b WHERE NOT EXISTS (SELECT 1 FROM employee e WHERE e.branch_id = b.branch_id) ORDER BY branch_id; The SELECT 1 is a convention — EXISTS only checks whether a row is present, so what you select doesn't matter."
+  ]
+}

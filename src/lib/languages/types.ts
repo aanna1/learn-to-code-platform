@@ -34,6 +34,15 @@ export interface LanguageDisplayConfig {
   accentRgb: string;
   /** Short glyph (emoji or letters) used as the card icon until we have real art. */
   icon: string;
+  /**
+   * Which output surface the IDE shows for this language's program output.
+   * Omitted/`"terminal"` ⇒ the streaming xterm terminal (Python, C — the default).
+   * `"grid"` ⇒ a tabular results grid for languages whose programs return result
+   * sets instead of a text stream (SQL). `<Ide>` branches on this — never on the
+   * language id — so a future language (e.g. R's plot pane) adds a new mode here
+   * without re-plumbing the IDE.
+   */
+  outputMode?: "terminal" | "grid";
 }
 
 // ---------------------------------------------------------------------------
@@ -50,11 +59,32 @@ export interface RuntimeError {
   traceback: string;
 }
 
+/**
+ * One tabular result — the shape SQL (and any future table-returning language)
+ * hands back instead of a text stream. Columns are header names; each row is a
+ * flat array of cell values aligned to `columns`. A cell may be `null` (SQL NULL).
+ */
+export interface QueryResultSet {
+  columns: string[];
+  rows: unknown[][];
+  /**
+   * Human-readable summary for statements that return no rows (DDL/DML), e.g.
+   * "2 rows affected" or "Table created". Absent for ordinary row-returning queries.
+   */
+  summary?: string;
+}
+
 export interface RunResult {
   /** True when the program finished without an uncaught error. */
   ok: boolean;
   /** Present when `ok` is false. */
   error?: RuntimeError;
+  /**
+   * Structured tabular output, one entry per statement that returned rows (a
+   * script can hold several). Present only for `outputMode: "grid"` languages;
+   * text-streaming languages leave it unset and stream via `onStdout` instead.
+   */
+  resultSets?: QueryResultSet[];
 }
 
 export interface RunOptions {

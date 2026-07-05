@@ -1,0 +1,36 @@
+You have a small `ShoppingCart` module below. Your job is to write the tests — not the implementation.
+
+The `ShoppingCart` class:
+
+```python
+class ShoppingCart:
+    def __init__(self):
+        self.items = {}          # name -> price
+
+    def add(self, name: str, price: float) -> None:
+        """Add an item. Raise ValueError if price <= 0."""
+
+    def remove(self, name: str) -> None:
+        """Remove an item. Raise KeyError if not present."""
+
+    def total(self) -> float:
+        """Return the sum of all item prices."""
+
+    def count(self) -> int:
+        """Return the number of items."""
+
+    def clear(self) -> None:
+        """Remove all items."""
+```
+
+Write five test functions that together verify the cart works correctly:
+
+- `test_add_item` — add one item and check `total()` equals its price
+- `test_add_multiple_items` — add two items and check `total()` equals their sum
+- `test_remove_item` — add two items, remove one, check `count()` is 1
+- `test_add_invalid_price` — adding an item with `price=0` raises `ValueError`
+- `test_remove_missing_item` — removing a name that was never added raises `KeyError`
+
+The starter code gives you the `ShoppingCart` implementation and empty test stubs. Fill in the stubs using plain `assert` — no imports needed.
+
+Each test gets a fresh cart from `make_cart()`, the fixture helper already in the starter.

@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Start with the guard: if b == 0: raise ValueError('Cannot divide by zero'). Put this at the top of the function, before the return.",
+    "After the guard, a plain return a / b handles everything else. Python's / operator always returns a float.",
+    "For the zero-numerator assert, try safe_divide(0, 5) — it should return 0.0. Only b == 0 is the error case.",
+    "To assert that an exception fires, use a try/except block: set a flag to False, call the function inside try, set the flag to True in the except, then assert the flag is True after the block."
+  ]
+}

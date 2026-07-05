@@ -1,0 +1,15 @@
+[
+  {
+    "name": "returns every employee-project pairing from the associative entity",
+    "orderMatters": false,
+    "expected": {
+      "columns": ["employee_id", "project_id", "assigned_date", "hours"],
+      "rows": [
+        [101, 1, "2024-03-03", 40],
+        [101, 2, "2024-04-10", 12],
+        [103, 1, "2024-03-05", 20],
+        [105, 2, "2024-04-11", 8]
+      ]
+    }
+  }
+]

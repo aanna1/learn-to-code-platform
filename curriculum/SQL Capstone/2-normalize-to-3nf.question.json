@@ -1,0 +1,33 @@
+{
+  "draft": "Write out the fat table's functional dependencies on paper first, then walk 1NF → 2NF → 3NF the way the exam expects. The graded fields are just reading off that work. The composite key of the line-item table is (order_id, book_title).",
+  "fields": [
+    {
+      "id": "which-nf",
+      "type": "single-select",
+      "label": "Inkwell's spreadsheet is one fat row per line item, already atomic (1NF). Its key is the composite (order_id, book_title). What is the FIRST normal form it violates?",
+      "options": ["2NF", "3NF", "BCNF", "It's already in 3NF"]
+    },
+    {
+      "id": "partials",
+      "type": "multi-select",
+      "label": "Which non-key columns depend on only PART of the composite key (order_id alone, or book_title alone) — the partial dependencies that break 2NF?",
+      "options": ["order_date", "customer_name", "customer_email", "author_name", "price", "quantity"]
+    },
+    {
+      "id": "fds",
+      "type": "token-set",
+      "grammar": "fd",
+      "label": "List the functional dependencies hiding in the fat table — the ones that make each order, customer, and book fact repeat on every line.",
+      "help": "One per line, as  a -> b  (a composite left side is  a, b -> c).",
+      "placeholder": "order_id -> order_date\nbook_title -> price\n..."
+    },
+    {
+      "id": "decompose",
+      "type": "partition",
+      "label": "After normalizing all the way to 3NF, which table does each fact live in? Drop each descriptive column into its home table.",
+      "help": "Keys and foreign keys are already placed; these are the descriptive facts.",
+      "items": ["order_date", "customer_name", "customer_email", "author_name", "price", "quantity"],
+      "targets": ["author", "book", "customer", "book_order", "order_line"]
+    }
+  ]
+}

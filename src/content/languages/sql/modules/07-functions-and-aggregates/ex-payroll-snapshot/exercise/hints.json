@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "An aggregate function takes a whole column and boils it down to one value -- SUM, AVG, MIN, and MAX all work this way, the same as COUNT.",
+    "Add SUM(salary), AVG(salary), MIN(salary), and MAX(salary) as more columns in the SELECT list, each with its own AS alias.",
+    "SELECT COUNT(*) AS headcount, SUM(salary) AS total_payroll, AVG(salary) AS avg_salary, MIN(salary) AS lowest, MAX(salary) AS highest FROM employee;"
+  ]
+}

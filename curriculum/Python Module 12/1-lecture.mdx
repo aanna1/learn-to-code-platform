@@ -1,0 +1,307 @@
+## Why this matters
+
+Imagine you've just been handed a file with five thousand lines like this:
+
+```
+2026-03-14 09:14:22 INFO  user=alice ip=10.0.0.5 path=/login status=200
+2026-03-14 09:14:23 ERROR user=bob   ip=10.0.0.9 path=/admin status=403
+```
+
+Your job: pull out every line where the status starts with 4, grab the IP, and count which IPs got rejected the most. The string methods from earlier modules can technically do this — split on spaces, split each chunk on `=`, check whether `status[0]` is `"4"`. Forty lines of code. Brittle. Breaks the day someone changes the log format.
+
+The same job in regex is one pattern and a `for` loop. You learn a small, dense language for describing patterns in text, and you skip the forty lines of slicing-and-checking. Validating that something looks like an email. Pulling phone numbers out of a paragraph. Replacing every four-digit year in a document with `[REDACTED]`. Any time the answer is "find the things that look like *this* in some text," regex is the tool.
+
+Two warnings up front. Regex looks like punctuation soup — a pattern like `^[\w.+-]+@[\w-]+\.[\w.-]+$` takes practice before it stops looking hostile. And regex is the wrong tool for anything with nested structure: HTML, JSON, source code. The joke about "now you have two problems" is about people who tried to parse HTML with regex. Use it for flat patterns; for nested data, use a real parser.
+
+<Callout type="info">
+No installation needed. Every code block on this platform has a **Run** button — press it and your code executes instantly in the browser.
+</Callout>
+
+## Core concepts
+
+### Why string methods aren't enough
+
+Suppose you want to check whether a user typed something that looks like an email address. A first try is reasonable:
+
+```python
+email = "alice@example.com"
+if "@" in email:
+    print("Valid")
+else:
+    print("Invalid")
+```
+
+Type `alice@example.com` and it says `Valid`. Type `not-an-email` and it says `Invalid`. So far so good. Now try `@` — just the single `@` character.
+
+It says `Valid`. That's wrong: nothing before the `@`, nothing after it.
+
+So you patch: check that `@` appears exactly once, split on it, verify both sides are non-empty, verify the domain has a dot. Every fix uncovers another edge case. After half an hour you have thirty lines of code and a queasy feeling you're still missing something. You are. The shape "letters and a few symbols, then `@`, then letters and dots and a top-level domain" is a *pattern*, and string methods don't speak pattern — they speak position and substring. Regex speaks pattern.
+
+### The `re` module and `re.search`
+
+Python's regex library is the `re` module in the standard library. The first function to know is `re.search`:
+
+<Runnable code={`import re
+
+email = "alice@example.com"
+if re.search(r"@", email):
+    print("Has an @")
+else:
+    print("No @")`} />
+
+`re.search(pattern, string)` looks for the pattern anywhere in the string. It returns a *match object* (truthy) if found, and `None` (falsy) if not. The pattern here is `r"@"` — just a literal `@`. At this point we're no better off than `"@" in email`. The power comes when the pattern describes something more interesting than a single character.
+
+### Raw strings — and why you'll forget once
+
+Notice the `r` in front of the pattern: `r"@"`. That makes it a raw string. In a normal Python string, a backslash starts an escape sequence: `"\n"` is a newline, `"\t"` is a tab. In a raw string, a backslash is just a backslash.
+
+Regex uses backslashes for its own special sequences — `\d` for digit, `\b` for word boundary, and so on. If you write a pattern in a normal string, Python sees the backslash first and tries to interpret it before `re` gets a look. Sometimes Python doesn't recognize the sequence and passes it through, so the pattern works by accident. Sometimes Python *does* recognize it — `"\b"` is a backspace character in a regular string — and you get a pattern that silently means something different from what you intended.
+
+Always use raw strings for regex patterns. `r"\d+"`, not `"\d+"`. This will save you at least one baffling debugging session.
+
+### Special symbols: matching things that aren't literal
+
+Regex patterns mostly look like text with a few special symbols mixed in. Here are the ones you'll use most:
+
+| Symbol | Meaning |
+|---|---|
+| `.` | Any single character except a newline |
+| `\d` | Any digit (0–9) |
+| `\w` | Any word character (letter, digit, underscore) |
+| `\s` | Any whitespace (space, tab, newline) |
+| `[abc]` | Any one of the characters `a`, `b`, or `c` |
+| `[^abc]` | Any character *except* `a`, `b`, or `c` |
+| `[a-z]` | Any lowercase letter |
+| `*` | The preceding item, zero or more times |
+| `+` | The preceding item, one or more times |
+| `?` | The preceding item, zero or one time |
+| `{3}` | The preceding item, exactly three times |
+| `{2,4}` | The preceding item, two to four times |
+| `^` | Start of the string |
+| `$` | End of the string |
+| `\|` | Either the left side or the right side |
+| `(...)` | A capture group |
+
+You won't memorize this table on first read — nobody does. Keep it open while you work the exercises. The common ones (`\d`, `+`, `*`, `[]`, anchors) become automatic within a few days.
+
+### Building the email validator step by step
+
+Back to the email problem. We want characters, then `@`, then characters, then `.`, then more characters.
+
+A first try:
+
+<Runnable code={`import re
+
+tests = ["alice@example.com", "@", "a@b", "my email is alice@example.com"]
+pattern = r".+@.+"
+
+for t in tests:
+    result = "Valid" if re.search(pattern, t) else "Invalid"
+    print(f"{t!r:45} -> {result}")`} />
+
+`.+` means "one or more of any character." This catches the bare `@` correctly (nothing before or after), but `a@b` passes even though there's no dot, and the full sentence passes because `re.search` finds the pattern *anywhere* in the string.
+
+Two fixes. First, require a dot in the domain: change the pattern to `r".+@.+\..+"`. The `\.` is a literal dot — the unescaped `.` means *any character*, so you must escape it when you want the period itself. Second, anchor the pattern: `r"^.+@.+\..+$"`. The `^` says the match must start at the beginning of the string; `$` says it must end at the end. Now `my email is alice@example.com` fails, because the leading text isn't part of the pattern. Run the updated version:
+
+<Runnable code={`import re
+
+tests = ["alice@example.com", "@", "a@b.c", "my email is alice@example.com"]
+pattern = r"^.+@.+\..+$"
+
+for t in tests:
+    result = "Valid" if re.search(pattern, t) else "Invalid"
+    print(f"{t!r:45} -> {result}")`} />
+
+A more careful version uses character classes to restrict what characters are allowed:
+
+<Runnable code={`import re
+
+PATTERN = re.compile(r"^[\w.+-]+@[\w-]+\.[\w.-]+$")
+
+def is_valid_email(email):
+    return bool(PATTERN.match(email))
+
+tests = ["alice@example.com", "user.name+tag@sub.domain.co", "@", "a@b", ".@."]
+for t in tests:
+    print(f"{t!r:35} -> {is_valid_email(t)}")`} />
+
+Reading left to right: `^` anchors the start; `[\w.+-]+` matches word characters, dots, pluses, or hyphens — the allowed local-part characters; `@` is literal; `[\w-]+` matches the domain name; `\.` is a literal dot; `[\w.-]+` matches the TLD section; `$` anchors the end.
+
+`re.compile` builds the pattern once so you can reuse it without paying the compilation cost every call. For a pattern used many times — in a loop, in a function called repeatedly — compile it upfront. Otherwise the inline `re.search(r"...", text)` form is fine.
+
+<Callout type="tip">
+Full RFC-compliant email validation is famously unwinnable. The canonical regex is over six thousand characters and still doesn't cover everything. For real applications, send the user a verification email — the only true test is whether mail to that address gets read.
+</Callout>
+
+Try the zip code challenge. A US zip code is exactly five digits, optionally followed by a hyphen and four more digits. Try writing the pattern before you run:
+
+<Runnable code={`import re
+
+PATTERN = re.compile(r"^\d{5}(-\d{4})?$")
+
+tests = ["78664", "78664-1234", "786", "78664-12", "ABCDE"]
+for t in tests:
+    print(f"{t!r:15} -> {bool(PATTERN.match(t))}")`} />
+
+<Callout type="tip">
+`\d{5}` means exactly five digits. `(-\d{4})?` groups a hyphen and four digits together; the `?` makes the whole group optional. The anchors keep stray characters from sneaking in at either end.
+</Callout>
+
+### `search` vs `match`
+
+Two similar functions, one important difference:
+
+- `re.search(pattern, string)` looks for the pattern *anywhere* in the string.
+- `re.match(pattern, string)` only matches at the *beginning* of the string.
+
+<Runnable code={`import re
+
+text = "hello world"
+print(re.match(r"world", text))   # None — "world" isn't at the start
+print(re.search(r"world", text))  # match object`} />
+
+`re.match` doesn't anchor at the *end*, only the start. So `re.match(r"hello", "hello world")` succeeds even though the string keeps going. If you want the pattern to cover the whole string, use `re.fullmatch` or put `^` and `$` around the pattern with `re.search`.
+
+Use `re.search` by default. Reach for `re.match` only when you specifically need start-anchoring. The most common bug here: writing `re.match(r"error", text)` expecting to find `"error"` somewhere in `text`, then getting `None` when the word appears in the middle.
+
+### `findall`: pull out every match
+
+`re.search` gives you the first match. When you want all of them, use `re.findall`:
+
+<Runnable code={`import re
+
+text = "Reach me at 512-555-0102 or 800-555-0199 or even 212-555-0123."
+matches = re.findall(r"\d{3}-\d{3}-\d{4}", text)
+print(matches)`} />
+
+The pattern is three digits, hyphen, three digits, hyphen, four digits. `findall` walks the whole string and collects every chunk that matches.
+
+Real phone numbers appear in many formats — `(512) 555-0102`, `512.555.0102`, `+1 512 555 0102`. A more forgiving pattern uses a character class for the separators:
+
+<Runnable code={`import re
+
+pattern = re.compile(r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}")
+text = "Call 512-555-0102, (800)555-0199, or 212.555.0123 today."
+print(pattern.findall(text))`} />
+
+`\(?` is an optional opening paren. `[-.\s]?` is an optional separator — hyphen, dot, or whitespace. You don't write a complete pattern from the top of your head. You write a rough one, run it on sample data, find what it misses, and tweak. Pattern, test, refine.
+
+### Groups: capturing pieces of a match
+
+Often you don't want the whole match — you want a piece of it. Parentheses around part of a pattern create a *group* you can extract:
+
+<Runnable code={`import re
+
+text = "Reach me at 512-555-0102."
+match = re.search(r"(\d{3})-(\d{3})-(\d{4})", text)
+
+print(match.group(0))   # whole match
+print(match.group(1))   # first group: area code
+print(match.group(2))   # second group
+print(match.group(3))   # third group
+print(match.groups())   # all groups as a tuple`} />
+
+`.group(0)` (or just `.group()`) is the whole match. `.group(1)` is what the first parenthesized group captured. `.groups()` returns all groups as a tuple.
+
+When `findall` sees a pattern with groups, it changes shape: instead of a list of full-match strings, you get a list of tuples — one tuple per match, with the group values in order:
+
+<Runnable code={`import re
+
+text = "Call 512-555-0102 or 800-555-0199."
+matches = re.findall(r"(\d{3})-(\d{3})-(\d{4})", text)
+print(matches)
+
+for area, exchange, number in matches:
+    print(f"Area code: {area}")`} />
+
+If you need grouping for quantifiers (`(-\d{4})?`) but don't want the group showing up in `findall` results, use a non-capturing group: `(?:...)`. It behaves exactly like a regular group for matching purposes but stays out of `findall` and `.groups()`.
+
+### `re.sub`: find and replace with patterns
+
+`re.sub(pattern, replacement, text)` returns a new string with every match replaced:
+
+<Runnable code={`import re
+
+text = "I was born in 1985, started school in 1990, and graduated in 2007."
+result = re.sub(r"\b(19|20)\d{2}\b", "[YEAR]", text)
+print(result)`} />
+
+`\b` is a *word boundary* — an invisible position between a word character and a non-word character. It prevents the pattern from matching inside a longer number like `19850`. The `(19|20)` matches either `19` or `20`. The whole pattern reads: a word boundary, then `19` or `20`, then two more digits, then another word boundary.
+
+You can reference captured groups in the replacement string with `\1`, `\2`, and so on — handy for reformatting:
+
+<Runnable code={`import re
+
+text = "John Smith, Alice Jones, Bob Brown"
+result = re.sub(r"(\w+) (\w+)", r"\2, \1", text)
+print(result)`} />
+
+The pattern captures first and last name into groups 1 and 2; the replacement flips them. Note that the replacement string is also a raw string, for the same backslash reason.
+
+Try it. Given `"Order #1042 shipped on 2026-03-14. Order #1085 shipped on 2026-04-02."`, pull out each order number and its ship date:
+
+<Runnable code={`import re
+
+text = "Order #1042 shipped on 2026-03-14. Order #1085 shipped on 2026-04-02."
+pattern = re.compile(r"#(\d+) shipped on (\d{4}-\d{2}-\d{2})")
+
+for order, date in pattern.findall(text):
+    print(f"{order}: {date}")`} />
+
+<Callout type="tip">
+Two capture groups — the digits after `#`, and the date. Because the pattern has groups, `findall` returns tuples, which unpack cleanly into `order, date` in the loop.
+</Callout>
+
+### When regex is the wrong tool
+
+Regex works well for flat, predictable patterns. It falls apart on anything with nested or recursive structure.
+
+HTML tags can nest arbitrarily deep, and regex can't count nesting — use a parser like `BeautifulSoup`. JSON has the same problem with nested braces and brackets — use the `json` module. CSV fields can contain commas when quoted — use the `csv` module. Parsing source code needs context regex doesn't have.
+
+A useful rule: if `.split()` would solve your problem, use `.split()`. If the data has a parser in the standard library, use the parser. Regex fills the gap between "trivial to split" and "needs a real parser."
+
+## Common pitfalls
+
+**Forgetting the raw string.** `"\b\w+\b"` is broken — `\b` is a backspace character in a regular Python string, so `re` never sees a word boundary. `r"\b\w+\b"` is correct. This one is sneaky because `"\d+"` *happens* to work (Python passes `\d` through unmodified), lulling you into thinking you don't need the `r`.
+
+**Using `match` when you wanted `search`.** `re.match(r"error", "log line with error in middle")` returns `None`. `re.search` is almost always what you want.
+
+**Forgetting to escape the dot.**
+
+```python
+re.search(r".com", "Wescom Bank")   # matches — the . matches the 's'
+re.search(r"\.com", "Wescom Bank")  # correctly returns None
+```
+
+**Greedy quantifiers swallowing too much.**
+
+```python
+import re
+text = "<b>hello</b> and <b>world</b>"
+print(re.findall(r"<b>(.*)</b>", text))   # ['hello</b> and <b>world'] — greedy!
+print(re.findall(r"<b>(.*?)</b>", text))  # ['hello', 'world'] — lazy .*?
+```
+
+`.*` grabs as many characters as possible. `.*?` grabs as few as possible. Also: if you're matching HTML tags at all, step back and reach for `BeautifulSoup`.
+
+**`findall` changing shape when groups are present.**
+
+```python
+re.findall(r"\d{3}-\d{4}", "call 555-0102 or 555-0199")
+# ['555-0102', '555-0199']  — list of strings (no groups)
+
+re.findall(r"(\d{3})-(\d{4})", "call 555-0102 or 555-0199")
+# [('555', '0102'), ('555', '0199')]  — list of tuples (groups present)
+```
+
+**Validating with `search` and no anchors.** `re.search(r"\d{5}", "78664 Main St, apt 12")` matches `"78664"` — it found a five-digit number *inside* the string. If you want to validate that the input *is* a five-digit number and nothing else, use `re.fullmatch(r"\d{5}", text)` or `re.search(r"^\d{5}$", text)`.
+
+## Recap
+
+- Regex is a small language for describing text patterns. Use it when the pattern is too varied for plain string methods and too flat for a dedicated parser.
+- Always write patterns as raw strings: `r"\d+"`. Without the `r`, backslash sequences can be silently misinterpreted.
+- Core building blocks: `.` (any char), `\d` (digit), `\w` (word char), `\s` (whitespace), `[...]` (character set), `*` / `+` / `?` (quantifiers), `{n}` and `{n,m}` (counts), `^` and `$` (anchors), `(...)` (capture group), `|` (alternation).
+- The four functions: `re.search` finds anywhere, `re.match` only at the start, `re.findall` returns every match, `re.sub` replaces matches. Default to `search`.
+- `match.group(n)` extracts a captured group; `.groups()` returns them all as a tuple.
+- `findall` returns strings when there are no groups, tuples when there are.
+- Don't use regex for HTML, JSON, or anything with nested structure — use a real parser.

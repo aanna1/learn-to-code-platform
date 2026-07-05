@@ -1,0 +1,7 @@
+Last report: the buyer wants to know which products are **dead stock** — items that have *never* appeared on a single order. This is an *anti-join*: products with no matching row in `order_item`. An `INNER JOIN` can't answer it (it only ever shows products that *were* ordered), so you'll reach for an outer join and filter for the gaps.
+
+Return the `name` of every never-ordered product, ordered by name. **Run**, then **Submit**.
+
+<Callout type="tip">
+The pattern is `LEFT JOIN` followed by `WHERE ... IS NULL`: keep every product, then keep only the ones where the `order_item` side came back empty (`oi.product_id IS NULL`). That `NULL` is the tell that this product found no partner. In Module 09 you'll meet `NOT EXISTS`, an even cleaner way to write anti-joins.
+</Callout>

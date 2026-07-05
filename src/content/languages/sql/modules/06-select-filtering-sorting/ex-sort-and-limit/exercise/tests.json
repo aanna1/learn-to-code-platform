@@ -1,0 +1,14 @@
+[
+  {
+    "name": "returns the top 3 earners, highest salary first",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name", "salary"],
+      "rows": [
+        ["Jan", 110000],
+        ["Michael", 90000],
+        ["Dwight", 62000]
+      ]
+    }
+  }
+]

@@ -1,0 +1,42 @@
+# Safe Divide
+
+`assert` is the simplest way to verify your code's behavior. When a condition is true, nothing happens. When it is false, Python raises `AssertionError` and stops right there — which is exactly what you want from a test.
+
+## Your task
+
+Implement the function `safe_divide(a, b)` so that:
+
+- It returns `a / b` when `b` is not zero.
+- It raises `ValueError` with the message `"Cannot divide by zero"` when `b` is zero.
+
+Then, below the function, write **four `assert` statements** that verify its behavior. Your asserts must cover:
+
+1. A basic division that returns the right result.
+2. Division where the result is a float.
+3. Division where `a` is zero (the result should be `0.0`, not an error).
+4. Confirm that calling `safe_divide(10, 0)` raises `ValueError`.
+
+For the fourth assert, use this pattern to catch the exception and confirm it fired:
+
+```python
+raised = False
+try:
+    safe_divide(10, 0)
+except ValueError:
+    raised = True
+assert raised, "safe_divide(10, 0) should raise ValueError"
+```
+
+## Requirements
+
+- `safe_divide` must raise `ValueError` (not any other exception) when `b` is zero.
+- The error message must be exactly `"Cannot divide by zero"`.
+- All four asserts must be present and pass when the solution is correct.
+
+## Example
+
+```python
+print(safe_divide(10, 2))   # 5.0
+print(safe_divide(0, 5))    # 0.0
+safe_divide(8, 0)           # raises ValueError: Cannot divide by zero
+```

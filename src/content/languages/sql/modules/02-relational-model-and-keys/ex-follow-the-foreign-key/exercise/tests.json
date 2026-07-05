@@ -1,0 +1,14 @@
+[
+  {
+    "name": "returns each employee's name alongside the branch_id foreign key",
+    "orderMatters": false,
+    "expected": {
+      "columns": ["first_name", "branch_id"],
+      "rows": [
+        ["Jan", 1],
+        ["Michael", 2],
+        ["Andy", 3]
+      ]
+    }
+  }
+]

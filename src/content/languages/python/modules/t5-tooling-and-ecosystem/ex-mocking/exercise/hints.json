@@ -1,0 +1,6 @@
+[
+  "Use `with patch('urllib.request.urlopen', return_value=make_mock_response(b'{\"ok\":true}')) as mock_open:` — then call send_alert inside the with block.",
+  "After the with block, call `mock_open.assert_called_once()` to verify urlopen was called. Access the Request object with `mock_open.call_args[0][0]` and check `.full_url`.",
+  "For the JSON test: set the response body to `b'{\"status\": \"ok\"}'` and assert `result == {\"status\": \"ok\"}`.",
+  "For the invalid level test: no patching needed — just call send_alert('msg', 'critical') inside try/except ValueError. Add `assert False, 'should have raised'` right after the call."
+]

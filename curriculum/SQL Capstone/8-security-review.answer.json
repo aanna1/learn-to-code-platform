@@ -1,0 +1,10 @@
+{
+  "the-hole": "The user's input is concatenated into the query string, so an attacker can close the quote and inject their own SQL — the input becomes code",
+  "the-fix": "Parameterize it: WHERE title LIKE ? and pass '%' + search + '%' as a bound value, so the input can never be parsed as code",
+  "least-privilege": "Least privilege — if an injection or stolen credential ever hits that account, the attacker inherits only those few rights and can't read staff logins, delete orders, or drop tables",
+  "layers": {
+    "Parameterized query": "Removes the injection vulnerability itself",
+    "Least-privilege GRANTs": "Caps the blast radius if an account is compromised",
+    "catalog_public view": "Exposes only safe columns and hides customer/staff tables"
+  }
+}

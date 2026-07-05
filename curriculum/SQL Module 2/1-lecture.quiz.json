@@ -1,0 +1,79 @@
+{
+  "questions": [
+    {
+      "question": "A `students` table has two rows with identical `name` and `major` values. How can you tell them apart?",
+      "options": [
+        {
+          "text": "By their primary key — it's guaranteed to be unique for every row, even if every other column matches.",
+          "correct": true,
+          "explanation": "Correct. That's exactly the job of a primary key: one column (or set of columns) guaranteed different for every row, so a specific row can always be identified even when every other value is the same."
+        },
+        {
+          "text": "You can't — duplicate data means duplicate rows, and the table is just broken.",
+          "correct": false,
+          "explanation": "Not so. Two rows sharing a name and major is completely normal; that's the whole reason a table has a primary key. The key still distinguishes them."
+        },
+        {
+          "text": "By the order the rows were inserted.",
+          "correct": false,
+          "explanation": "Row order isn't a reliable way to identify data in a relational database — the database is free to store and return rows in any order. Only the primary key gives you a dependable handle on a specific row."
+        },
+        {
+          "text": "By adding up the values in all the other columns.",
+          "correct": false,
+          "explanation": "If two rows are identical in every other column, adding those columns up gives the same total for both — so it can't tell them apart. The primary key is the column designed to be unique."
+        }
+      ]
+    },
+    {
+      "question": "What's the difference between a surrogate key and a natural key?",
+      "options": [
+        {
+          "text": "A surrogate key has no meaning outside the database (like an auto-generated ID); a natural key is already a unique real-world identifier (like a Social Security number).",
+          "correct": true,
+          "explanation": "Correct. A surrogate key is invented by the database purely to keep rows distinct; a natural key reuses something that's already unique in the real world."
+        },
+        {
+          "text": "A surrogate key is always a number and a natural key is always text.",
+          "correct": false,
+          "explanation": "Format isn't the distinction. A natural key can be a number (like an SSN) and a surrogate key could be a string. What separates them is where the value's meaning comes from — the database, or the real world."
+        },
+        {
+          "text": "Only one table in a database is allowed to use a surrogate key.",
+          "correct": false,
+          "explanation": "There's no such limit. Any table can use either kind of key, and most tables you design will use a surrogate key."
+        },
+        {
+          "text": "A surrogate key links tables together; a natural key can't be used in a relationship.",
+          "correct": false,
+          "explanation": "Linking tables is what a foreign key does, and a foreign key can point at either kind of primary key. The surrogate-vs-natural distinction is about where a key's uniqueness comes from, not about relationships."
+        }
+      ]
+    },
+    {
+      "question": "What does a foreign key actually store?",
+      "options": [
+        {
+          "text": "The primary key value of a row in another table (or, for a self-referencing key, another row in the same table).",
+          "correct": true,
+          "explanation": "Correct. A foreign key holds the primary key value of the row it points at, which is exactly how one table refers to a specific row in another — the mechanism that makes a database relational."
+        },
+        {
+          "text": "A copy of every column from the related row.",
+          "correct": false,
+          "explanation": "That would duplicate data across tables — the exact problem foreign keys exist to avoid. A foreign key stores only the key value needed to find the related row, not a copy of it."
+        },
+        {
+          "text": "A password that controls access to the related table.",
+          "correct": false,
+          "explanation": "Foreign keys are about linking data, not about security permissions. Access control is a separate topic entirely (Module 12)."
+        },
+        {
+          "text": "Nothing — a foreign key is just a note in the documentation, not real data in a column.",
+          "correct": false,
+          "explanation": "A foreign key is a real column holding a real value on each row. That value is the primary key of the row it points at."
+        }
+      ]
+    }
+  ]
+}

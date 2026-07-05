@@ -1,0 +1,17 @@
+[
+  {
+    "name": "every Scranton employee's salary went up by 3000",
+    "probe": "SELECT first_name, salary FROM employee WHERE branch_id = 2 ORDER BY first_name;",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name", "salary"],
+      "rows": [["Dwight", 65000], ["Jim", 63000], ["Michael", 93000], ["Pam", 45000], ["Stanley", 61000]]
+    }
+  },
+  {
+    "name": "employees in other branches are untouched (Jan still earns 110000)",
+    "probe": "SELECT salary FROM employee WHERE employee_id = 100;",
+    "orderMatters": true,
+    "expected": { "columns": ["salary"], "rows": [[110000]] }
+  }
+]

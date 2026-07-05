@@ -1,0 +1,30 @@
+[
+  {
+    "name": "totals quantity * price for each order, ordered by order_id",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["order_id", "revenue"],
+      "rows": [
+        [100, 22.5],
+        [101, 24],
+        [102, 25],
+        [103, 33]
+      ]
+    }
+  },
+  {
+    "name": "a new order becomes its own revenue group",
+    "setup": "INSERT INTO sales_order (order_id, customer_id, order_date) VALUES (104, 2, '2024-04-01'); INSERT INTO order_item (order_id, product_id, quantity) VALUES (104, 13, 2);",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["order_id", "revenue"],
+      "rows": [
+        [100, 22.5],
+        [101, 24],
+        [102, 25],
+        [103, 33],
+        [104, 40]
+      ]
+    }
+  }
+]

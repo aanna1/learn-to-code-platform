@@ -1,0 +1,301 @@
+<Callout type="info">
+No install needed — every example on this page has a **Run** button. `ThreadPoolExecutor` and `asyncio` examples run directly in your browser. `ProcessPoolExecutor` and live network calls require a local Python install; those blocks are marked with a callout and shown as plain code.
+</Callout>
+
+## Why this matters
+
+You write a script that checks 100 servers. Each check takes about a second. The script takes 100 seconds. Your boss asks why it's so slow.
+
+You write another script that processes 100 large files, heavy computation per file, one minute each. You have a 16-core machine. The script takes 100 minutes instead of the 7 it should.
+
+Both scripts do one thing at a time when they don't have to. The first problem is concurrency — you can wait on 100 network responses at once. The second is parallelism — you can run 16 computations at once on 16 cores.
+
+Python has separate tools for each, because of a feature that makes the distinction matter: the Global Interpreter Lock. Reaching for the wrong one either does nothing or makes things worse.
+
+Most automation scripts don't need any of this. A job that runs once a night can take five minutes instead of two and nobody cares. Reach for concurrency when latency or throughput is a real problem, and measure first.
+
+## The GIL: what it means for your code
+
+CPython (the standard Python implementation) has a lock called the **Global Interpreter Lock**. Only one thread can execute Python bytecode at a time, even on a multi-core machine.
+
+Why does threading exist then?
+
+Because the GIL is released during I/O. When a thread calls `requests.get(url)`, it blocks waiting for the network. Before blocking, it releases the GIL, so other threads can run during the wait. Same for disk reads, database queries, and `time.sleep` — anything waiting on the OS releases the GIL while waiting.
+
+For I/O-bound work (threads mostly waiting), the GIL is invisible. Ten threads each waiting on a network response finish in about the time of one.
+
+For CPU-bound work (pure Python computation — parsing, checksumming, encoding), the GIL bites hard. Ten threads doing pure Python take the same wall-clock time as one, because they take turns on one core. Threading gains nothing here. To use multiple cores, you need multiple *processes*.
+
+Pick your tool based on the work:
+
+- **I/O-bound** → `ThreadPoolExecutor` (simple) or `asyncio` (very high connection counts)
+- **CPU-bound** → `ProcessPoolExecutor` (each worker gets its own GIL)
+
+## Sequential first: establish a baseline
+
+Before adding concurrency, write and time the sequential version. You need a number to beat.
+
+<Callout type="note">
+The examples below use `time.sleep(1)` to simulate a one-second I/O wait — same shape as a network request, without needing network access. In production, replace the sleep with `requests.get(url, timeout=10)`.
+</Callout>
+
+<Runnable code={`import time
+
+def fetch(task_id: int) -> str:
+    """Simulate a one-second I/O-bound task."""
+    time.sleep(1)
+    return f"result-{task_id}"
+
+def main():
+    start = time.monotonic()
+    results = [fetch(i) for i in range(5)]
+    elapsed = time.monotonic() - start
+    print(f"Sequential: {len(results)} tasks in {elapsed:.2f}s")
+    print(results)
+
+main()
+`} />
+
+Five tasks, one second each, takes about five seconds. That's the baseline.
+
+## ThreadPoolExecutor: I/O-bound work
+
+`concurrent.futures.ThreadPoolExecutor` manages a pool of worker threads and gives you a clean API to submit work to them.
+
+<Runnable code={`import time
+from concurrent.futures import ThreadPoolExecutor
+
+def fetch(task_id: int) -> str:
+    """Simulate a one-second I/O-bound task."""
+    time.sleep(1)
+    return f"result-{task_id}"
+
+def main():
+    start = time.monotonic()
+    with ThreadPoolExecutor(max_workers=5) as pool:
+        results = list(pool.map(fetch, range(5)))
+    elapsed = time.monotonic() - start
+    print(f"Threaded: {len(results)} tasks in {elapsed:.2f}s")
+    print(results)
+
+main()
+`} />
+
+Five threads sleep concurrently, so the whole thing finishes in about one second. `pool.map` returns results in submission order and raises immediately if any task raises.
+
+For real work you usually want per-task error handling and results as they arrive. That's what `submit` and `as_completed` are for:
+
+<Runnable code={`import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+def fetch(task_id: int) -> str:
+    time.sleep(0.5)
+    if task_id == 3:
+        raise ValueError(f"task {task_id} failed")
+    return f"result-{task_id}"
+
+def fetch_all(task_ids: list) -> dict:
+    results = {}
+    with ThreadPoolExecutor(max_workers=5) as pool:
+        future_to_id = {pool.submit(fetch, tid): tid for tid in task_ids}
+        for future in as_completed(future_to_id):
+            tid = future_to_id[future]
+            try:
+                results[tid] = future.result()
+            except Exception as e:
+                results[tid] = f"error: {e}"
+    return results
+
+print(fetch_all(list(range(5))))
+`} />
+
+`pool.submit(fetch, tid)` schedules `fetch(tid)` on a worker and returns a `Future` immediately. The dict maps each future back to its task ID. `as_completed` yields futures as they finish, in completion order — not submission order. `future.result()` either returns the value or re-raises the exception the worker threw. One task failing doesn't touch the others.
+
+`max_workers` is a tuning knob. For HTTP fetches, 10–30 is a reasonable starting point. Profile with your real workload.
+
+One trap: threading CPU-bound work. If `fetch` computed a large checksum instead of sleeping, the threaded version would be no faster than the sequential one — the GIL prevents true parallelism for Python computation. More threads don't fix it; that's just the wrong tool.
+
+## ProcessPoolExecutor: CPU-bound work
+
+For CPU-bound work you need multiple Python processes. `ProcessPoolExecutor` has the same API as `ThreadPoolExecutor`, so switching is often a one-line change.
+
+<Callout type="warning">
+`ProcessPoolExecutor` spawns real OS subprocesses, which aren't available in the browser. The example below is read-only reference code. Run it locally to see the speedup.
+</Callout>
+
+```python
+from concurrent.futures import ProcessPoolExecutor
+import hashlib
+import os
+
+def compute_checksum(data: bytes) -> str:
+    """CPU-bound: compute SHA-256 of a chunk of data."""
+    return hashlib.sha256(data).hexdigest()
+
+def hash_all(chunks: list[bytes]) -> list[str]:
+    with ProcessPoolExecutor(max_workers=os.cpu_count()) as pool:
+        return list(pool.map(compute_checksum, chunks))
+
+if __name__ == "__main__":
+    chunks = [b"x" * 10_000_000 for _ in range(8)]
+    results = hash_all(chunks)
+    print(f"Hashed {len(results)} chunks")
+```
+
+`os.cpu_count()` returns the number of cores. One worker per core is a good default for CPU-bound work.
+
+Because each worker is a separate process, three things work differently from threading. First, communication is expensive — arguments and return values are pickled and sent through a pipe. Small inputs and outputs are fine; sending a 500 MB object to each worker has pickling overhead that can eat the speedup. Second, task functions must be picklable — top-level `def` functions are, but lambdas, nested functions, and locally bound methods are not. Third, workers don't share memory — setting a module-level variable in the main process has no effect on workers.
+
+Always put the entry point under `if __name__ == "__main__":`. On Windows and macOS, workers re-import your script to bootstrap. Without the guard, each worker spawns more workers, recursively, until you run out of memory.
+
+## asyncio: when threads don't scale
+
+Threading handles I/O-bound work. So why does `asyncio` exist?
+
+Each thread costs memory: about 8 MB of stack on Linux. At 10,000 threads that's 80 GB before any work happens. For things like "hold 50,000 idle WebSocket connections," threading falls apart.
+
+`asyncio` runs one OS thread that switches between many tasks cooperatively. A task runs until it hits something that would block — a network read, a sleep — then yields control back to the event loop with `await`. The event loop picks the next ready task. No extra threads, no extra RAM per connection.
+
+<Runnable code={`import asyncio
+import time
+
+async def fetch(task_id: int) -> str:
+    """Async task: yield to the event loop during the wait."""
+    await asyncio.sleep(1)
+    return f"result-{task_id}"
+
+async def main():
+    start = time.monotonic()
+    results = await asyncio.gather(*(fetch(i) for i in range(5)))
+    elapsed = time.monotonic() - start
+    print(f"Async: {len(results)} tasks in {elapsed:.2f}s")
+    print(results)
+
+asyncio.run(main())
+`} />
+
+`async def` turns a function into a coroutine. `await asyncio.sleep(1)` yields control for one second — other tasks run during that second. `asyncio.gather(*coroutines)` schedules all coroutines to run concurrently and waits for all to finish. `asyncio.run(main())` creates the event loop, runs `main` to completion, and closes it.
+
+A few things trip people up consistently.
+
+**Don't call `time.sleep()` from async code.** It's blocking and synchronous — it freezes the entire event loop while every other task stalls. Use `await asyncio.sleep(seconds)` instead.
+
+<Runnable code={`import asyncio
+import time
+
+async def bad_task():
+    time.sleep(1)       # blocks the whole event loop
+    return "done"
+
+async def good_task():
+    await asyncio.sleep(1)  # yields; other tasks run
+    return "done"
+
+async def main():
+    # Bad: two tasks run sequentially because time.sleep blocks
+    start = time.monotonic()
+    await asyncio.gather(bad_task(), bad_task())
+    print(f"bad: {time.monotonic() - start:.2f}s")
+
+    # Good: two tasks run concurrently
+    start = time.monotonic()
+    await asyncio.gather(good_task(), good_task())
+    print(f"good: {time.monotonic() - start:.2f}s")
+
+asyncio.run(main())
+`} />
+
+**Always `await` the call.** `client.get(url)` creates a coroutine object but never runs it. `await client.get(url)` runs it. A coroutine that's never awaited silently produces nothing — no error, no result.
+
+**Use async libraries for I/O.** Calling a sync library like `requests` inside an `async def` blocks the event loop just like `time.sleep`. Use `httpx.AsyncClient`, `aiohttp`, or push the sync call to a thread pool with `await asyncio.to_thread(blocking_fn, arg)`.
+
+## When to use which tool
+
+For fewer than 10 items when latency doesn't matter, sequential is fine. Don't add concurrency you don't need.
+
+For tens to hundreds of I/O-bound tasks, `ThreadPoolExecutor` is the simplest path — it works with any blocking library and needs no async rewrite.
+
+For CPU-bound work, `ProcessPoolExecutor` scaled to `os.cpu_count()` workers. Needs a local Python install; not available in browser environments.
+
+For thousands of concurrent connections, or when you're already inside an async framework like FastAPI or an aiohttp server, `asyncio` is the right fit — but it requires async-compatible libraries throughout the stack.
+
+Mixing is fine. You can run a blocking function inside async code with `await asyncio.to_thread(fn, arg)`. You can swap `ThreadPoolExecutor` for `ProcessPoolExecutor` (or back) by changing one class name.
+
+## Profiling: measure before you optimise
+
+Your script is slow. Where is the time going?
+
+Don't guess. Run a profiler.
+
+`cProfile` shows where a whole program spends its time:
+
+<Runnable code={`import cProfile
+import pstats
+import io
+
+def slow_sum(n: int) -> int:
+    return sum(range(n))
+
+def fast_sum(n: int) -> int:
+    return n * (n - 1) // 2
+
+def workload():
+    for _ in range(1000):
+        slow_sum(10_000)
+    for _ in range(1000):
+        fast_sum(10_000)
+
+profiler = cProfile.Profile()
+profiler.enable()
+workload()
+profiler.disable()
+
+buf = io.StringIO()
+stats = pstats.Stats(profiler, stream=buf).sort_stats("cumulative")
+stats.print_stats(10)
+print(buf.getvalue())
+`} />
+
+`ncalls` is how many times a function ran. `tottime` is time inside it, excluding subcalls. `cumtime` includes subcalls. Sort by `cumulative` to find the high-level functions eating the most time; sort by `tottime` to find the leaf functions doing actual work.
+
+`timeit` measures a small piece of code precisely:
+
+<Runnable code={`import timeit
+
+slow = timeit.timeit("sum(range(10_000))", number=5000)
+fast = timeit.timeit("10_000 * 9_999 // 2", number=5000)
+
+print(f"sum(range) x 5000:   {slow:.4f}s")
+print(f"arithmetic x 5000:   {fast:.4f}s")
+print(f"ratio: {slow/fast:.0f}x faster")
+`} />
+
+Use `timeit` to compare two implementations of a small function. Use `cProfile` for a whole program.
+
+Once you have a profile, optimise the hot spot. The function eating 60% of the time gets attention. The one at 0.2% doesn't. Human intuition about Python performance is usually wrong — dict lookups, attribute access, and string concatenation are faster than people expect; `try/except` in tight loops, regex compilation on every call, and repeated I/O are slower.
+
+If Python itself is the bottleneck and you've proved it: `numpy` for numerical work, `Cython`/`mypyc` to compile Python-ish code to C, or `PyO3` to write hot paths in Rust and call them from Python.
+
+## Common pitfalls
+
+Threading CPU-bound work doesn't speed anything up — the GIL serialises all threads. Use `ProcessPoolExecutor`.
+
+Network calls without a timeout can hang forever. `requests.get(url)` with no `timeout` is a latent bug. In a thread pool a hung worker can starve the pool.
+
+Forgetting `if __name__ == "__main__":` with multiprocessing causes a recursive spawn loop on Windows and macOS. Each worker re-imports your script; without the guard, each worker spawns more workers until you run out of memory.
+
+Calling sync I/O from async code — `requests.get()` inside an `async def` — blocks the entire event loop. Use the async library or `await asyncio.to_thread(...)`.
+
+Forgetting `await` is silent. `coro = some_async_fn()` creates a coroutine object; nothing runs. `result = await some_async_fn()` runs it. Static analysers like `mypy` catch this at type-check time.
+
+Shared mutable state in threads races. Two threads incrementing the same counter can lose updates. Return values from workers and aggregate on the main thread — avoids locks entirely.
+
+Optimising without a profile wastes time. The bottleneck is almost never where you expect.
+
+## Recap
+
+- The GIL serialises Python bytecode in one process. It releases during I/O, so threads help with I/O-bound work; it doesn't release during pure Python computation, so threads don't help with CPU-bound work.
+- I/O-bound → `ThreadPoolExecutor` (simple) or `asyncio` (high scale). CPU-bound → `ProcessPoolExecutor`.
+- `asyncio` runs many tasks cooperatively on one thread; tasks yield at `await` points. Don't call blocking sync code from async functions.
+- Profile before optimising — `cProfile` for programs, `timeit` for snippets. Optimise the actual hot spot.
+- `ProcessPoolExecutor` and real network I/O need a local Python install; they aren't available in browser runtimes.

@@ -1,0 +1,104 @@
+{
+  "questions": [
+    {
+      "question": "For the seeded employee table, COUNT(*) returns 8 but COUNT(branch_id) returns 7. Why?",
+      "options": [
+        {
+          "text": "COUNT(*) counts every row; COUNT(branch_id) counts only rows where branch_id is not NULL, and Ryan's is NULL.",
+          "correct": true,
+          "explanation": "Correct. COUNT(*) tallies rows regardless of content. COUNT(column) tallies non-NULL values in that column, and Ryan's branch_id is NULL, so he's skipped."
+        },
+        {
+          "text": "COUNT(branch_id) counts the number of distinct branches represented.",
+          "correct": false,
+          "explanation": "That would be COUNT(DISTINCT branch_id). Plain COUNT(branch_id) counts non-null values, not distinct values — there are only 3 distinct branches, not 7."
+        },
+        {
+          "text": "One of the two functions has a bug — they should always return the same number.",
+          "correct": false,
+          "explanation": "Both are correct; they answer different questions. COUNT(*) is \"how many rows,\" COUNT(column) is \"how many rows have a value here.\""
+        },
+        {
+          "text": "COUNT(branch_id) failed to count Ryan because his row is missing entirely.",
+          "correct": false,
+          "explanation": "Ryan's row exists and is counted by COUNT(*) — all 8 rows are present. He's excluded from COUNT(branch_id) only because that specific column's value is NULL for him."
+        }
+      ]
+    },
+    {
+      "question": "What's the difference between WHERE and HAVING?",
+      "options": [
+        {
+          "text": "WHERE filters individual rows before grouping and can't use aggregates; HAVING filters whole groups after aggregating and is where a condition like COUNT(*) > 1 must go.",
+          "correct": true,
+          "explanation": "Correct. The clause order is WHERE, then GROUP BY, then HAVING — so only HAVING can test an aggregate's result."
+        },
+        {
+          "text": "They're interchangeable; use whichever reads better in a given query.",
+          "correct": false,
+          "explanation": "They run at different stages of query processing, so swapping them changes results or causes an error — WHERE can't reference an aggregate that doesn't exist yet."
+        },
+        {
+          "text": "HAVING filters rows and WHERE filters groups.",
+          "correct": false,
+          "explanation": "That's backwards. WHERE is the row filter, applied before grouping; HAVING is the group filter, applied after."
+        },
+        {
+          "text": "WHERE can only be used with GROUP BY, and HAVING can be used on its own.",
+          "correct": false,
+          "explanation": "It's the opposite kind of pairing that matters: HAVING only makes sense alongside GROUP BY (or a whole-table aggregate), while WHERE works with or without grouping."
+        }
+      ]
+    },
+    {
+      "question": "Branch 1 has exactly one employee, Jan. What's the security concern with publishing AVG(salary) grouped by branch?",
+      "options": [
+        {
+          "text": "The \"average\" for a one-person group is that person's exact salary — an aggregate can leak an individual's data when the group is tiny (an inference risk).",
+          "correct": true,
+          "explanation": "Correct. Aggregates feel anonymous, but a group of one hands back the individual value directly — this is called inference."
+        },
+        {
+          "text": "None — aggregates combine multiple rows, so they can never reveal an individual value.",
+          "correct": false,
+          "explanation": "False exactly when the group has only one member, which is the case here — the average collapses to a single person's real salary."
+        },
+        {
+          "text": "The risk is only that the query runs slowly on large tables.",
+          "correct": false,
+          "explanation": "The concern here is disclosure of a specific person's data, not query performance."
+        },
+        {
+          "text": "There's no concern as long as the column isn't named salary in the report.",
+          "correct": false,
+          "explanation": "Renaming or aliasing the column doesn't change what value comes back — the exposed number is still Jan's exact salary regardless of its label."
+        }
+      ]
+    },
+    {
+      "question": "You write SELECT branch_id, first_name, AVG(salary) FROM employee GROUP BY branch_id. Why is this wrong?",
+      "options": [
+        {
+          "text": "first_name is neither grouped nor aggregated — a single grouped row can't pick one first name out of the several in its group.",
+          "correct": true,
+          "explanation": "Correct. Every SELECT column must be either in the GROUP BY list or wrapped in an aggregate. Branch 2 has five different first names, so there's no single value for the grouped row to show."
+        },
+        {
+          "text": "You can never combine a plain column with an aggregate in one SELECT.",
+          "correct": false,
+          "explanation": "You can, as long as the plain column is one you're grouping by — branch_id here is fine. The problem is specifically the ungrouped first_name."
+        },
+        {
+          "text": "AVG isn't allowed together with GROUP BY.",
+          "correct": false,
+          "explanation": "That's exactly what GROUP BY is for — computing an aggregate like AVG once per group. The problem is the ungrouped first_name column, not the pairing of AVG with GROUP BY."
+        },
+        {
+          "text": "GROUP BY can only be used with a single column, never alongside other columns in the SELECT list.",
+          "correct": false,
+          "explanation": "GROUP BY works fine alongside other SELECT columns, as long as those columns are either grouped by or aggregated. The rule is about which columns, not how many."
+        }
+      ]
+    }
+  ]
+}

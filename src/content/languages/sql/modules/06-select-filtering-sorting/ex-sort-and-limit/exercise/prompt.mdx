@@ -1,0 +1,9 @@
+The classic "top N" query: sort the rows, then keep only the first few. Here you'll find the company's **three highest-paid employees**.
+
+Return **`first_name`** and **`salary`**, sorted by salary from highest to lowest, and keep only the **top 3** rows. Order matters for this one — the grid must come back Jan, then Michael, then Dwight.
+
+The starter sorts correctly but forgets to cut the list off, so all eight employees come back. Add `LIMIT 3`, press **Run**, then **Submit**.
+
+<Callout type="tip">
+`ORDER BY salary DESC` sorts high-to-low, and `LIMIT 3` keeps the first three rows *after* sorting. The `LIMIT` goes at the very end, after the `ORDER BY`. (On the Oracle-based exam this same idea is written `FETCH FIRST 3 ROWS ONLY` — there's no `LIMIT` in Oracle.)
+</Callout>

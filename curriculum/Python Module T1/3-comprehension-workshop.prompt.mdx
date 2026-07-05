@@ -1,0 +1,55 @@
+# Comprehension Workshop
+
+Python comprehensions come in four shapes depending on the brackets. This exercise drills all four.
+
+## Your task
+
+Implement four functions, each using the appropriate comprehension shape.
+
+### 1. `square_evens(nums)`
+
+Return a **list** of squares of every even number in `nums`.
+
+```python
+square_evens([1, 2, 3, 4, 5])  # [4, 16]
+square_evens([0, 7, 8])         # [0, 64]
+```
+
+Use a list comprehension `[... for x in nums if ...]`.
+
+### 2. `word_lengths(words)`
+
+Return a **dict** mapping each word to its length.
+
+```python
+word_lengths(["cat", "elephant", "ox"])  # {"cat": 3, "elephant": 8, "ox": 2}
+```
+
+Use a dict comprehension `{key: value for ...}`.
+
+### 3. `unique_squares(nums)`
+
+Return a **set** containing the square of every number in `nums`. Because sets discard duplicates, `[-2, 2]` should produce `{4}`, not `{4, 4}`.
+
+```python
+unique_squares([-2, -1, 0, 1, 2])  # {0, 1, 4}
+unique_squares([3, -3, 5])          # {9, 25}
+```
+
+Use a set comprehension `{... for x in nums}`.
+
+### 4. `first_n_squares(n)`
+
+Return a **generator** that yields the first `n` perfect squares starting from `0²`.
+
+```python
+list(first_n_squares(5))  # [0, 1, 4, 9, 16]
+list(first_n_squares(3))  # [0, 1, 4]
+```
+
+Use a generator expression `(... for x in range(n))`. The result should be a generator object, not a list.
+
+## Requirements
+
+- Each function must use the comprehension shape described — not a `for` loop that builds a result variable.
+- `first_n_squares` must return a generator (checked by the tests).

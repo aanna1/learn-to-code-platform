@@ -1,0 +1,12 @@
+{
+  "id": "05-defining-the-schema-ddl",
+  "title": "Defining the Schema (DDL)",
+  "description": "Data Definition Language: the core data types, CREATE TABLE, and the constraints (NOT NULL, UNIQUE, DEFAULT, PRIMARY KEY, FOREIGN KEY ... REFERENCES, CHECK) that stop bad data at the door. Plus ALTER TABLE and DROP TABLE, and where SQLite, MySQL, and Oracle disagree on syntax the exam cares about.",
+  "order": 5,
+  "lessons": [
+    { "id": "lecture", "title": "Defining the Schema (DDL)", "type": "lecture", "order": 1 },
+    { "id": "ex-create-the-student-table", "title": "Create the Student Table", "type": "exercise", "order": 2 },
+    { "id": "ex-add-the-foreign-key", "title": "Add the Foreign Key", "type": "exercise", "order": 3 },
+    { "id": "ex-alter-the-table", "title": "Alter the Table", "type": "exercise", "order": 4 }
+  ]
+}

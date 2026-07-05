@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "WHERE filters individual rows BEFORE grouping, so it can't see an aggregate like COUNT(*) -- to filter on the result of an aggregate, you need HAVING, which runs AFTER the groups are formed.",
+    "Add a HAVING clause after GROUP BY branch_id that keeps only groups where COUNT(*) is greater than 1.",
+    "SELECT branch_id, COUNT(*) AS headcount FROM employee GROUP BY branch_id HAVING COUNT(*) > 1;"
+  ]
+}

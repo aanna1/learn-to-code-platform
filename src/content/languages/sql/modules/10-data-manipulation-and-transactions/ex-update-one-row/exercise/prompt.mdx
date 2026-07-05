@@ -1,0 +1,5 @@
+Ryan (employee 107) has no branch — his `branch_id` is `NULL`. He's just been assigned to Stamford, which is `branch_id` 3. The starter tries to make that change but leaves off the `WHERE`, so it reassigns *everyone* to branch 3. Add a `WHERE` so only Ryan changes, then **Submit**.
+
+<Callout type="warning">
+The `WHERE` in an `UPDATE` is optional, and leaving it off applies the change to **every row in the table**. Before running a real `UPDATE`, it's worth writing the `WHERE` as a `SELECT` first to confirm it matches exactly the rows you intend.
+</Callout>

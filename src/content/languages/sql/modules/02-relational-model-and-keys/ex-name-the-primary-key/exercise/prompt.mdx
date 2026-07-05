@@ -1,0 +1,13 @@
+The lecture's big idea: every table needs a **primary key** — one column guaranteed unique for every row — so no two entries can ever be confused. This `students` table has one, `student_id`, and it earns its keep here. Look at rows 1 and 4: two different students both named Jack, both studying Biology. On name and major alone, they're indistinguishable.
+
+The starter query returns only `name` and `major`, so the two Jacks come back as two identical rows. The one column that can tell them apart is the primary key.
+
+## Your task
+
+Change the query so the results grid also shows each student's **primary key**. Return `student_id`, `name`, and `major` — in that order — so every row is uniquely identifiable.
+
+Press **Run** to see the grid, then **Submit** to check it.
+
+<Callout type="tip">
+You already know how to pick specific columns from Module 01: list them by name, separated by commas. Put `student_id` first: `SELECT student_id, name, major FROM students;`.
+</Callout>

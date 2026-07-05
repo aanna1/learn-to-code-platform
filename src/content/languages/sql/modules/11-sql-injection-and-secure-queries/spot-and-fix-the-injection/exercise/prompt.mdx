@@ -1,0 +1,13 @@
+You've now *run* two injections. This exercise is the code review: no editor, just the reasoning a security engineer does when they read a query and decide whether it's safe.
+
+The vulnerable login you attacked builds its SQL like this:
+
+```
+"SELECT id, username, role FROM users WHERE username = '" + input + "' AND password = '" + input + "'"
+```
+
+Work through the four questions below: name the root cause, pick the input that bypasses the login, explain why the trailing `--` is essential, and choose the one change that actually removes the vulnerability. Use the **draft** box to substitute the payload by hand first (it isn't graded); then complete the fields and press **Submit answer**.
+
+<Callout type="note">
+This is a **Track-2 reasoning exercise** — there's no SQL to run, because the bug lives in the application code that glues the string together, and the browser has no application tier. Your answers are graded on the reasoning, exactly as a real code review is.
+</Callout>

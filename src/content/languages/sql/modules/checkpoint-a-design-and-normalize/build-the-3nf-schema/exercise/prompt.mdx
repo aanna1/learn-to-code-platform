@@ -1,0 +1,16 @@
+Now build the design you drew in Part 1. Same registrar scenario — the wide `enrollments` spreadsheet with student, course, and department facts all crammed together — but this time you turn the ERD into real tables with `CREATE TABLE`, using everything from Module 05.
+
+Your 3NF schema is four tables:
+
+- **student** — `student_id` (PK), `student_name` (required), `student_email`
+- **department** — `dept_id` (PK), `dept_name` (required), `dept_building`
+- **course** — `course_id` (PK), `course_title` (required), `dept_id` — with a **foreign key** to `department`
+- **enrollment** — the associative entity: `student_id`, `course_id`, `grade`, a **composite primary key** `(student_id, course_id)`, and **foreign keys** to both `student` and `course`
+
+The starter builds `student` and `department` for you and leaves `course` and `enrollment` unfinished — `course` is missing its foreign key, and `enrollment` has the wrong key and no foreign keys. Fix those two.
+
+Press **Run** to create the tables, then **Submit**. The checks read your schema's structure — the tables you created, `enrollment`'s composite key, and the foreign keys — not any data.
+
+<Callout type="tip">
+A composite primary key is declared as its own table constraint, not on a column: `PRIMARY KEY (student_id, course_id)`. Foreign keys are table constraints too: `FOREIGN KEY (course_id) REFERENCES course(course_id)`.
+</Callout>

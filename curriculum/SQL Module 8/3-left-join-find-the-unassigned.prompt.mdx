@@ -1,0 +1,7 @@
+HR wants a full roster: every employee's first name next to their branch name — *including* anyone who hasn't been assigned a branch yet.
+
+The starter uses a plain join, which quietly drops any employee with no matching branch. Fix it so **every** employee shows up, ordered by `employee_id`, with `NULL` in `branch_name` for anyone unassigned.
+
+<Callout type="tip">
+This is the outer-join case: keep every row from one side even when it has no partner. Only one keyword needs to change from the starter.
+</Callout>

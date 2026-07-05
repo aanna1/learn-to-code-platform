@@ -1,0 +1,23 @@
+Back in Module 08 you learned that `UNION` stacks one query's rows onto another's — with a warning that it's "the engine behind an entire family of attacks." Here's that family.
+
+The store's product search builds its query the dangerous way:
+
+```
+"SELECT name, price FROM product WHERE name LIKE '%" + search + "%'"
+```
+
+The attacker types this into the search box:
+
+```
+none%' UNION SELECT username, password FROM users --
+```
+
+Rewrite the starter into the query that input assembles into, so the **users' credentials** come back rendered into the product grid. Press **Run** to see the leak, then **Submit**.
+
+<Callout type="note">
+The product half searches for `none` and matches nothing, so every row you get back is a stolen credential — usernames and passwords sitting in columns still labelled `name` and `price`. That mislabelling is the whole trick: the page shows them as if they were products.
+</Callout>
+
+<Callout type="tip">
+`UNION` needs both halves to select the **same number of columns** (two: `username`, `password`) with compatible types — exactly the rules from Module 08. The output keeps the first query's column names.
+</Callout>

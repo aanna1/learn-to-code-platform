@@ -1,0 +1,10 @@
+{
+  "id": "01-databases-and-security",
+  "title": "Databases, RDBMS & Why Attackers Care",
+  "description": "What a database and a DBMS really are, what makes one relational, what SQL is — and why the database is the part of a system attackers go after first.",
+  "lessons": [
+    { "id": "lecture", "title": "Databases, RDBMS & Why Attackers Care", "type": "lecture", "order": 1 },
+    { "id": "ex-see-the-table", "title": "Read the Whole Table", "type": "exercise", "order": 2 },
+    { "id": "ex-pick-columns", "title": "Ask for Just the Columns You Want", "type": "exercise", "order": 3 }
+  ]
+}

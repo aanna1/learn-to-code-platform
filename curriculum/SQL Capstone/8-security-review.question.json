@@ -1,0 +1,54 @@
+{
+  "draft": "Put on the attacker's hat from Modules 11–12. Read the vulnerable search query, substitute the payload by hand, then decide what actually fixes it and what merely caps the damage.",
+  "fields": [
+    {
+      "id": "the-hole",
+      "type": "single-select",
+      "label": "Inkwell's title search is built as \"SELECT title, price FROM book WHERE title LIKE '%\" + search + \"%'\". Why is it injectable?",
+      "options": [
+        "The user's input is concatenated into the query string, so an attacker can close the quote and inject their own SQL — the input becomes code",
+        "LIKE is an inherently unsafe operator that should never be used",
+        "SELECT should never be run against a table that also holds prices",
+        "The % wildcards let the attacker read arbitrary files from disk"
+      ]
+    },
+    {
+      "id": "the-fix",
+      "type": "single-select",
+      "label": "What is the correct fix for that search query?",
+      "options": [
+        "Parameterize it: WHERE title LIKE ? and pass '%' + search + '%' as a bound value, so the input can never be parsed as code",
+        "Strip the words UNION and SELECT out of the search text before running it",
+        "Escape every quote in the search text and keep concatenating",
+        "Reject any search longer than 20 characters"
+      ]
+    },
+    {
+      "id": "least-privilege",
+      "type": "single-select",
+      "label": "Even after parameterizing, why grant the website's database account only SELECT on the catalog and SELECT, INSERT on orders — and nothing on staff_user?",
+      "options": [
+        "Least privilege — if an injection or stolen credential ever hits that account, the attacker inherits only those few rights and can't read staff logins, delete orders, or drop tables",
+        "It makes the storefront's queries run measurably faster",
+        "It prevents SQL injection from ever happening on that account",
+        "It is required or the CREATE VIEW in Stage 6 will not run"
+      ]
+    },
+    {
+      "id": "layers",
+      "type": "matching",
+      "label": "Match each part of the security pass to the role it plays.",
+      "help": "Only one of these removes the vulnerability; the others limit the damage or hide the data.",
+      "left": [
+        "Parameterized query",
+        "Least-privilege GRANTs",
+        "catalog_public view"
+      ],
+      "options": [
+        "Removes the injection vulnerability itself",
+        "Caps the blast radius if an account is compromised",
+        "Exposes only safe columns and hides customer/staff tables"
+      ]
+    }
+  ]
+}

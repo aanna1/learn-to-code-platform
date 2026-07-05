@@ -1,0 +1,11 @@
+{
+  "id": "07-functions-and-aggregates",
+  "title": "Functions & Aggregates",
+  "description": "Aggregate functions (COUNT, SUM, AVG, MIN, MAX) that collapse many rows into one summary value, scalar functions for strings/numbers/dates, GROUP BY to compute an aggregate per group, and HAVING to filter groups — plus how a tiny group can turn an \"anonymous\" aggregate into an inference attack.",
+  "lessons": [
+    { "id": "lecture", "title": "Functions & Aggregates", "type": "lecture", "order": 1 },
+    { "id": "ex-payroll-snapshot", "title": "Payroll Snapshot", "type": "exercise", "order": 2 },
+    { "id": "ex-average-salary-per-branch", "title": "Average Salary Per Branch", "type": "exercise", "order": 3 },
+    { "id": "ex-filter-the-groups", "title": "Filter the Groups", "type": "exercise", "order": 4 }
+  ]
+}

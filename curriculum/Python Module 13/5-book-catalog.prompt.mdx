@@ -1,0 +1,49 @@
+Build two cooperating classes — `Book` and `Library` — that form a small catalog you can search and serialize.
+
+**`Book`**
+
+Takes `title`, `author`, and `year`. Needs:
+
+- `__repr__` — returns something like `Book('Dune', 'Frank Herbert', 1965)`
+- `__eq__` — two books are equal if `title`, `author`, and `year` all match
+- `to_dict()` — returns `{"title": ..., "author": ..., "year": ...}`
+- `from_dict(cls, d)` — a `@classmethod` that builds a `Book` from a dict
+
+**`Library`**
+
+Takes no arguments — it starts with an empty collection. Needs:
+
+- `add(book)` — adds a `Book` to the catalog
+- `find_by_author(author)` — returns a list of all books by that author (exact match, case-sensitive)
+- `__len__` — `len(library)` returns the number of books
+- `to_dict()` — returns `{"books": [b.to_dict() for b in ...]}` 
+- `from_dict(cls, d)` — a `@classmethod` that rebuilds a `Library` from that dict format
+
+<Runnable code={`import json
+
+class Book:
+    def __init__(self, title, author, year):
+        self.title = title
+        self.author = author
+        self.year = year
+
+    # Add __repr__, __eq__, to_dict, from_dict here
+
+class Library:
+    def __init__(self):
+        self.books = []
+
+    # Add add, find_by_author, __len__, to_dict, from_dict here
+
+lib = Library()
+lib.add(Book("Dune", "Frank Herbert", 1965))
+lib.add(Book("Dune Messiah", "Frank Herbert", 1969))
+lib.add(Book("Foundation", "Isaac Asimov", 1951))
+
+print(len(lib))                          # 3
+print(lib.find_by_author("Frank Herbert"))
+
+# Round-trip through JSON
+data = json.dumps(lib.to_dict())
+lib2 = Library.from_dict(json.loads(data))
+print(len(lib2))                         # 3`} />

@@ -1,0 +1,11 @@
+Now draw a design, the way the exam asks you to. The scenario is the one from the lecture: employees, projects, and the branches employees work at.
+
+> Each **employee** works at exactly one **branch**. Employees are assigned to **projects**: an employee can work on many projects, and a project can have many employees.
+
+There's no code editor here — you'll answer by building the model directly: name the cardinality, decide which relationships are identifying, and fill in a small structured ERD that resolves the many-to-many. Use the **draft** box to sketch it first (it isn't graded); then complete the fields and press **Submit answer**.
+
+For the ERD, model exactly three entities — `employee` (PK `employee_id`), `project` (PK `project_id`), and the associative entity `assignment` with the composite key `(employee_id, project_id)` — and connect each parent to `assignment` with a 1:N identifying relationship.
+
+<Callout type="note">
+This is a **Track-2 modeling exercise**. Your ERD is graded on its *structure* — the entities, their keys, and the relationships (endpoints, cardinality, and identifying-ness) — never on how it's drawn. Endpoints are compared both ways, so `employee 1:N assignment` and `assignment N:1 employee` count the same.
+</Callout>

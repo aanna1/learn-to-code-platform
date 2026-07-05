@@ -1,0 +1,35 @@
+Build a `Rectangle` class, then a `Square` subclass that inherits from it.
+
+**`Rectangle`** takes `width` and `height`. It needs:
+- `area()` — returns `width * height`
+- `perimeter()` — returns `2 * (width + height)`
+- `is_square()` — returns `True` if `width == height`, `False` otherwise
+- `__str__` — returns something like `Rectangle(4 x 6)`
+
+**`Square`** is a rectangle where both sides are equal. Its `__init__` takes only `side`. Use `super().__init__(side, side)` to let `Rectangle` set up `width` and `height` — don't duplicate that logic. `Square` only needs to override `__str__` to return something like `Square(5)`.
+
+Because `Square` inherits everything else, `area()`, `perimeter()`, and `is_square()` should all work without you re-implementing them.
+
+<Runnable code={`class Rectangle:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+
+    # Add area, perimeter, is_square, and __str__ here
+
+class Square(Rectangle):
+    def __init__(self, side):
+        super().__init__(side, side)
+
+    # Override __str__ here
+
+r = Rectangle(4, 6)
+print(r)              # Rectangle(4 x 6)
+print(r.area())       # 24
+print(r.perimeter())  # 20
+print(r.is_square())  # False
+
+s = Square(5)
+print(s)              # Square(5)
+print(s.area())       # 25  (inherited)
+print(s.is_square())  # True (inherited)`} />

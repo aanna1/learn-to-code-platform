@@ -1,0 +1,19 @@
+The last exercise showed the disease: "Scranton" copied onto every order line. This one shows the cure. After normalization, the city lives in exactly one place — the `branch` table — and the `orders` table just stores a `branch_id` that points at it. No order ever repeats a city again.
+
+Both tables are set up for you. The starter query lists the branch ids but leaves off the column that makes the point: the `city`.
+
+## Your task
+
+Change the query so the results grid shows `branch_id` and `city` — two columns, in that order — from the `branch` table.
+
+Then compare it to the previous exercise. There, "Scranton" appeared on four rows. Here it appears on exactly **one**, even though two orders (1001 and 1002) were placed at that branch — they just store `branch_id` 2 and point here. Rename Scranton in this single row and every order that references it is instantly correct, because there was never a second copy to update. That is what "the key, the whole key, and nothing but the key" buys you: one fact, one place.
+
+Press **Run** to see the grid, then **Submit** to check it.
+
+<Callout type="note">
+This is the integrity win from the lecture made concrete — and an access-control win too: because the city (and later, anything sensitive about a branch) lives in one table, you can lock that table down on its own instead of chasing copies across every order row.
+</Callout>
+
+<Callout type="tip">
+List the two columns by name, separated by a comma: `SELECT branch_id, city FROM branch;`.
+</Callout>

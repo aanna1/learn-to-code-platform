@@ -1,0 +1,25 @@
+{
+  "order-book-card": "N:M",
+  "resolve-nm": "Add an associative entity (order_line) with the composite key (order_id, book_id) plus the line's own quantity, resolving the N:M into two 1:N relationships",
+  "erd": {
+    "entities": [
+      { "name": "author", "attributes": [{ "name": "author_id", "pk": true }] },
+      { "name": "customer", "attributes": [{ "name": "customer_id", "pk": true }] },
+      { "name": "book", "attributes": [{ "name": "book_id", "pk": true }] },
+      { "name": "book_order", "attributes": [{ "name": "order_id", "pk": true }] },
+      {
+        "name": "order_line",
+        "attributes": [
+          { "name": "order_id", "pk": true },
+          { "name": "book_id", "pk": true }
+        ]
+      }
+    ],
+    "relationships": [
+      { "from": "author", "to": "book", "cardinality": "1:N", "identifying": false },
+      { "from": "customer", "to": "book_order", "cardinality": "1:N", "identifying": false },
+      { "from": "book_order", "to": "order_line", "cardinality": "1:N", "identifying": true },
+      { "from": "book", "to": "order_line", "cardinality": "1:N", "identifying": true }
+    ]
+  }
+}

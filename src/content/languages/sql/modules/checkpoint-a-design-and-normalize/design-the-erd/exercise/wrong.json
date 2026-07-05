@@ -1,0 +1,17 @@
+{
+  "fds": [
+    "student_id -> student_name",
+    "course_id -> course_title"
+  ],
+  "erd": {
+    "entities": [
+      { "name": "student", "attributes": [{ "name": "student_id", "pk": true }] },
+      { "name": "course", "attributes": [{ "name": "course_id", "pk": true }] },
+      { "name": "department", "attributes": [{ "name": "dept_id", "pk": true }] }
+    ],
+    "relationships": [
+      { "from": "student", "to": "course", "cardinality": "N:M", "identifying": false },
+      { "from": "department", "to": "course", "cardinality": "1:N", "identifying": false }
+    ]
+  }
+}

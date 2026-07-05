@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Cardinality: the tell is 'many … many', once on each side — neither employee nor project is the 'one' side.",
+    "For identifying vs. non-identifying, apply the one-question test: is the parent's key part of the child's primary key? employee_id IS part of assignment's PK; branch_id is NOT part of employee's PK.",
+    "The many-to-many can't be a single relationship. Invent the associative entity 'assignment' with the composite key (employee_id, project_id), and connect each parent to it.",
+    "Both employee→assignment and project→assignment are 1:N, and both are identifying, because each parent's key is part of assignment's composite primary key."
+  ]
+}

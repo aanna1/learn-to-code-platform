@@ -1,0 +1,9 @@
+{
+  "hints": [
+    "For timed: capture the start time before 'yield' with 'start = time.monotonic()'. Put the print statement after 'yield', inside a 'finally' block so it runs even if the with body raises.",
+    "The @contextmanager pattern looks like: record start, then 'try: yield', then 'finally: compute elapsed and print'. The try/finally ensures cleanup happens on exceptions too.",
+    "For managed_list.__enter__: just 'return self'. This is what makes 'with managed_list() as ml' give you the instance in 'ml'.",
+    "For managed_list.__exit__: call 'self.items.sort()' and then 'return None'. Returning None (or False) lets any exception from the with body propagate normally.",
+    "managed_list.__exit__ always runs — you don't need to check exc_type. Whether the with body succeeded or raised, __exit__ is called. That's the whole point of a context manager."
+  ]
+}

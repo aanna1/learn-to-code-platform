@@ -1,0 +1,7 @@
+[
+  "For the two 'raises' tests: wrap the TextProcessor(...) call in try/except ValueError. Add `assert False, 'should have raised'` on the line right after the constructor — this makes the test fail if no exception is thrown.",
+  "For test_word_count: use make_processor('hello world foo') and assert word_count() == 3. Three words, three items after split().",
+  "For test_uppercase: use make_processor('hello world') and assert uppercase() == 'HELLO WORLD'. Check the exact string, not just that it changed.",
+  "For test_truncate: use make_processor('hello world') and assert truncate(5) == 'hello'. Slicing 'hello world' to 5 characters gives exactly 'hello'.",
+  "For test_truncate_invalid_max_len: call make_processor('hello').truncate(0) inside try/except ValueError. max_len=0 is the boundary case the implementation guards against."
+]

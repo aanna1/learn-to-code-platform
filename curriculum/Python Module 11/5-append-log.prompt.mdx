@@ -1,0 +1,33 @@
+# Append Logger
+
+Append mode is what separates a log file from a scratch file. Each call adds to the end; nothing already there gets touched. Combined with `pathlib`, it's the pattern behind event logs, audit trails, and journal files.
+
+## Your task
+
+Write two functions that maintain a simple log file:
+
+**`append_log(message, filepath)`** — appends one entry to the log file at `filepath`. Each entry is written on its own line in the format `[LOG] message`. Creates the file if it doesn't exist (append mode does this automatically).
+
+**`read_log(filepath)`** — reads the log file and returns all entries as a list of strings, with whitespace stripped. Returns `[]` if the file does not exist.
+
+## Requirements
+
+- `append_log` must use `"a"` (append) mode, not `"w"`.
+- Each line written must end with `\n` so entries don't run together.
+- Each entry must be formatted as `[LOG] message` (the prefix is literal, with the brackets).
+- `read_log` must return `[]` if the file does not exist.
+- `read_log` must strip whitespace from each returned line.
+
+## Example
+
+```python
+append_log("server started", "app.log")
+append_log("user logged in", "app.log")
+append_log("request handled", "app.log")
+
+print(read_log("app.log"))
+# ['[LOG] server started', '[LOG] user logged in', '[LOG] request handled']
+
+print(read_log("missing.log"))
+# []
+```

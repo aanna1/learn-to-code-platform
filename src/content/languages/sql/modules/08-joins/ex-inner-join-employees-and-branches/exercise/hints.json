@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "You need rows from both employee and branch at once — that's what JOIN is for. Add a JOIN clause after FROM employee e.",
+    "The ON condition is the matching rule: pair an employee row with a branch row where their branch_id values are equal. Write it as ON e.branch_id = b.branch_id.",
+    "Full shape: SELECT e.first_name, e.last_name, b.branch_name FROM employee e JOIN branch b ON e.branch_id = b.branch_id ORDER BY e.employee_id; Ryan won't appear — his branch_id is NULL, so he matches nothing, and INNER JOIN drops unmatched rows."
+  ]
+}

@@ -1,0 +1,7 @@
+Parameterized queries are the primary fix — but a serious system layers more defenses behind that primary one, so an attacker who gets past something still hits a wall. This exercise checks that you can tell the layers apart: which control *removes* the vulnerability, and which ones only *reduce the damage* when something slips.
+
+Answer the four questions below: why an identifier can't be parameterized (and what to do instead), why parameterizing beats escaping, why a blocklist is weak, and how to match each defense to the job it does. Use the **draft** box to lay out the layers first (it isn't graded); then complete the fields and press **Submit answer**.
+
+<Callout type="warning">
+Keep the order straight: **parameterize first**, then validate input, then restrict privileges with least privilege, then fail safely. The extra layers reduce the blast radius; only parameterization removes the hole.
+</Callout>

@@ -1,0 +1,9 @@
+{
+  "hints": [
+    "Each format spec goes after a colon inside the braces: f\"{value:spec}\". For example, f\"{price:.2f}\" formats price to 2 decimal places.",
+    "The dollar sign is a literal character outside the braces: f\"${price:.2f}\". Only what's inside the braces is affected by the format spec.",
+    "For percentages, f\"{ratio:.1%}\" multiplies by 100 and appends the % symbol automatically. You don't need to multiply ratio by 100 yourself.",
+    "For hex with the '0x' prefix, use f\"{status_code:#x}\". The '#' flag tells Python to include the '0x' prefix. Without it, f\"{status_code:x}\" gives only the digits.",
+    "For binary padded to 8 digits, use f\"{flags:08b}\". The '0' means pad with zeros, '8' sets the minimum width, and 'b' selects binary output."
+  ]
+}

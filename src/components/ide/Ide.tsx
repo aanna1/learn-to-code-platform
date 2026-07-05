@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { CodeEditor } from "@/components/ide/CodeEditor";
 import { Terminal, type TerminalHandle } from "@/components/ide/Terminal";
+import { ResultsGrid } from "@/components/ide/ResultsGrid";
 import { ResizableSplit } from "@/components/ide/ResizableSplit";
 import { ErrorCallout } from "@/components/ide/ErrorCallout";
 import { TestResults } from "@/components/ide/TestResults";
@@ -14,7 +15,13 @@ import { Modal } from "@/components/ui/Modal";
 import { getLanguage } from "@/lib/languages/registry";
 import { useTheme } from "@/lib/theme";
 import { clearCode, loadCode, saveCode } from "@/lib/progress";
-import type { Diagnostic, RuntimeError, SubmitResult } from "@/lib/languages/types";
+import type {
+  Diagnostic,
+  Language,
+  QueryResultSet,
+  RuntimeError,
+  SubmitResult,
+} from "@/lib/languages/types";
 
 export interface IdeExercise {
   starter: string;
@@ -30,16 +37,27 @@ interface IdeProps {
   autosave?: { moduleId: string; lessonId: string };
   /** Called once when all hidden tests pass. */
   onAllTestsPassed?: () => void;
+  /**
+   * Overrides the registry lookup. Used by the temporary `/dev/ide-c` harness to mount a
+   * language that isn't registered yet (the way Python's IDE was proven on `/dev/ide`
+   * before going live). Production lessons omit this and resolve via the registry.
+   */
+  language?: Language;
 }
 
 type RuntimeStatus = "idle" | "loading" | "ready";
 
-export function Ide({ languageId, exercise, autosave, onAllTestsPassed }: IdeProps) {
-  const language = getLanguage(languageId);
+export function Ide({ languageId, exercise, autosave, onAllTestsPassed, language: languageOverride }: IdeProps) {
+  const language = languageOverride ?? getLanguage(languageId);
   const { theme } = useTheme();
+
+  // Which output surface this language uses. Branch on config.outputMode — never on
+  // the language id — so terminal languages (Python/C) are completely unaffected.
+  const isGrid = (language?.config.outputMode ?? "terminal") === "grid";
 
   const [code, setCode] = useState(exercise.starter);
   const [diagnostics, setDiagnostics] = useState<Diagnostic[]>([]);
+  const [resultSets, setResultSets] = useState<QueryResultSet[] | null>(null);
   const [status, setStatus] = useState<RuntimeStatus>("idle");
   const [loadMessage, setLoadMessage] = useState("");
   const [running, setRunning] = useState(false);
@@ -105,9 +123,10 @@ export function Ide({ languageId, exercise, autosave, onAllTestsPassed }: IdePro
     setRunning(true);
     setRuntimeError(null);
     setTestResult(null);
+    if (isGrid) setResultSets(null);
     try {
       await ensureReady();
-      terminalRef.current?.write("\x1b[2m— Running —\x1b[0m\n");
+      if (!isGrid) terminalRef.current?.write("\x1b[2m— Running —\x1b[0m\n");
       const controller = new AbortController();
       abortRef.current = controller;
       const result = await language.runtime.run({
@@ -118,15 +137,18 @@ export function Ide({ languageId, exercise, autosave, onAllTestsPassed }: IdePro
           terminalRef.current?.readLine() ?? Promise.reject(new Error("Terminal not ready")),
         signal: controller.signal,
       });
+      if (isGrid) setResultSets(result.resultSets ?? []);
       if (!result.ok && result.error) setRuntimeError(result.error);
     } catch (error) {
-      terminalRef.current?.writeError(`\n${String((error as Error)?.message ?? error)}\n`);
+      const message = String((error as Error)?.message ?? error);
+      if (isGrid) setRuntimeError({ type: "", message, traceback: message });
+      else terminalRef.current?.writeError(`\n${message}\n`);
     } finally {
       abortRef.current = null;
       busyRef.current = false;
       setRunning(false);
     }
-  }, [code, language, ensureReady]);
+  }, [code, language, ensureReady, isGrid]);
 
   const handleSubmit = useCallback(async () => {
     if (!language || busyRef.current) return;
@@ -136,7 +158,7 @@ export function Ide({ languageId, exercise, autosave, onAllTestsPassed }: IdePro
     setTestResult(null);
     try {
       await ensureReady();
-      terminalRef.current?.write("\x1b[2m— Checking your work —\x1b[0m\n");
+      if (!isGrid) terminalRef.current?.write("\x1b[2m— Checking your work —\x1b[0m\n");
       const controller = new AbortController();
       abortRef.current = controller;
       const result = await language.runtime.runTests({
@@ -153,13 +175,15 @@ export function Ide({ languageId, exercise, autosave, onAllTestsPassed }: IdePro
         onAllTestsPassed?.();
       }
     } catch (error) {
-      terminalRef.current?.writeError(`\n${String((error as Error)?.message ?? error)}\n`);
+      const message = String((error as Error)?.message ?? error);
+      if (isGrid) setRuntimeError({ type: "", message, traceback: message });
+      else terminalRef.current?.writeError(`\n${message}\n`);
     } finally {
       abortRef.current = null;
       busyRef.current = false;
       setSubmitting(false);
     }
-  }, [code, exercise.tests, language, ensureReady, onAllTestsPassed]);
+  }, [code, exercise.tests, language, ensureReady, onAllTestsPassed, isGrid]);
 
   const handleStop = useCallback(() => {
     abortRef.current?.abort();
@@ -172,6 +196,7 @@ export function Ide({ languageId, exercise, autosave, onAllTestsPassed }: IdePro
     setDiagnostics([]);
     setRuntimeError(null);
     setTestResult(null);
+    setResultSets(null);
     terminalRef.current?.clear();
     setShowResetConfirm(false);
   }, [exercise.starter, autosave, languageId]);
@@ -270,7 +295,13 @@ export function Ide({ languageId, exercise, autosave, onAllTestsPassed }: IdePro
               ariaLabel={`${language.config.displayName} code editor`}
             />
           }
-          second={<Terminal ref={terminalRef} theme={theme} />}
+          second={
+            isGrid ? (
+              <ResultsGrid results={resultSets} running={running} />
+            ) : (
+              <Terminal ref={terminalRef} theme={theme} />
+            )
+          }
         />
       </div>
 

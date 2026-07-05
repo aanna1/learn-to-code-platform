@@ -1,0 +1,104 @@
+{
+  "questions": [
+    {
+      "question": "In ER modeling, what's the difference between an entity and an attribute?",
+      "options": [
+        {
+          "text": "An entity is a kind of thing you store data about (it becomes a table); an attribute is a single fact about that thing (it becomes a column).",
+          "correct": true,
+          "explanation": "Correct. The entity is the type — the box that becomes a table — and each attribute is one fact every instance has, which becomes a column."
+        },
+        {
+          "text": "An entity is a single row and an attribute is a single column.",
+          "correct": false,
+          "explanation": "An entity is the whole type, not one row. A specific row is called an instance (Michael Scott), while the entity (employee) is the shape every instance shares."
+        },
+        {
+          "text": "An entity is a number and an attribute is text.",
+          "correct": false,
+          "explanation": "The data type has nothing to do with the distinction. An attribute can be a number, text, or a date; what makes it an attribute is that it's a single fact about an entity."
+        },
+        {
+          "text": "An entity is a foreign key and an attribute is a primary key.",
+          "correct": false,
+          "explanation": "Keys are specific columns with special roles, not the entity/attribute distinction. An entity is a whole thing (a table); an attribute is any single fact (column) about it, key or not."
+        }
+      ]
+    },
+    {
+      "question": "An employee can work on many projects, and a project can have many employees. How do you store this many-to-many relationship?",
+      "options": [
+        {
+          "text": "Create an associative (junction) entity whose rows each record one employee–project pairing.",
+          "correct": true,
+          "explanation": "Correct. A many-to-many resolves into an associative entity — each row is one pairing, and it becomes the natural home for facts about the pairing itself, like the hours worked."
+        },
+        {
+          "text": "Put a list of project IDs in a single column on the employee table.",
+          "correct": false,
+          "explanation": "A column holds one value, not a list — which is exactly why the associative entity is needed. You can't cram many project IDs into one cell and still query it reliably."
+        },
+        {
+          "text": "Add a single foreign key to whichever table is more important.",
+          "correct": false,
+          "explanation": "A single foreign key can only capture one-to-many. It can't represent 'many' on both sides — that's the whole reason the associative entity exists."
+        },
+        {
+          "text": "Nothing special is needed — a plain relationship line handles it automatically.",
+          "correct": false,
+          "explanation": "A many-to-many line can't be built directly in a real database. You must resolve it into an associative entity before there's any table to store the pairings in."
+        }
+      ]
+    },
+    {
+      "question": "The `assignment` table's primary key is `(employee_id, project_id)`, both borrowed from its parents. Is its relationship to `employee` identifying or non-identifying?",
+      "options": [
+        {
+          "text": "Identifying — the parent's key is part of the child's own primary key, so the assignment can't be identified (or exist) without the parent.",
+          "correct": true,
+          "explanation": "Correct. Apply the one-question test: is the parent's key part of the child's primary key? Here yes, so it's identifying — and assignment is a weak entity that borrows its identity."
+        },
+        {
+          "text": "Non-identifying — the foreign key is just an ordinary attribute here.",
+          "correct": false,
+          "explanation": "It would be non-identifying only if employee_id were an ordinary column. But it's part of assignment's primary key, which makes the relationship identifying."
+        },
+        {
+          "text": "It depends on how many rows are currently in the table.",
+          "correct": false,
+          "explanation": "Identifying vs. non-identifying is fixed by the design — is the parent's key in the child's PK? — not by the data that happens to be in the table."
+        },
+        {
+          "text": "Neither — associative entities have no relationships, only columns.",
+          "correct": false,
+          "explanation": "An associative entity has two relationships, one to each parent, and is almost always identifying on both sides. That's precisely what makes it the resolution of a many-to-many."
+        }
+      ]
+    },
+    {
+      "question": "You split employee credentials into a separate `user_account` table with a one-to-one relationship to `employee`. What's the security benefit?",
+      "options": [
+        {
+          "text": "You can grant access to `employee` without exposing the credentials, keeping the most sensitive attributes in a separately lockable entity.",
+          "correct": true,
+          "explanation": "Correct. A one-to-one split isolates crown-jewel attributes so you can lock that one table down harder — a confidentiality win, straight out of the CIA triad."
+        },
+        {
+          "text": "It makes every query against the employee table run faster.",
+          "correct": false,
+          "explanation": "Performance isn't the point here — and a split can even add a join. The reason to split is isolating sensitive data for access control, not speed."
+        },
+        {
+          "text": "It prevents SQL injection entirely.",
+          "correct": false,
+          "explanation": "Table structure alone doesn't stop injection — that's about how queries are built from input (Module 11). Splitting the table only limits what a leak exposes."
+        },
+        {
+          "text": "It removes the need for a primary key on either table.",
+          "correct": false,
+          "explanation": "Both tables still need primary keys — in fact the one-to-one relationship is implemented by keys. Splitting changes what's exposed, not whether keys are required."
+        }
+      ]
+    }
+  ]
+}

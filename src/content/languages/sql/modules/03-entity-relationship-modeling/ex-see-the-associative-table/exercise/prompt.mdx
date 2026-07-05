@@ -1,0 +1,19 @@
+In the lecture, an employee could work on many projects and a project could have many employees — a **many-to-many** relationship. You saw that it can't be stored with a single foreign key, so it's resolved into an **associative entity**: a table that sits between the two, where each row records exactly one pairing.
+
+Here that table is `assignment`. The schema above sets up three tables — `employee`, `project`, and the `assignment` table that links them. The starter query shows you the projects, but a project row has nowhere to list everyone working on it. The pairings live in the associative entity, and that's where you need to look.
+
+## Your task
+
+Change the query so the results grid shows the whole `assignment` table — every employee-project pairing, with all its columns.
+
+Then read it: `employee_id` 101 (Michael) shows up on two rows, so he's on two projects; `project_id` 1 shows up on two rows, so that project has two employees. That "many on both sides" is the many-to-many, finally stored. Notice `assigned_date` and `hours` sit here too — facts about the *pairing*, belonging to neither table alone.
+
+Press **Run** to see the grid, then **Submit** to check it.
+
+<Callout type="note">
+This is the audit point the security lens mentioned: `assignment` is the record of *which employee may touch which project*. Being able to read it is the first step to being able to control it.
+</Callout>
+
+<Callout type="tip">
+Ask for the whole table by name: `SELECT * FROM assignment;`.
+</Callout>

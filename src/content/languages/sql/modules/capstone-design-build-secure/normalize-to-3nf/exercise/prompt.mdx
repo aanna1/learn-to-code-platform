@@ -1,0 +1,16 @@
+**Stage 2 — Normalize it (3NF).** Imagine Inkwell's current spreadsheet — one fat row per line item:
+
+```
+order_id | order_date | customer_name | customer_email   | book_title | author_name    | price | quantity
+---------+------------+---------------+------------------+------------+----------------+-------+---------
+1        | 2026-06-01 | Maya Chen     | maya@example.com | Earthsea   | Ursula Le Guin | 12.00 | 1
+1        | 2026-06-01 | Maya Chen     | maya@example.com | 1984       | George Orwell  | 10.00 | 2
+```
+
+Every anomaly from Module 04 is sitting right there: Maya's email is copied onto every line (update anomaly), a book nobody has ordered can't be recorded (insertion anomaly), and deleting her last order loses the customer (deletion anomaly). Normalize it: identify the normal form it violates, the partial dependencies, the functional dependencies, and where each fact ends up in 3NF.
+
+Use the **draft** box to write the FDs and walk 1NF → 2NF → 3NF first (it isn't graded); then complete the fields and press **Submit answer**.
+
+<Callout type="note">
+The composite key of this line-item table is `(order_id, book_title)`. A column that depends on only *part* of that key is a partial dependency — the thing that breaks 2NF. Grading ignores your table labels in the last field; only the *grouping* of facts is checked.
+</Callout>

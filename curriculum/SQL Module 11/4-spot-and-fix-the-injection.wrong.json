@@ -1,0 +1,8 @@
+{
+  "root-cause": "SQL is an inherently insecure language that should be avoided",
+  "bypass-input": "admin",
+  "why-dashes": "They are identical; the -- is only a stylistic choice",
+  "the-fix": [
+    "Escape the quote characters in the input"
+  ]
+}

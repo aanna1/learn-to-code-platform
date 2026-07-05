@@ -1,0 +1,15 @@
+[
+  {
+    "name": "shows product, emp_name, and branch_city so the redundancy is visible",
+    "orderMatters": false,
+    "expected": {
+      "columns": ["product", "emp_name", "branch_city"],
+      "rows": [
+        ["Paper", "Michael", "Scranton"],
+        ["Toner", "Michael", "Scranton"],
+        ["Stapler", "Michael", "Scranton"],
+        ["Paper", "Angela", "Scranton"]
+      ]
+    }
+  }
+]

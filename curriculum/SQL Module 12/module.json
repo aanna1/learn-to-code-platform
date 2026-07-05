@@ -1,0 +1,13 @@
+{
+  "id": "12-access-control-views-and-auditing",
+  "title": "Access Control, Views & Auditing",
+  "description": "The security sublanguage that closes the course: DCL (GRANT/REVOKE) and the principle of least privilege, roles as reusable privilege bundles, views as an access-control boundary that exposes only safe columns and rows, and auditing plus backup/recovery — mapping onto the CIA triad. Mind the engine: GRANT/REVOKE/roles are Oracle/server SQL you learn for the exam, while CREATE VIEW actually runs in the browser IDE.",
+  "order": 14,
+  "lessons": [
+    { "id": "lecture", "title": "Access Control, Views & Auditing", "type": "lecture", "order": 1 },
+    { "id": "ex-column-view", "title": "A View That Hides Salary", "type": "exercise", "order": 2 },
+    { "id": "ex-row-view", "title": "A View That Filters Rows", "type": "exercise", "order": 3 },
+    { "id": "least-privilege-and-dcl", "title": "Least Privilege & DCL", "type": "modeling", "order": 4 },
+    { "id": "views-and-the-cia-triad", "title": "Views & the CIA Triad", "type": "modeling", "order": 5 }
+  ]
+}

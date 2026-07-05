@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "UNION ALL keeps every row, duplicates included — that's why branch_id 2 shows up 5 times. You want the version of UNION that folds duplicates together.",
+    "Drop the ALL. Plain UNION removes duplicate rows automatically, the same way SELECT DISTINCT would on a single query.",
+    "Full shape: SELECT branch_id FROM employee UNION SELECT branch_id FROM branch ORDER BY branch_id; Five distinct values come back: NULL, 1, 2, 3, 4 — even though employee alone lists 2 five times."
+  ]
+}

@@ -1,0 +1,28 @@
+This is the first checkpoint — no new ideas, just everything from Modules 02–04 applied to one real, messy dataset. A registrar has been tracking course enrollments in a single spreadsheet, and it's a normalization horror story:
+
+```
+enrollments  (one row per student-in-a-course)
++------------+--------------+-----------------+-----------+---------------+---------+-----------+---------------+-------+
+| student_id | student_name | student_email   | course_id | course_title  | dept_id | dept_name | dept_building  | grade |
++------------+--------------+-----------------+-----------+---------------+---------+-----------+---------------+-------+
+| 1          | Alice        | alice@uni.edu   | 101       | Databases     | 10      | CS        | Lawson         | A     |
+| 1          | Alice        | alice@uni.edu   | 205       | Networks      | 10      | CS        | Lawson         | B     |
+| 2          | Bao          | bao@uni.edu     | 101       | Databases     | 10      | CS        | Lawson         | A     |
+| 3          | Cira         | cira@uni.edu    | 340       | Ethics        | 20      | Phil      | Heavilon       | A     |
++------------+--------------+-----------------+-----------+---------------+---------+-----------+---------------+-------+
+```
+
+Every design problem you've studied is in here: Alice's name and email repeat on every course she takes, the CS department's building repeats on every CS course, and there's nowhere to record a course nobody has enrolled in yet. Your job across this two-part checkpoint is to fix it properly — first design (this part), then build (Part 2).
+
+## Part 1 — the design
+
+Two tasks, both graded:
+
+1. **List the functional dependencies.** Read off what determines what. Remember a composite left side (`student_id, course_id -> grade`) and that a right side can list several columns.
+2. **Draw the ERD.** Model the four entities and the three relationships. Model each entity with just its **primary key** — represent the foreign keys through the relationships, not as extra attributes — and resolve the student–course many-to-many with the associative entity `enrollment` (composite key `(student_id, course_id)`).
+
+Sketch it in the **draft** box first if it helps (ungraded), then fill in the fields and press **Submit answer**. In Part 2 you'll turn this exact design into real tables.
+
+<Callout type="note">
+The ERD is graded on **structure** — entities and their keys, plus each relationship's endpoints, cardinality, and whether it's identifying — never on layout. Endpoints compare both ways, so `student 1:N enrollment` and `enrollment N:1 student` count the same.
+</Callout>

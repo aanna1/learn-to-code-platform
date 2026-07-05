@@ -1,0 +1,38 @@
+[
+  {
+    "name": "all five tables exist",
+    "probe": "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["name"],
+      "rows": [["author"], ["book"], ["book_order"], ["customer"], ["order_line"]]
+    }
+  },
+  {
+    "name": "book references author via a foreign key",
+    "probe": "SELECT \"table\" AS parent, \"from\" AS fk_col FROM pragma_foreign_key_list('book');",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["parent", "fk_col"],
+      "rows": [["author", "author_id"]]
+    }
+  },
+  {
+    "name": "order_line has a two-column composite primary key",
+    "probe": "SELECT COUNT(*) AS pk_cols FROM pragma_table_info('order_line') WHERE pk > 0;",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["pk_cols"],
+      "rows": [[2]]
+    }
+  },
+  {
+    "name": "order_line has both foreign keys (to book_order and book)",
+    "probe": "SELECT COUNT(*) AS fks FROM pragma_foreign_key_list('order_line');",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["fks"],
+      "rows": [[2]]
+    }
+  }
+]

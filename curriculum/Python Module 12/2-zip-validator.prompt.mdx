@@ -1,0 +1,32 @@
+# Zip Code Validator
+
+US zip codes come in two forms: a five-digit base (`78664`) and an extended ZIP+4 format with a hyphen and four more digits (`78664-1234`). Both are valid. Everything else is not.
+
+## Your task
+
+Write a function `is_valid_zip(code)` that returns `True` if `code` is a valid US zip code and `False` otherwise.
+
+A valid zip code:
+- Contains exactly five digits, OR
+- Contains exactly five digits, a hyphen, then exactly four digits
+
+No extra characters — not at the start, not at the end.
+
+## Requirements
+
+- Use `re.fullmatch` or anchors (`^` and `$`) so that extra characters at either end cause the function to return `False`.
+- Use `\d{n}` to match exactly `n` digits.
+- Make the `+4` extension optional with `(?:...)?` or a group followed by `?`.
+- The function must return a boolean (`True` or `False`), not a match object.
+
+## Example output
+
+```
+78664        -> True
+78664-1234   -> True
+786          -> False
+7866412      -> False
+78664-12     -> False
+ABCDE        -> False
+1234-56789   -> False
+```

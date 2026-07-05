@@ -1,0 +1,196 @@
+Every module so far has been building toward this one. You've designed tables, normalized them, and written the `CREATE TABLE` SQL to make them real — and now you get to ask them questions. The verb for that is `SELECT`, and it's the single most-used word in all of SQL. Almost everything you do with a database for the rest of your life is some flavor of "SELECT the rows I care about."
+
+When you run a `SELECT` in this course's IDE, you don't get a stream of text scrolling by like the Python or C courses — you get a **results grid**, a little table of exactly the rows and columns you asked for. Press Run on a query and the answer comes back as a table you can read at a glance. This module is about controlling precisely what shows up in that grid.
+
+<Callout type="note">
+This module is tagged `[27200]`: it's core test-out material. `SELECT`, `WHERE`, `ORDER BY`, and the pattern/set operators are the everyday SQL a handwritten exam leans on hardest. Two dialect traps below (`LIMIT` vs. Oracle's `FETCH FIRST`, and the `= NULL` bug) are exactly the kind of thing that gets marked wrong.
+</Callout>
+
+Every example below runs against one seeded table — the Dunder Mifflin `employee` table you've been modeling since Module 02, now with real rows in it:
+
+```
+employee
++-------------+------------+-----------+-----------+--------+------------+
+| employee_id | first_name | last_name | branch_id | salary | hire_date  |
++-------------+------------+-----------+-----------+--------+------------+
+| 100         | Jan        | Levinson  | 1         | 110000 | 2004-03-15 |
+| 101         | Michael    | Scott     | 2         | 90000  | 2005-03-24 |
+| 102         | Dwight     | Schrute   | 2         | 62000  | 2005-04-01 |
+| 103         | Jim        | Halpert   | 2         | 60000  | 2006-01-10 |
+| 104         | Pam        | Beesly    | 2         | 42000  | 2006-05-08 |
+| 105         | Andy       | Bernard   | 3         | 55000  | 2007-09-20 |
+| 106         | Stanley    | Hudson    | 2         | 58000  | 2004-11-02 |
+| 107         | Ryan       | Howard    | NULL      | 48000  | 2007-06-01 |
++-------------+------------+-----------+-----------+--------+------------+
+```
+
+(Branch 1 is Corporate, 2 is Scranton, 3 is Stamford. Ryan was just hired and hasn't been assigned a branch yet — that's why his `branch_id` is `NULL`. Hold that thought; it matters later.)
+
+## Prerequisites
+
+Module 05 (you should recognize a table's columns and types). Everything here queries data that already exists; you don't need to know how to *insert* rows yet — that's Module 10.
+
+## What you'll learn
+
+- `SELECT` to choose columns, rename them with aliases, and drop duplicates with `DISTINCT`
+- `WHERE` to filter rows, using comparison and logical operators
+- Pattern and set matching: `LIKE`, `IN`, `BETWEEN`, and the special case of `IS NULL`
+- `ORDER BY` to sort the results, and `LIMIT` to keep only the top few
+- Where Oracle (the exam) and SQLite (this course's engine) disagree on limiting rows
+- (woven throughout) why asking for *only* the data you need is a security habit, not just a tidy one
+
+## SELECT: choosing columns
+
+The simplest query names the columns you want and the table to pull them from:
+
+```sql
+SELECT first_name, last_name FROM employee;
+```
+
+You get back a grid with just those two columns, one row per employee. The order you list the columns in is the order they appear in the grid.
+
+To grab *every* column, use the star:
+
+```sql
+SELECT * FROM employee;
+```
+
+`SELECT *` is handy when you're exploring a table and want to see everything. But once you're writing a query that some application or report will actually use, naming the exact columns you need is the better habit — and here's a real reason why.
+
+<Callout type="warning">
+**Security lens.** `SELECT *` pulls back *every* column, including ones you may not have meant to expose — `salary` here, or a `password_hash`, or a national ID in a real table. That data then flows into whatever runs the query: an app response, a log file, a screenshot in a bug report. Asking for only the columns you need is called **data minimization**, and it's one of the cheapest confidentiality wins there is: data you never selected can't leak from a place it was never sent. Naming columns also means your query won't silently start returning a new sensitive column the day someone adds one to the table.
+</Callout>
+
+You can rename a column in the output with `AS` — an **alias**. This doesn't change the table, only the header in the grid:
+
+```sql
+SELECT first_name AS name, salary AS annual_pay FROM employee;
+```
+
+And `DISTINCT` collapses duplicate values, showing each one only once:
+
+```sql
+SELECT DISTINCT branch_id FROM employee;
+```
+
+Eight employees, but only four distinct `branch_id` values (1, 2, 3, and `NULL`) — `DISTINCT` is how you ask "what branches do we have anyone in?" without getting Scranton back five times.
+
+## WHERE: filtering rows
+
+`SELECT` picks columns; `WHERE` picks *rows*. Add a `WHERE` clause and only the rows whose condition is true come back:
+
+```sql
+SELECT first_name, salary FROM employee WHERE salary > 60000;
+```
+
+Jim earns exactly `60000`, so `salary > 60000` is false for him and he's left out — the `>` is strict. The comparison operators are what you'd expect, with two SQL quirks:
+
+```
+=     equal to
+<>    not equal to   (also written != in most engines)
+<     less than
+>     greater than
+<=    less than or equal to
+>=    greater than or equal to
+```
+
+Note that "equal to" is a single `=`, not the doubled `==` you'd use in Python or C — SQL uses one equals sign for comparison. Combine conditions with the logical operators `AND`, `OR`, and `NOT`:
+
+```sql
+SELECT first_name, salary FROM employee
+WHERE branch_id = 2 AND salary > 55000;
+```
+
+Only Scranton employees (`branch_id = 2`) earning more than `55000` come back — Pam is in Scranton but earns `42000`, so the `AND` knocks her out.
+
+<Callout type="warning">
+**Security lens.** The `WHERE` clause is the single most important line in SQL security, because it's where **SQL injection** happens. Picture an app that builds a query by gluing a username straight into the text, ending with `WHERE user = '` and then whatever was typed. Type an ordinary name and it works. Type a carefully chosen string full of quotes and SQL keywords, and you can change what the query *means* — making the `WHERE` match rows it should never return. You'll see the exact attack and its fix (parameterized queries) in Module 11; for now, just register that the moment untrusted input reaches a `WHERE` clause is the moment to be careful.
+</Callout>
+
+One more thing worth saying early: a `WHERE` clause filters *which rows a query returns* — it is **not** a security boundary. If someone can run their own SQL against your database, they can simply write a query without your `WHERE`, or with a different one. Real access control (who's even allowed to read the `salary` column at all) comes from privileges and views in Module 12, not from being careful with `WHERE`.
+
+## Matching patterns and sets: LIKE, IN, BETWEEN, IS NULL
+
+Plain comparisons cover a lot, but four more tools handle the cases they can't.
+
+**`LIKE`** matches text against a pattern. Two wildcards do the work: `%` stands for any run of characters (including none), and `_` stands for exactly one character.
+
+```sql
+SELECT first_name, last_name FROM employee WHERE last_name LIKE 'S%';
+```
+
+`'S%'` means "starts with S, then anything," so it catches Scott and Schrute. `'%s'` would mean "ends in s," and `'%an%'` would mean "has 'an' somewhere inside."
+
+**`IN`** checks whether a value is in a list — much cleaner than stringing together a pile of `OR`s:
+
+```sql
+SELECT first_name, branch_id FROM employee WHERE branch_id IN (1, 3);
+```
+
+That's exactly the same as `WHERE branch_id = 1 OR branch_id = 3`, just shorter and easier to read.
+
+**`BETWEEN`** checks a range, and it's *inclusive* of both ends:
+
+```sql
+SELECT first_name, salary FROM employee WHERE salary BETWEEN 50000 AND 65000;
+```
+
+`BETWEEN 50000 AND 65000` is shorthand for `salary >= 50000 AND salary <= 65000` — both `50000` and `65000` themselves would be included if anyone earned exactly that.
+
+**`IS NULL`** is the odd one, and it trips up nearly everyone at first. Remember Ryan, whose `branch_id` is `NULL` because he's unassigned. You might reach for `WHERE branch_id = NULL` to find him — but that returns *nothing*:
+
+```sql
+SELECT first_name FROM employee WHERE branch_id IS NULL;
+```
+
+`NULL` means "unknown," and in SQL nothing is ever *equal* to an unknown — not even another unknown. So `branch_id = NULL` is never true for anyone, and `= NULL` silently matches zero rows. To test for a missing value you must use `IS NULL` (or `IS NOT NULL` for the opposite).
+
+<Callout type="warning">
+`= NULL` is one of the most common SQL bugs there is, and it's nasty precisely because it doesn't error — it just quietly returns no rows, so your query "runs fine" and gives a wrong, empty answer. Any time you're filtering on a column that's allowed to be empty, reach for `IS NULL` / `IS NOT NULL`, never `=`.
+</Callout>
+
+## ORDER BY: sorting the results
+
+A query's rows come back in no guaranteed order unless you ask for one. `ORDER BY` sorts them:
+
+```sql
+SELECT first_name, salary FROM employee ORDER BY salary DESC;
+```
+
+`DESC` sorts high-to-low; `ASC` (the default, so you can leave it off) sorts low-to-high. You can sort by more than one column — `ORDER BY branch_id ASC, salary DESC` sorts by branch first, then ranks each branch's people by salary within it, the second column breaking ties in the first.
+
+## LIMIT: just the top few
+
+Once results are sorted, `LIMIT` keeps only the first *n* rows — perfect for "top 3 earners":
+
+```sql
+SELECT first_name, salary FROM employee ORDER BY salary DESC LIMIT 3;
+```
+
+`LIMIT` almost always travels with `ORDER BY` — "the top 3" only means something once you've said top *by what*. Without an `ORDER BY`, `LIMIT 3` gives you *some* three rows, but which three is anyone's guess.
+
+<Callout type="warning">
+**Dialect note.** `LIMIT` is a MySQL/SQLite spelling, and it's the one that runs in this course's IDE. **Oracle — the environment the CNIT 27200 exam is written against — has no `LIMIT`.** Oracle writes the same idea as `FETCH FIRST 3 ROWS ONLY` (modern Oracle) or filters on the pseudo-column `ROWNUM <= 3` (older Oracle style). So a query that ends `ORDER BY salary DESC LIMIT 3` here would be `ORDER BY salary DESC FETCH FIRST 3 ROWS ONLY` on the exam. Know the idea in both spellings; writing `LIMIT` on an Oracle exam is a classic wrong-dialect slip. (And note it's neither SQL Server's spelling, `TOP 3` — three databases, three different answers to the same question.)
+</Callout>
+
+## Try it: predict the grid
+
+```sql
+SELECT first_name, salary FROM employee
+WHERE branch_id = 2 AND salary < 60000
+ORDER BY salary DESC;
+```
+
+Using the seeded `employee` table above, which rows come back, and in what order?
+
+<Callout type="note">
+**Two rows — Stanley (58000), then Pam (42000).** Walk the conditions. `branch_id = 2` keeps the Scranton crew: Michael, Dwight, Jim, Pam, Stanley. Then `salary < 60000` (strict) drops Michael (90000), Dwight (62000), and Jim (exactly 60000, so *not* less than it) — leaving Stanley (58000) and Pam (42000). Ryan is out too, and for a subtle reason: his `branch_id` is `NULL`, and `NULL = 2` is never true, so he never even reaches the salary test. Finally `ORDER BY salary DESC` puts the higher earner first: Stanley above Pam. If you included Jim, re-check the `<` — it's strict, and Jim sits right on the boundary. If you included Ryan, that's the `NULL` trap doing exactly what it does.
+</Callout>
+
+## Recap
+
+`SELECT` chooses columns (name them explicitly rather than reaching for `SELECT *`, both for clarity and to avoid leaking data you didn't mean to); `AS` renames a column in the output, and `DISTINCT` removes duplicate values. `WHERE` filters rows with the comparison operators (`=`, `<>`, `<`, `>`, `<=`, `>=`) and the logical operators (`AND`, `OR`, `NOT`) — and it's the place untrusted input turns into SQL injection, though a `WHERE` clause is a filter, never an access-control boundary. `LIKE` matches text patterns (`%` = any run of characters, `_` = exactly one), `IN` checks membership in a list, `BETWEEN` checks an inclusive range, and `IS NULL` tests for missing values — because `= NULL` silently matches nothing. `ORDER BY` sorts (`ASC`/`DESC`), and `LIMIT` keeps the top *n* rows, which Oracle spells `FETCH FIRST n ROWS ONLY` instead.
+
+## Up next
+
+You can now pull back exactly the rows and columns you want. Module 07 makes the database do *arithmetic* on them: aggregate functions like `COUNT`, `SUM`, and `AVG`, plus `GROUP BY` and `HAVING` to answer questions like "what's the average salary *per branch*" — summarizing many rows into one answer instead of listing them.

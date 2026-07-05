@@ -1,0 +1,13 @@
+Time to turn a design into a real table. You're building the `student` table the lecture kept sketching — three columns, each carrying a constraint that decides what counts as valid data.
+
+Write a `CREATE TABLE student` with exactly these columns:
+
+- **`student_id`** — an `INTEGER` that is the table's **`PRIMARY KEY`**
+- **`name`** — `TEXT` that can never be empty (**`NOT NULL`**)
+- **`major`** — `TEXT` that **defaults** to `'undecided'` when no value is given
+
+The starter has the three columns but none of the constraints. Add them, press **Run** to create the table, then **Submit** — the checks read your table's *structure* (its key, its NOT NULL column, its default), not any data.
+
+<Callout type="tip">
+`PRIMARY KEY` goes right after the column's type: `student_id INTEGER PRIMARY KEY`. `NOT NULL` and `DEFAULT 'undecided'` attach the same way, after their column's type.
+</Callout>

@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The projects table can't hold the pairings — the table that does is the associative (junction) entity between employee and project.",
+    "That table is named assignment. Each of its rows is one employee paired with one project.",
+    "Ask for the whole table: SELECT * FROM assignment;"
+  ]
+}

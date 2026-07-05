@@ -1,0 +1,137 @@
+**A database is just a collection of related information.** Your phone contacts. A shopping list. Facebook's entire userbase. All databases. The interesting part isn't the definition — it's what happens once that information is worth something to someone who shouldn't have it. That's where this course actually starts.
+
+By the end of this module you'll know what a database and a database management system actually are, what makes a database *relational*, and why — out of every part of an application — the database is usually the part attackers go after first. That last piece isn't a detour from learning SQL. It's the lens the rest of this course looks through.
+
+<Callout type="note">
+Every module in this course is tagged for whether it's required test-out material (`[27200]`), part of the security throughline (`[SEC]`), or both. This one is both: it's where the course states its two goals out loud.
+</Callout>
+
+## Prerequisites
+
+None. If you've used a spreadsheet, you already have the core intuition — we'll build on it directly.
+
+## What you'll learn
+
+- What a database is, in the general sense, and what a database management system (DBMS) adds on top of it
+- The four operations every DBMS exists to perform — Create, Read, Update, Delete (CRUD)
+- The difference between relational and non-relational databases, and what makes a *relational* database management system (RDBMS) specifically relational
+- What SQL is, and why it's a *standard* language that still isn't 100% portable between RDBMSs
+- Why databases are consistently one of the highest-value targets for attackers, and the three properties (confidentiality, integrity, availability) a secure database has to protect
+- What this course is actually training you for — a real Purdue test-out exam, plus habits a security-minded developer never turns off
+
+## What a database actually is
+
+Strip away the software and the jargon, and a database is any collection of related information. A phone book is a database — names next to numbers. A to-do list is a database. So is Facebook's entire set of users. All of these are the same basic thing: related information, stored somewhere, so you can use it later.
+
+"Stored somewhere" is doing more work than it looks like. Databases don't have to live on a computer at all — you can store one on paper (a shopping list scrawled on a sticky note), or even just in your head (you can probably list your five closest friends right now without writing anything down). A database is a *concept*, not a piece of software.
+
+So why does this course spend any time on computers at all? Compare two databases:
+
+**A shopping list.** Ten or twenty items. If you lose it, you can probably reconstruct it from memory, or just wander the store. If a stranger picks it up off the sidewalk and reads it, nothing bad happens to you.
+
+**Amazon's database.** Trillions of pieces of information — products, orders, reviews, addresses, and payment details, for hundreds of millions of people. If it goes down, Amazon loses money every second. If someone gets *unauthorized read access* to it, that's not an inconvenience — it's a breach with your name in the headline.
+
+Both are databases. They are not remotely the same problem. The shopping list needs none of: durability, availability at scale, or security. Amazon's database needs all three, non-negotiably. That gap — between "a list of things" and "the thing an attacker wants" — is why computers, not paper or memory, are how real databases get built, and it's the gap this course lives in.
+
+## Database management systems, and the four things every one of them does
+
+A database is the information. A **database management system (DBMS)** is the software that creates, organizes, and controls access to that information. Amazon.com doesn't read or write its own database directly — it talks to a DBMS, and the DBMS is the only thing that actually touches the stored data. That indirection is deliberate: it's what lets the DBMS guarantee the data stays consistent, enforce who's allowed to see what, and keep working when a thousand requests hit it at once.
+
+Whatever a DBMS looks like on the inside, it exists to do four things, usually shortened to **CRUD**:
+
+- **Create** — add new information
+- **Read** — retrieve information that's already there (some people say *Retrieve* instead)
+- **Update** — change existing information
+- **Delete** — remove information
+
+Every feature you'll ever build on top of a database eventually reduces to some combination of those four operations. Keep CRUD in your head — it comes back constantly, including later in this course when we talk about exactly *which* of the four operations an attacker is trying to perform without permission.
+
+A DBMS typically also handles things that have nothing to do with any single row of data: **security** (who's allowed to do what), **backup** (so a hardware failure or a bad `DELETE` doesn't mean the data is gone forever), and letting other software talk to it programmatically. Hold onto that security bullet — Module 12 is entirely about it.
+
+## Relational vs. non-relational — and what "relational" actually means
+
+There are two broad families of databases.
+
+A **relational database** organizes data into one or more **tables**. Each table has columns (the kinds of information you're storing — name, email, price) and rows (one entry per thing — one row per student, one row per order), and a unique key identifies each row. If you've used a spreadsheet, you've already used the shape of a relational database: rows and columns, one sheet per kind of thing. This should already feel familiar.
+
+```
+students
++----+----------+---------+
+| id | name     | major   |
++----+----------+---------+
+| 1  | Ada      | CS      |
+| 2  | Grace    | Math    |
++----+----------+---------+
+```
+
+A **non-relational database** ("NoSQL") is, honestly, defined by what it isn't: anything that stores data in a shape other than fixed tables. Documents (think JSON), key-value pairs, and graphs are the common shapes. MongoDB, DynamoDB, and Firebase are popular examples. Relational databases are still by far the most common choice for the kind of structured, everything-connects-to-everything data most applications have — which is exactly why this entire course, and CNIT 27200, is about the relational side.
+
+A **relational database management system (RDBMS)** is a DBMS built specifically to create and maintain relational databases. MySQL, PostgreSQL, MariaDB, and **Oracle** are the big names. That last one matters for you specifically: the real CNIT 27200 course runs on an Oracle database via Oracle SQL Developer, while this course's in-browser IDE runs on SQLite.
+
+<Callout type="note">
+**Dialect note:** most of the SQL you'll write here is standard and works identically everywhere. When Oracle does something differently — and it does, a handful of times — we'll flag it explicitly, because the test-out exam is handwritten against Oracle's conventions, not whatever's running in your browser.
+</Callout>
+
+## What SQL is
+
+Every RDBMS in that last section needs a language you use to actually talk to it — define tables, insert rows, ask questions, lock down access. That language is **SQL — Structured Query Language**. SQL is how you perform CRUD operations against a relational database, and also how you handle the administrative side: user management, security, backups.
+
+SQL is a *standard*, which is why the same rough language works across MySQL, PostgreSQL, Oracle, and SQLite. It is not a perfectly *portable* standard — every RDBMS implements it with its own extensions and quirks, which is exactly why the dialect note above exists. "SQL is standard, but not 100% portable" is a sentence worth remembering; you'll see it play out concretely starting in Module 05.
+
+## What pressing Run actually shows you
+
+You don't know any SQL syntax yet — that starts for real in Module 05 (schema) and Module 06 (querying). But it's worth seeing, once, what this course's IDE does when you run a query, because it's different from every other language on this platform.
+
+```sql
+SELECT * FROM students;
+```
+
+Run a query like that against a small seeded `students` table and, instead of text scrolling in a terminal, you'll see a **table** appear — columns across the top, rows underneath:
+
+```
+ id | name  | major
+----+-------+-------
+ 1  | Ada   | CS
+ 2  | Grace | Math
+```
+
+That's the shape every SQL query answer takes here: not printed text, but a result set. Every other language on this platform streams text to a terminal; SQL is the first one that doesn't, because a query's real answer is a table, not a sentence. Keep that picture in mind — the rest of this course is really just "how do I ask for a more specific table."
+
+<Callout type="tip">
+The two exercises after this lecture let you press Run for real and watch the results grid fill in. You aren't expected to know the syntax — the query is written for you, and you'll make one small change. It's a preview, not a test.
+</Callout>
+
+## Why databases are the target
+
+Go back to the Amazon-vs-shopping-list comparison from earlier, and look at it through a different lens: what happens if the *wrong person* gets access?
+
+Nobody cares if a stranger reads your shopping list. Amazon's database holds names, addresses, phone numbers, and payment details for hundreds of millions of people — read access to that database, without permission, is precisely what a data breach *is*. The database isn't incidental to the attack. In the overwhelming majority of real breaches, the database — or a query running against it — is the actual target, because it's where the valuable data concentrates into one place.
+
+Security engineers describe what a secure system has to protect using three properties, often called the **CIA triad**:
+
+- **Confidentiality** — only authorized people or processes can *read* the data. (An attacker reading your customer table without permission breaks confidentiality.)
+- **Integrity** — the data is accurate and hasn't been tampered with. (An attacker silently changing a price or a balance breaks integrity.)
+- **Availability** — authorized people can actually get to the data when they need it. (An attacker deleting a table or overloading the database breaks availability.)
+
+Notice these map directly onto CRUD, just from the defender's side: **C**reate and **U**pdate without permission attack integrity, **R**ead without permission attacks confidentiality, and **D**elete (or a database ground to a halt) attacks availability. Every attack technique you'll learn to recognize in this course — starting with SQL injection in Module 11 — is really just a way of forcing one of CRUD's four operations to run when it shouldn't, and every defense is about making sure only the *right* CRUD, from the *right* person, ever reaches the database.
+
+<Callout type="warning">
+It's tempting to think "my app isn't Amazon, nobody's targeting my little database." Attackers overwhelmingly don't pick targets by size — they scan for the *mistake* (an unsanitized input, an overly generous permission) and whatever database is sitting behind it is the one that gets hit. Security habits aren't something you turn on later once a project is "big enough." That's why they start in Module 01, not Module 11.
+</Callout>
+
+## Two goals, one course
+
+This course is training you for two things at once, and they reinforce each other more than you'd expect:
+
+1. **Purdue's CNIT 27200 test-out exam** — a real, 2-hour, handwritten, hand-graded exam. If you pass at 70% or better, you get credit for the course without taking it. Modules tagged `[27200]` are exactly the material that exam covers: data modeling, normalization, DDL, DML, joins, subqueries, transactions.
+2. **Thinking like a security-aware database developer** — modules tagged `[SEC]` go past what 27200 requires, into how the SQL you're writing gets attacked and how to write it so it can't be. This isn't padding. The catalog description for 27200 itself mentions "practical issues that database developers must handle," and in the real world, security *is* one of the biggest practical issues database developers handle.
+
+Some modules — like this one — carry both tags. Most will carry one. Both tracks build on the same tables, the same queries, the same schema you'll design starting in Module 03.
+
+## Recap
+
+A database is any collection of related information; a DBMS is the software that manages one and guarantees CRUD — Create, Read, Update, Delete — happens correctly and securely. Relational databases store that information in tables (rows and columns, like a spreadsheet), and an RDBMS is a DBMS built to manage them; MySQL, PostgreSQL, and Oracle are all RDBMSs, and this course's browser IDE runs on a fourth, SQLite. SQL is the standardized-but-not-perfectly-portable language you use to talk to any of them. And because databases concentrate an application's most valuable data in one place, they're consistently one of the highest-value targets for attackers — which is why this course teaches SQL through a security lens from day one, in service of a real exam and a habit that should never turn off.
+
+## Up next
+
+Module 02 gets concrete about the *relational* part of "relational database": tables, rows, columns, and the two kinds of keys — primary and foreign — that let tables refer to each other instead of duplicating data everywhere. That's the foundation everything from Module 03's ER diagrams onward is built on.

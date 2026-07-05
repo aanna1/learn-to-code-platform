@@ -1,0 +1,5 @@
+[
+  "Which two columns does the task ask you to return? Start with `SELECT name, price FROM products`.",
+  "\"Most expensive first\" means sorting. Add `ORDER BY price DESC`.",
+  "\"The top three\" means you only want the first few rows after sorting. Add `LIMIT 3`."
+]

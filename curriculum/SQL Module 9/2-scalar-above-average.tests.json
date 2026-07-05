@@ -1,0 +1,26 @@
+[
+  {
+    "name": "returns only employees paid above the company average, highest first",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name", "salary"],
+      "rows": [
+        ["Jan", 110000],
+        ["Michael", 90000]
+      ]
+    }
+  },
+  {
+    "name": "recomputes the average when a new hire changes it (not hardcoded)",
+    "setup": "INSERT INTO employee (employee_id, first_name, last_name, branch_id, salary) VALUES (108, 'Holly', 'Flax', 1, 100000);",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name", "salary"],
+      "rows": [
+        ["Jan", 110000],
+        ["Holly", 100000],
+        ["Michael", 90000]
+      ]
+    }
+  }
+]

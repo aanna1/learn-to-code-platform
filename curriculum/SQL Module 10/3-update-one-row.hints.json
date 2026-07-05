@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Run the starter and look carefully: every employee's branch_id became 3, not just Ryan's. A missing WHERE means 'all rows'.",
+    "Add a WHERE clause that picks exactly the row you mean: WHERE employee_id = 107.",
+    "Full answer: UPDATE employee SET branch_id = 3 WHERE employee_id = 107;"
+  ]
+}

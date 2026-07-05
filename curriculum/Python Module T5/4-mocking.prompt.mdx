@@ -1,0 +1,32 @@
+You have a `notifier.py` module with a `send_alert(message, level)` function that calls `urllib.request.urlopen` to POST an alert to a monitoring endpoint. You need to test it without making real network requests.
+
+Here is the function you are testing:
+
+```python
+import json
+import urllib.request
+
+ENDPOINT = "https://monitor.example.com/alerts"
+
+def send_alert(message: str, level: str = "info") -> dict:
+    """POST an alert to the monitoring endpoint.
+
+    Returns the parsed JSON response body.
+    Raises ValueError if level is not 'info', 'warning', or 'error'.
+    """
+```
+
+Write three tests using `unittest.mock.patch`:
+
+**`test_send_alert_posts_to_endpoint`** — mock `urllib.request.urlopen`, call `send_alert("disk full", "warning")`, then assert:
+- The mock was called once
+- The URL passed was `ENDPOINT`
+- The `data` keyword argument contained `b"disk full"` somewhere in it
+
+**`test_send_alert_returns_parsed_json`** — mock `urlopen` to return a fake response whose `read()` gives `b'{"status": "ok"}'`, and assert that `send_alert(...)` returns `{"status": "ok"}`.
+
+**`test_send_alert_invalid_level`** — assert that calling `send_alert("msg", "critical")` raises `ValueError` (no mock needed — this should fail before any network call).
+
+Remember: patch where the name is *used*, not where it's defined. The function imports with `import urllib.request`, so patch `urllib.request.urlopen`.
+
+The starter includes a `make_mock_response(body_bytes)` helper that builds a fake context-manager response object for you.

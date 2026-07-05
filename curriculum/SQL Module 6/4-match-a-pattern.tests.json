@@ -1,0 +1,13 @@
+[
+  {
+    "name": "returns employees whose last name starts with S",
+    "orderMatters": false,
+    "expected": {
+      "columns": ["first_name", "last_name"],
+      "rows": [
+        ["Michael", "Scott"],
+        ["Dwight", "Schrute"]
+      ]
+    }
+  }
+]

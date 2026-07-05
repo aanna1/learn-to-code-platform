@@ -1,0 +1,2 @@
+-- Nothing is pre-created: building the five tables IS the exercise.
+-- Write your CREATE TABLE statements in the editor.

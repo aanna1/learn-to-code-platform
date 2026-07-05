@@ -1,0 +1,13 @@
+Most of this module's access control (`GRANT`, `REVOKE`, roles) can't run in the browser's SQLite engine — but **views can**, and a view is the access-control boundary that hides sensitive columns. So this one you get to build and run.
+
+HR may see salaries; a team lead browsing the directory must not — yet it's the same `employee` table. The fix is a **view** that selects only the safe columns, so `salary` simply isn't part of it.
+
+The starter defines `employee_public` with `SELECT *`, which copies *every* column — salary included, so it's no boundary at all. Redefine the view to expose only `employee_id`, `first_name`, `last_name`, and `branch_id`. Press **Run** to see the safe window, then **Submit**.
+
+<Callout type="note">
+A view holds no data of its own — it's a saved window onto the real table. Pair it with DCL on a real database (`GRANT SELECT ON employee_public ...; REVOKE ALL ON employee ...`) and the team lead *cannot* reach salary, because the column isn't in anything they're allowed to query.
+</Callout>
+
+<Callout type="tip">
+The view's columns are exactly the columns its `SELECT` lists. Name the four safe ones instead of using `*`, and `salary` becomes unreachable through `employee_public`.
+</Callout>

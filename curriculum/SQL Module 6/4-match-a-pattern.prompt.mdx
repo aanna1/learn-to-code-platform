@@ -1,0 +1,9 @@
+Sometimes you don't have an exact value to match — you have a *shape*. `LIKE` matches text against a pattern, where `%` stands for any run of characters and `_` stands for exactly one.
+
+Return the **`first_name`** and **`last_name`** of every employee whose **last name starts with the letter `S`**.
+
+The starter uses `LIKE 'S'` with no wildcard, so it only matches a last name that is *exactly* `S` — which nobody has, so the grid comes back empty. Add the `%` wildcard so it means "starts with S," press **Run**, then **Submit**.
+
+<Callout type="tip">
+`'S%'` means "an `S`, then any run of characters" — a prefix match. Without the `%`, `LIKE 'S'` behaves just like `= 'S'` and matches only the single-letter string.
+</Callout>

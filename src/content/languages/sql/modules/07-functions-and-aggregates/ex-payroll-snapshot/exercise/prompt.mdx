@@ -1,0 +1,20 @@
+An **aggregate function** takes an entire column of values and collapses it into a single number. `COUNT(*)` is one you've already used to count rows — `SUM`, `AVG`, `MIN`, and `MAX` work the same way, just doing a different piece of arithmetic across the column.
+
+The starter query only computes the headcount.
+
+## Your task
+
+Extend the query so it also computes:
+
+- `SUM(salary)` aliased `total_payroll`
+- `AVG(salary)` aliased `avg_salary`
+- `MIN(salary)` aliased `lowest`
+- `MAX(salary)` aliased `highest`
+
+All five aggregates collapse the whole `employee` table into one summary row.
+
+Press **Run** to see the grid, then **Submit** to check it.
+
+<Callout type="tip">
+List every aggregate you want in the same SELECT, each with its own `AS` alias, separated by commas.
+</Callout>

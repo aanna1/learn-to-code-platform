@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The key is the composite (order_id, book_title). A column that depends on only order_id (order_date, customer facts) or only book_title (price, author_name) is a PARTIAL dependency — and a partial dependency is exactly what breaks 2NF.",
+    "Only quantity depends on the WHOLE key (order_id, book_title) — the same book on the same order has one quantity. Everything else is partial, which is why the fat table isn't in 2NF.",
+    "Splitting to 3NF: each fact goes with the key it truly depends on — order_date with the order, customer_name/email with the customer, price with the book, author_name with the author, quantity with the line."
+  ]
+}

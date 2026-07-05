@@ -1,0 +1,32 @@
+[
+  {
+    "name": "returns the five non-managers (NOT the empty result the NULL trap gives)",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name"],
+      "rows": [
+        ["Dwight"],
+        ["Jim"],
+        ["Pam"],
+        ["Stanley"],
+        ["Ryan"]
+      ]
+    }
+  },
+  {
+    "name": "still correct after a manager is removed (fix holds with more NULLs present)",
+    "setup": "UPDATE branch SET mgr_id = NULL WHERE branch_id = 3;",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name"],
+      "rows": [
+        ["Dwight"],
+        ["Jim"],
+        ["Pam"],
+        ["Andy"],
+        ["Stanley"],
+        ["Ryan"]
+      ]
+    }
+  }
+]

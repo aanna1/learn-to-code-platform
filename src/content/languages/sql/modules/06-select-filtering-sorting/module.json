@@ -1,0 +1,13 @@
+{
+  "id": "06-select-filtering-sorting",
+  "title": "SELECT, Filtering & Sorting",
+  "description": "The first querying module: SELECT (columns, aliases, DISTINCT), WHERE with comparison and logical operators, pattern and set matching (LIKE, IN, BETWEEN, IS NULL), and ORDER BY / LIMIT. Woven throughout: data minimization and the = NULL trap, plus the LIMIT-vs-Oracle-FETCH-FIRST dialect note.",
+  "lessons": [
+    { "id": "lecture", "title": "SELECT, Filtering & Sorting", "type": "lecture", "order": 1 },
+    { "id": "ex-choose-columns", "title": "Choose the Columns", "type": "exercise", "order": 2 },
+    { "id": "ex-filter-with-where", "title": "Filter with WHERE", "type": "exercise", "order": 3 },
+    { "id": "ex-match-a-pattern", "title": "Match a Pattern with LIKE", "type": "exercise", "order": 4 },
+    { "id": "ex-handle-null", "title": "Find the Missing Value", "type": "exercise", "order": 5 },
+    { "id": "ex-sort-and-limit", "title": "Sort and Limit", "type": "exercise", "order": 6 }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The injected input turns one query into two stacked with UNION: the harmless product search (matching 'none', so nothing) and the attacker's SELECT against users.",
+    "UNION has two rules from Module 08: the two SELECTs must have the same column COUNT (two here: username, password) and compatible types. The output columns keep the FIRST query's names -- name, price.",
+    "Write:  SELECT name, price FROM product WHERE name LIKE '%none%' UNION SELECT username, password FROM users;  and press Run -- the credentials appear where products should be."
+  ]
+}

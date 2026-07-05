@@ -1,0 +1,7 @@
+[
+  "In __set_name__, store the private attribute name: self.private_name = f'_{name}'. This runs automatically when the class body finishes, so 'volume' becomes '_volume'.",
+  "In __set__, clamp the value: clamped = max(self.min_val, min(self.max_val, value)). Then store it on the instance: setattr(instance, self.private_name, clamped).",
+  "In __get__, use getattr(instance, self.private_name, self.min_val). The third argument to getattr is the default — this handles the case where no value has been set yet.",
+  "The descriptor must store values on each instance separately (via setattr on the instance). Never store the value on self (the descriptor) — that would make all instances share one value.",
+  "The __init__ in AudioSettings just does self.volume = volume and self.bass = bass — those assignments automatically go through the descriptors' __set__ methods."
+]

@@ -1,0 +1,6 @@
+[
+  "For `to_json`, call `json.dumps(data, indent=2)` and return the result. The `indent=2` argument makes the output multi-line and human-readable.",
+  "For `from_json`, call `json.loads(text)` and return the result. It converts a JSON string back into a Python dict (or list, or whatever the top-level type was).",
+  "For `safe_serialize`, wrap `json.dumps(data)` in a `try` block. Add `except TypeError:` below it and `return \"not serializable\"` inside that block.",
+  "Sets, custom objects, and `datetime.date` values are the common non-serializable types. Lists, dicts, strings, numbers, booleans, and `None` are all safe."
+]

@@ -1,0 +1,23 @@
+This is the attack the whole module warns about — and here you get to *run* it, not just read about it.
+
+A vulnerable login page builds its query by gluing your input straight into the SQL:
+
+```
+"SELECT id, username, role FROM users WHERE username = '" + input + "' AND password = '" + input + "'"
+```
+
+The starter is that query for an ordinary login (`admin` / `s3cr3t`) — it returns exactly one row. But an attacker doesn't type a username. They type SQL. Into the **username** box they put:
+
+```
+' OR '1'='1' --
+```
+
+Rewrite the starter into the query the database *actually receives* once that input is glued in, so it returns **every account** — no password required. Press **Run** to watch the breach, then **Submit**.
+
+<Callout type="warning">
+There is no application code in the browser to exploit, so you're typing the assembled query by hand. That reconstruction *is* the skill: a code reviewer has to see, in their head, exactly the string the app would build.
+</Callout>
+
+<Callout type="tip">
+The leading `'` closes the empty username. `OR '1'='1'` is true for every row. The trailing `--` comments out the leftover `AND password = '...'`, so the password check never runs. What's left is `WHERE username = '' OR '1'='1'`.
+</Callout>

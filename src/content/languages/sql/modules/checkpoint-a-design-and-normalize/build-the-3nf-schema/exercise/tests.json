@@ -1,0 +1,38 @@
+[
+  {
+    "name": "creates all four tables: course, department, enrollment, student",
+    "orderMatters": true,
+    "probe": "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;",
+    "expected": {
+      "columns": ["name"],
+      "rows": [["course"], ["department"], ["enrollment"], ["student"]]
+    }
+  },
+  {
+    "name": "enrollment uses the composite primary key (student_id, course_id)",
+    "orderMatters": true,
+    "probe": "SELECT name FROM pragma_table_info('enrollment') WHERE pk > 0 ORDER BY pk;",
+    "expected": {
+      "columns": ["name"],
+      "rows": [["student_id"], ["course_id"]]
+    }
+  },
+  {
+    "name": "course has a foreign key on dept_id referencing department",
+    "orderMatters": true,
+    "probe": "SELECT \"table\", \"from\", \"to\" FROM pragma_foreign_key_list('course');",
+    "expected": {
+      "columns": ["table", "from", "to"],
+      "rows": [["department", "dept_id", "dept_id"]]
+    }
+  },
+  {
+    "name": "enrollment has foreign keys to both student and course",
+    "orderMatters": true,
+    "probe": "SELECT \"table\" FROM pragma_foreign_key_list('enrollment') ORDER BY \"table\";",
+    "expected": {
+      "columns": ["table"],
+      "rows": [["course"], ["student"]]
+    }
+  }
+]

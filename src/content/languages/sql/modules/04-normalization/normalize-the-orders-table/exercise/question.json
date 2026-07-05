@@ -1,0 +1,33 @@
+{
+  "draft": "Before you fill in the fields below, work the table on paper the way you would on the exam: list its functional dependencies, then walk 1NF → 2NF → 3NF. The graded answers should just be reading off your work.",
+  "fields": [
+    {
+      "id": "which-nf",
+      "type": "single-select",
+      "label": "This wide table is in 1NF (every cell is atomic). What is the first normal form it violates?",
+      "options": ["2NF", "3NF", "BCNF", "It's already in 3NF"]
+    },
+    {
+      "id": "partials",
+      "type": "multi-select",
+      "label": "The key is the composite (order_id, product). Which non-key columns depend on only PART of that key (on order_id alone) — the partial dependencies?",
+      "options": ["qty", "emp_id", "emp_name", "branch_city", "client_name"]
+    },
+    {
+      "id": "fds",
+      "type": "token-set",
+      "grammar": "fd",
+      "label": "List the functional dependencies among the non-key columns — the ones that make each employee, branch, and client fact repeat on every order line.",
+      "help": "One per line, in the form  a -> b  (a composite left side is written  a, b -> c).",
+      "placeholder": "emp_id -> emp_name\nemp_id -> branch_id\n..."
+    },
+    {
+      "id": "decompose",
+      "type": "partition",
+      "label": "After normalizing all the way to 3NF, which table does each fact live in? Drop each column into its home table.",
+      "help": "Keys and foreign keys are already placed for you; these are the descriptive facts.",
+      "items": ["emp_name", "branch_city", "client_name", "qty"],
+      "targets": ["employee", "branch", "client", "order_items"]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "A foreign key is written inline as  author_id INTEGER NOT NULL REFERENCES author(author_id)  — the column, then REFERENCES parent(column).",
+    "order_line is the associative entity. Its primary key is the COMPOSITE (order_id, book_id), declared as a table-level line: PRIMARY KEY (order_id, book_id).",
+    "Both order_line columns are also foreign keys: order_id REFERENCES book_order(order_id) and book_id REFERENCES book(book_id). Add NOT NULL and the CHECK (quantity > 0) too."
+  ]
+}

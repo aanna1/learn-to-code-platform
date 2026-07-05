@@ -1,0 +1,9 @@
+{
+  "hints": [
+    "For running_sum: initialize total = 0 before the loop. Inside the loop, add the current number to total, then 'yield total'. The generator pauses at each yield and resumes when the caller asks for the next value.",
+    "For first_n: a regular for loop works fine. Collect items into a list and break as soon as the list reaches length n. Don't try to slice the iterable — slicing doesn't work on generators.",
+    "For fibonacci: start with a, b = 0, 1. In a while True loop, yield a, then swap with a, b = b, a + b. The function never returns — that's correct; it's an infinite sequence.",
+    "A generator function is any function that contains 'yield'. Calling it returns a generator object; the body doesn't run until you ask for the first value with next() or a for loop.",
+    "If first_n seems to hang, make sure you have a break condition. Without 'if len(result) >= n: break', your loop will try to consume the entire (infinite) iterable."
+  ]
+}

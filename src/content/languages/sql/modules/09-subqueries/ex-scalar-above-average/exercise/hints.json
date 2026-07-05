@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "A scalar subquery is a query in parentheses that returns exactly one value. You can drop it anywhere SQL expects a value — including on the right side of the > in your WHERE clause.",
+    "Replace the literal 60000 with (SELECT AVG(salary) FROM employee). The database runs that inner query first, gets the average, then filters as if you'd typed that number.",
+    "Full shape: SELECT first_name, salary FROM employee WHERE salary > (SELECT AVG(salary) FROM employee) ORDER BY salary DESC; The average is 65625, so only Jan and Michael clear it."
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "questions": [
+    {
+      "question": "What does `re.findall(r\"(\\d{3})-(\\d{4})\", \"call 555-0102 or 555-0199\")` return?",
+      "options": [
+        { "text": "[('555', '0102'), ('555', '0199')]", "correct": true, "explanation": "When the pattern has groups, findall returns a list of tuples — one tuple per match, with one element per capture group." },
+        { "text": "['555-0102', '555-0199']", "correct": false, "explanation": "That's what findall returns when the pattern has *no* groups. As soon as you add parenthesized groups, the return value switches to a list of tuples." },
+        { "text": "('555', '0102')", "correct": false, "explanation": "findall always returns a list, not a single tuple. It collects every match in the string." },
+        { "text": "'555-0102'", "correct": false, "explanation": "findall returns a list of all matches, not just the first one. Use re.search if you only want the first match." }
+      ]
+    },
+    {
+      "question": "Which of these patterns correctly validates that a string is *exactly* five digits and nothing else?",
+      "options": [
+        { "text": "r\"^\\d{5}$\"", "correct": true, "explanation": "The ^ anchor requires the match to start at the beginning of the string; the $ anchor requires it to end there. Together they ensure nothing else can appear." },
+        { "text": "r\"\\d{5}\"", "correct": false, "explanation": "Without anchors, re.search will find a five-digit sequence anywhere in the string. '78664 Main St' would pass even though it's not a zip code." },
+        { "text": "r\"^\\d{5}\"", "correct": false, "explanation": "^ anchors the start, but without $ the pattern matches any string that *begins* with five digits. '786641234' would pass." },
+        { "text": "r\"\\d{5}$\"", "correct": false, "explanation": "$ anchors the end, but without ^ the pattern matches any string that *ends* with five digits. 'abc78664' would pass." }
+      ]
+    },
+    {
+      "question": "What is the difference between `re.match` and `re.search`?",
+      "options": [
+        { "text": "re.match only looks at the start of the string; re.search looks anywhere.", "correct": true, "explanation": "re.match anchors at the beginning — it returns None if the pattern doesn't start at position 0. re.search scans the whole string and returns the first match wherever it appears." },
+        { "text": "re.match returns all matches; re.search returns only the first.", "correct": false, "explanation": "Both return a single match object (or None). To get all matches, use re.findall." },
+        { "text": "re.search is case-insensitive by default; re.match is not.", "correct": false, "explanation": "Both are case-sensitive by default. Pass re.IGNORECASE (or re.I) as a flag to either function to make them case-insensitive." },
+        { "text": "re.match requires a compiled pattern; re.search accepts a raw string.", "correct": false, "explanation": "Both functions accept either a raw string pattern or a compiled re.Pattern object." }
+      ]
+    }
+  ]
+}

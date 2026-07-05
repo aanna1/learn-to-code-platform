@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Find the entities first: the nouns the sheet stores data about are student, course, department — and the enrollment that ties a student to a course.",
+    "For the FDs, ask what each id determines: student_id gives you the student's name and email; course_id gives the title and which department; dept_id gives the department's name and building; and the grade needs BOTH student_id and course_id.",
+    "A student takes many courses and a course has many students — that's many-to-many, so it needs the associative entity 'enrollment' with composite key (student_id, course_id).",
+    "student→enrollment and course→enrollment are both 1:N and identifying (each parent's key is part of enrollment's PK). department→course is 1:N but non-identifying (dept_id is just an ordinary column on course, not part of its key)."
+  ]
+}

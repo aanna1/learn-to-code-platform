@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "For `append_log`, open the file with `\"a\"` mode: `with open(filepath, \"a\") as f:`. Append mode creates the file if it doesn't exist and adds to the end if it does — never erasing existing content.",
+    "Format each entry as an f-string and include the newline: `f.write(f\"[LOG] {message}\\n\")`. Without the `\\n`, every entry runs together on the same line.",
+    "For `read_log`, check if the file exists first: `if not Path(filepath).exists(): return []`. Then open with `\"r\"` and build a list. Iterate with `for line in f:`, strip each line, and skip empty ones.",
+    "A list comprehension over the file works well: `return [line.strip() for line in f if line.strip()]`. The `if line.strip()` part skips any trailing blank lines."
+  ]
+}

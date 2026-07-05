@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Ryan (107) is now in branch 3",
+    "probe": "SELECT branch_id FROM employee WHERE employee_id = 107;",
+    "orderMatters": true,
+    "expected": { "columns": ["branch_id"], "rows": [[3]] }
+  },
+  {
+    "name": "everyone else is left alone (Jan is still in branch 1)",
+    "probe": "SELECT branch_id FROM employee WHERE employee_id = 100;",
+    "orderMatters": true,
+    "expected": { "columns": ["branch_id"], "rows": [[1]] }
+  }
+]

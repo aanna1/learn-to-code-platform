@@ -1,0 +1,7 @@
+Welcome to the store. Four tables model it: `customer`, `product`, `sales_order` (one row per order), and `order_item` (one row per product on an order). This checkpoint is a series of reports that pull those tables back together — exactly the join work from Module 08, on a schema you designed the shape of back in Modules 02–05.
+
+Start simple. The `sales_order` table stores only a `customer_id` number, which isn't much of a report. Write a query that lists each `order_id` alongside the **customer's name and city**, ordered by `order_id`. Press **Run** to see the grid and **Submit** to check it.
+
+<Callout type="tip">
+An `INNER JOIN` (plain `JOIN`) pairs each order with the one customer row whose `customer_id` matches. Qualify your columns with the table alias — `o.order_id`, `c.name` — so it's clear which table each comes from.
+</Callout>

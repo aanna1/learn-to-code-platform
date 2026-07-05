@@ -1,0 +1,11 @@
+{
+  "identifiers": "Placeholders stand in only for values, never for identifiers like column or table names; validate the chosen column against an allowlist of known-good names and reject anything else",
+  "why-parameterize": "The query structure is compiled before the input is ever seen, and the value is then bound as pure data that is never parsed as SQL — so no input can become code",
+  "blocklist": "Blocklists are trivially bypassed — UNunionION, different casing, and encodings all slip through — so they supplement but never replace parameterizing",
+  "layers": {
+    "Parameterized query": "Removes the vulnerability entirely",
+    "Least privilege": "Caps the blast radius of a successful injection",
+    "Safe error handling": "Denies attackers a schema map from leaked error text",
+    "Allowlist validation": "The only safe way to handle identifiers like a sort column"
+  }
+}

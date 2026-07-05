@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The primary key of the students table is the column guaranteed unique for every row — that's student_id.",
+    "List the columns you want by name, separated by commas, the way you did in Module 01.",
+    "Put the primary key first so the query reads: SELECT student_id, name, major FROM students;"
+  ]
+}

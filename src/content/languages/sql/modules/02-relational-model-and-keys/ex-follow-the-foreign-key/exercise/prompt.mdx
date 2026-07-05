@@ -1,0 +1,15 @@
+A **foreign key** is what makes a database *relational*: a column on one table that stores the primary key of a row in another. Here, each `employee` has a `branch_id` — and that value isn't the employee's own key, it's the primary key of the branch they work in. Follow the value from one table to the matching row in the other, and you know where someone works, without the word "Scranton" ever being repeated on the employee table.
+
+The starter query returns only `first_name`, so you see the people but not the link. To *see* the foreign key, you have to put its column on the grid.
+
+## Your task
+
+Change the query so the results grid shows each employee's `first_name` **and** the `branch_id` foreign key that links them to a branch — two columns, in that order.
+
+Then read it: Michael's `branch_id` is 2. Scroll up to the `branch` table — row 2 is Scranton. That's the whole mechanism.
+
+Press **Run** to see the grid, then **Submit** to check it.
+
+<Callout type="tip">
+Same move as picking columns in Module 01 — list the two you want, separated by a comma: `SELECT first_name, branch_id FROM employee;`.
+</Callout>

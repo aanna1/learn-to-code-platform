@@ -1,0 +1,222 @@
+So far, every query has handed back a list of rows — filtered and sorted, but still one line per employee. This module is about the other kind of question: not "show me the rows" but "give me *one number* that summarizes them." What's the *average* salary? *How many* people work in Scranton? *Who* earns the most? Those are **aggregate** questions, and answering them is where a database starts to feel less like a filing cabinet and more like a calculator you can point at your data.
+
+You'll also meet **scalar functions** — small transformations applied to each value, like uppercasing a name or pulling the year out of a date — and then the two clauses that make aggregates truly powerful: `GROUP BY`, which computes an aggregate *per group* instead of over the whole table, and `HAVING`, which filters those groups.
+
+<Callout type="note">
+This module is tagged `[27200]`: it's core test-out material. Aggregates, `GROUP BY`, and `HAVING` are exactly the kind of query a handwritten exam asks you to write from scratch — and the `WHERE` vs. `HAVING` distinction is a reliable exam question in its own right.
+</Callout>
+
+Every example runs against the same seeded `employee` table from Module 06:
+
+```
+employee
++-------------+------------+-----------+-----------+--------+------------+
+| employee_id | first_name | last_name | branch_id | salary | hire_date  |
++-------------+------------+-----------+-----------+--------+------------+
+| 100         | Jan        | Levinson  | 1         | 110000 | 2004-03-15 |
+| 101         | Michael    | Scott     | 2         | 90000  | 2005-03-24 |
+| 102         | Dwight     | Schrute   | 2         | 62000  | 2005-04-01 |
+| 103         | Jim        | Halpert   | 2         | 60000  | 2006-01-10 |
+| 104         | Pam        | Beesly    | 2         | 42000  | 2006-05-08 |
+| 105         | Andy       | Bernard   | 3         | 55000  | 2007-09-20 |
+| 106         | Stanley    | Hudson    | 2         | 58000  | 2004-11-02 |
+| 107         | Ryan       | Howard    | NULL      | 48000  | 2007-06-01 |
++-------------+------------+-----------+-----------+--------+------------+
+```
+
+## Prerequisites
+
+Module 06 (`SELECT`, `WHERE`, `ORDER BY`). It also helps to remember from Module 06 that `NULL` means "unknown" — it comes back to bite in a specific, useful way here.
+
+## What you'll learn
+
+- The five core **aggregate functions**: `COUNT`, `SUM`, `AVG`, `MIN`, `MAX`
+- The difference between `COUNT(*)` and `COUNT(column)`, and why `NULL` is behind it
+- **Scalar functions** for strings, numbers, and dates — and which ones differ by dialect
+- `GROUP BY` to compute an aggregate once *per group*
+- `HAVING` to filter groups, and exactly how it differs from `WHERE`
+- (woven throughout) how an aggregate can quietly leak a single person's data, and how to prevent it
+
+## Aggregate functions: many rows into one number
+
+An **aggregate function** takes a whole column of values and boils it down to a single result. There are five you'll use constantly:
+
+```sql
+SELECT COUNT(*) AS headcount,
+       SUM(salary) AS total_payroll,
+       AVG(salary) AS avg_salary,
+       MIN(salary) AS lowest,
+       MAX(salary) AS highest
+FROM employee;
+```
+
+```
++-----------+---------------+------------+--------+---------+
+| headcount | total_payroll | avg_salary | lowest | highest |
++-----------+---------------+------------+--------+---------+
+| 8         | 525000        | 65625      | 42000  | 110000  |
++-----------+---------------+------------+--------+---------+
+```
+
+One row, because the eight employees collapsed into one summary. `COUNT` tallies rows, `SUM` adds a numeric column up, `AVG` averages it, and `MIN`/`MAX` find the smallest and largest. Simple — but `COUNT` has a wrinkle worth knowing cold.
+
+There are two ways to count, and they don't always agree:
+
+```sql
+SELECT COUNT(*) AS all_rows, COUNT(branch_id) AS with_branch FROM employee;
+```
+
+```
++----------+-------------+
+| all_rows | with_branch |
++----------+-------------+
+| 8        | 7           |
++----------+-------------+
+```
+
+`COUNT(*)` counts *rows* — all eight. `COUNT(branch_id)` counts *non-`NULL` values in that column* — and Ryan's `branch_id` is `NULL`, so he's skipped, giving seven. That's not a quirk to memorize blindly; it's the same rule from Module 06 (`NULL` is "unknown") showing up again: `COUNT` of a column is really "how many rows actually *have* a value here." `SUM`, `AVG`, `MIN`, and `MAX` ignore `NULL`s the same way.
+
+## Scalar functions: transforming each value
+
+Where an aggregate turns *many* rows into one, a **scalar function** transforms *each* value on its own — the result still has one row per input row. They come in three broad families.
+
+**String functions** reshape text. `UPPER` and `LOWER` change case, `LENGTH` counts characters:
+
+```sql
+SELECT UPPER(last_name) AS shouted, LENGTH(last_name) AS letters
+FROM employee WHERE employee_id = 101;
+```
+
+```
++---------+---------+
+| shouted | letters |
++---------+---------+
+| SCOTT   | 5       |
++---------+---------+
+```
+
+To glue strings together — say, a full name from two columns — you use the concatenation operator `||`:
+
+```sql
+SELECT first_name || ' ' || last_name AS full_name
+FROM employee WHERE employee_id = 101;
+-- full_name: Michael Scott
+```
+
+<Callout type="warning">
+**Dialect note.** `||` is the string-concatenation operator in SQLite (this course's engine) *and* Oracle (the exam's environment) — so here they happily agree. MySQL is the odd one out: it doesn't use `||` for text at all and wants `CONCAT(first_name, ' ', last_name)` instead. If you ever move this query to MySQL and it errors, that's why.
+</Callout>
+
+**Numeric functions** do math on numbers. The one you'll reach for most is `ROUND`, which trims a value to a set number of decimal places — handy for tidying up an average that comes out to a long decimal:
+
+```sql
+SELECT ROUND(AVG(salary), 2) AS avg_salary FROM employee;
+-- ROUND(x, 2) keeps two digits after the decimal point
+```
+
+**Date functions** work on dates — pulling out the year, or computing how long ago something happened. This is the *least* portable corner of SQL: nearly every engine spells these differently. The idea "get the year from `hire_date`" is `strftime('%Y', hire_date)` in SQLite, `YEAR(hire_date)` in MySQL, and `EXTRACT(YEAR FROM hire_date)` or `TO_CHAR(hire_date, 'YYYY')` in Oracle.
+
+<Callout type="warning">
+**Dialect note.** Don't try to memorize every engine's date functions — even experienced people look them up. Do know that Oracle (the exam) leans on `TO_DATE` (text → date), `TO_CHAR` (date → formatted text), and `EXTRACT`. If a handwritten exam question asks you to format or pull a piece out of a date, it's expecting Oracle's spelling, not SQLite's.
+</Callout>
+
+## GROUP BY: one aggregate per group
+
+`AVG(salary)` over the whole table gives *one* company-wide average. But the more useful question is usually "average salary *per branch*." `GROUP BY` does exactly that: it splits the rows into groups that share a value, then computes the aggregate once for each group.
+
+```sql
+SELECT branch_id, COUNT(*) AS headcount, AVG(salary) AS avg_salary
+FROM employee
+GROUP BY branch_id;
+```
+
+```
++-----------+-----------+------------+
+| branch_id | headcount | avg_salary |
++-----------+-----------+------------+
+| 1         | 1         | 110000     |
+| 2         | 5         | 62400      |
+| 3         | 1         | 55000      |
+| NULL      | 1         | 48000      |
++-----------+-----------+------------+
+```
+
+Instead of one row for the whole company, you get one row *per branch* — and the aggregate is computed within each. Branch 2 (Scranton) has five people averaging `62400`; branch 1 has just Jan. (`GROUP BY` gathers all the `NULL` branch values into their own group too, which is why Ryan shows up as a `NULL` row rather than vanishing.)
+
+There's a rule here that catches everyone once. Every column in the `SELECT` must either be one you're grouping by, or wrapped in an aggregate function. Ask for `SELECT branch_id, first_name, AVG(salary) ... GROUP BY branch_id` and it makes no sense — branch 2 has five different first names, so *which one* would the single grouped row show? Group-by columns and aggregates only; no loose raw columns.
+
+<Callout type="note">
+**Security lens.** Look hard at that grid. Branches 1, 3, and `NULL` each contain exactly *one* person — so `AVG(salary)` for branch 1 is `110000`, which is Jan's precise salary, exposed under the friendly disguise of an "average." Aggregates *feel* anonymous because they blend rows together, but when a group is small enough — and a group of one is the extreme — the aggregate hands back the individual value directly. This is a real category of attack, called **inference**: reconstructing protected individual data from statistics you *are* allowed to see. `MIN` and `MAX` are even worse, since they always return some real person's exact number. Whenever you expose aggregates over sensitive data, the group size is a security parameter, not an afterthought.
+</Callout>
+
+## HAVING: filtering groups
+
+`WHERE` filters rows — but it runs *before* grouping, so it can't see an aggregate like `COUNT(*)` or `AVG(salary)` yet. To filter on the *result* of an aggregate, you need `HAVING`, which runs *after* the groups are formed:
+
+```sql
+SELECT branch_id, COUNT(*) AS headcount
+FROM employee
+GROUP BY branch_id
+HAVING COUNT(*) > 1;
+```
+
+```
++-----------+-----------+
+| branch_id | headcount |
++-----------+-----------+
+| 2         | 5         |
++-----------+-----------+
+```
+
+Only Scranton survives, because it's the one branch with more than one employee. This is the whole `WHERE` vs. `HAVING` distinction, and it's a reliable exam question:
+
+- `WHERE` filters **individual rows**, before grouping. It can't use aggregates.
+- `HAVING` filters **whole groups**, after aggregating. It's the only place an aggregate condition like `COUNT(*) > 1` can go.
+
+The clauses always run in this order: `WHERE` narrows the rows, then `GROUP BY` buckets them, then `HAVING` throws out unwanted buckets. (`SELECT` and `ORDER BY` come after that.)
+
+<Callout type="note">
+**Security lens.** That last query is more than a syntax demo — `HAVING COUNT(*) > 1` is the exact tool that defuses the inference problem from a moment ago. By refusing to report any group with only one member (in practice you'd use a larger threshold, like `HAVING COUNT(*) >= 5`), you make sure every number you hand out summarizes enough people that no single person's value can be read off it. That's the real technique behind "we only publish statistics for groups of 5 or more" — it's just a `HAVING` clause guarding a minimum group size.
+</Callout>
+
+## Try it: predict the grid
+
+```sql
+SELECT branch_id, AVG(salary) AS avg_salary
+FROM employee
+WHERE salary > 50000
+GROUP BY branch_id
+HAVING AVG(salary) > 60000;
+```
+
+Three clauses interacting at once. Against the seeded table, what comes back? Work through the order, then check below.
+
+<Callout type="note">
+**Two rows:**
+
+```
++-----------+------------+
+| branch_id | avg_salary |
++-----------+------------+
+| 1         | 110000     |
+| 2         | 67500      |
++-----------+------------+
+```
+
+Follow the clause order:
+
+1. **`WHERE salary > 50000`** runs first, on individual rows. Out go Pam (42000) and Ryan (48000). Remaining: Jan (br 1), and Michael/Dwight/Jim/Stanley (br 2), and Andy (br 3).
+2. **`GROUP BY branch_id`** buckets what's left: branch 1 has just `110000`; branch 2 has `90000, 62000, 60000, 58000`; branch 3 has `55000`.
+3. Compute `AVG` per group: branch 1 → 110000, branch 2 → 270000/4 = 67500, branch 3 → 55000.
+4. **`HAVING AVG(salary) > 60000`** filters the *groups*: branch 3's 55000 is out; branches 1 and 2 stay.
+
+The classic trap is doing `HAVING`'s job in `WHERE` or vice versa. `salary > 50000` had to be `WHERE` (it's about individual rows, before grouping); `AVG(salary) > 60000` had to be `HAVING` (it's about a group's aggregate, which doesn't exist until after grouping).
+</Callout>
+
+## Recap
+
+Aggregate functions collapse many rows into one summary value: `COUNT` (rows, or non-`NULL` values of a column), `SUM`, `AVG`, `MIN`, and `MAX` — all of which ignore `NULL`s, which is why `COUNT(*)` and `COUNT(branch_id)` can differ. Scalar functions instead transform each value one at a time: string functions like `UPPER`/`LENGTH` and the `||` concatenation operator (Oracle and SQLite agree; MySQL uses `CONCAT`), numeric functions like `ROUND`, and date functions, which are the least portable part of SQL and which Oracle spells with `TO_DATE`/`TO_CHAR`/`EXTRACT`. `GROUP BY` computes an aggregate once per group (and every `SELECT` column must be grouped or aggregated), while `HAVING` filters those groups using aggregate conditions `WHERE` can't — because `WHERE` runs on rows before grouping and `HAVING` on groups after. And because an aggregate over a tiny group can expose an individual's exact value, a minimum-group-size `HAVING` clause is as much a privacy control as it is a query filter.
+
+## Up next
+
+You've been querying one table this whole time. Module 08 is the big one: **joins** — combining rows from *two or more* tables in a single query, so you can finally answer "list each employee *with the city of the branch they work in*," pulling the branch's name across the foreign key you designed back in Module 02. Joins are the most heavily tested topic on the real exam, so they get the most room.

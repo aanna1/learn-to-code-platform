@@ -1,0 +1,13 @@
+{
+  "id": "t5-tooling-and-ecosystem",
+  "title": "Tooling and the Ecosystem",
+  "description": "pytest test functions, fixtures, parametrize, mocks, virtual environments, pyproject.toml, ruff, mypy, and pre-commit — the tools that keep code correct and projects reproducible over time.",
+  "order": 19,
+  "lessons": [
+    { "id": "lecture",              "title": "Tooling and the Ecosystem",  "type": "lecture",  "order": 1 },
+    { "id": "ex-test-functions",    "title": "Writing Test Functions",     "type": "exercise", "order": 2 },
+    { "id": "ex-parametrize",       "title": "Parametrize and Exceptions", "type": "exercise", "order": 3 },
+    { "id": "ex-mocking",           "title": "Mocking External Systems",   "type": "exercise", "order": 4 },
+    { "id": "ex-test-suite",        "title": "Full Test Suite",            "type": "exercise", "order": 5 }
+  ]
+}

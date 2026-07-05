@@ -1,0 +1,129 @@
+{
+  "questions": [
+    {
+      "question": "An inner join of `employee` and `branch` on `branch_id` returns 7 rows, but `employee` has 8 rows and `branch` has 4. Why 7?",
+      "options": [
+        {
+          "text": "Inner joins keep only matched rows: Ryan's `branch_id` is `NULL` so he matches no branch, and Buffalo (branch 4) has no employees — both unmatched rows are dropped, leaving the 7 that pair up.",
+          "correct": true,
+          "explanation": "Correct. INNER JOIN's defining behavior is that a row survives only if it finds a partner on the other side. Ryan and Buffalo are each unmatched on one side, so both vanish, leaving the 7 rows that actually paired up."
+        },
+        {
+          "text": "A join always returns the row count of the smaller table.",
+          "correct": false,
+          "explanation": "False — a join returns matched rows, which can be more or fewer than either table depending on how many matches exist. A one-to-many match, for instance, can return more rows than either table has."
+        },
+        {
+          "text": "One of Scranton's employees was a duplicate and got removed.",
+          "correct": false,
+          "explanation": "Inner joins don't de-duplicate anything; all five Scranton employees are present in the 7 rows. The missing 2 come from unmatched rows (Ryan and Buffalo), not deduplication."
+        },
+        {
+          "text": "SQL caps join results at 7 rows unless you add `LIMIT`.",
+          "correct": false,
+          "explanation": "There's no such cap. The row count here is exactly the number of matched pairs the ON condition produces — 7, because Ryan and Buffalo are each unmatched on one side."
+        }
+      ]
+    },
+    {
+      "question": "You want a list of every branch *including* ones with no employees, each with its employee count. Which join, and why not an inner join?",
+      "options": [
+        {
+          "text": "A `LEFT JOIN` from `branch` (or `RIGHT JOIN` to it) — an inner join would silently drop Buffalo, the empty branch, which is exactly the row you need to show a 0.",
+          "correct": true,
+          "explanation": "Correct. An outer join keeps the unmatched branch row and pads the employee side with NULL, which is what lets you report a true zero for Buffalo instead of losing the row entirely."
+        },
+        {
+          "text": "An inner join is fine; empty branches will show up with a count of 0.",
+          "correct": false,
+          "explanation": "No — an inner join omits unmatched branch rows entirely, so Buffalo wouldn't appear at all, not even with a 0. There'd be no row to report a count for."
+        },
+        {
+          "text": "A `UNION` of the two tables.",
+          "correct": false,
+          "explanation": "UNION stacks rows vertically; it can't attach each branch to its employees side by side, which is what a per-branch count needs. That's a join's job, not UNION's."
+        },
+        {
+          "text": "A `NATURAL JOIN`, since it automatically includes every branch.",
+          "correct": false,
+          "explanation": "NATURAL JOIN is still an inner join under the hood — it auto-matches on shared column names but keeps only matched rows, so it would drop Buffalo exactly like a plain inner join would."
+        }
+      ]
+    },
+    {
+      "question": "On that outer join, why does `COUNT(employee_id)` give Buffalo a headcount of 0 while `COUNT(*)` gives 1?",
+      "options": [
+        {
+          "text": "The outer join emits one row for Buffalo with a `NULL` `employee_id`; `COUNT(column)` skips `NULL`s so it's 0, while `COUNT(*)` counts the row itself so it's 1.",
+          "correct": true,
+          "explanation": "Correct. The LEFT JOIN produces exactly one physical row for Buffalo, padded with NULL on the employee side. COUNT(*) counts that row regardless of its contents; COUNT(a_column) only counts non-NULL values in that column."
+        },
+        {
+          "text": "`COUNT(*)` is simply wrong on joins and should never be used.",
+          "correct": false,
+          "explanation": "It's not wrong, it just answers a different question — it counts rows rather than non-null values. Which one you want depends on whether you're asking \"how many rows\" or \"how many real values.\""
+        },
+        {
+          "text": "Buffalo actually has one employee whose name is `NULL`.",
+          "correct": false,
+          "explanation": "No — Buffalo has zero employees. The NULL is produced by the outer join padding the unmatched side, not by a real employee row with missing data."
+        },
+        {
+          "text": "`COUNT(employee_id)` and `COUNT(*)` always agree; the difference here is a bug in this specific query.",
+          "correct": false,
+          "explanation": "They only disagree on unmatched outer-join rows, by design — this isn't a bug, it's the documented behavior of COUNT(column) skipping NULLs. On matched rows the two counts agree fine."
+        }
+      ]
+    },
+    {
+      "question": "Why do many developers write every outer join as a `LEFT JOIN` rather than using `RIGHT JOIN`?",
+      "options": [
+        {
+          "text": "Any `RIGHT JOIN` is equivalent to a `LEFT JOIN` with the tables in the other order, and `LEFT JOIN` is more widely supported and consistent to read.",
+          "correct": true,
+          "explanation": "Correct. RIGHT and FULL OUTER JOIN are newer additions in some engines (including this course's SQLite build), so reordering the tables and always writing LEFT JOIN sidesteps that portability gap entirely."
+        },
+        {
+          "text": "`RIGHT JOIN` produces incorrect results.",
+          "correct": false,
+          "explanation": "It's correct; it just preserves the right table instead of the left, and can always be rewritten as a LEFT join by swapping table order. There's nothing wrong with its results."
+        },
+        {
+          "text": "`RIGHT JOIN` is slower on every database.",
+          "correct": false,
+          "explanation": "The choice is about portability and readability, not a universal performance rule. Query performance depends on indexes and the query planner, not which side is preserved."
+        },
+        {
+          "text": "`RIGHT JOIN` doesn't support an `ON` clause, only `NATURAL JOIN` syntax.",
+          "correct": false,
+          "explanation": "RIGHT JOIN takes an ordinary ON condition exactly like LEFT and INNER JOIN. The reason to prefer LEFT is portability and habit, not a syntax restriction on RIGHT."
+        }
+      ]
+    },
+    {
+      "question": "What's the difference between `UNION` and `UNION ALL`, and why does it matter for security?",
+      "options": [
+        {
+          "text": "`UNION` removes duplicate rows (like `DISTINCT`); `UNION ALL` keeps them all and is faster — and `UNION`'s ability to append a second `SELECT` onto a query is the basis of UNION-based SQL injection.",
+          "correct": true,
+          "explanation": "Correct. Both stack result sets vertically; the only functional difference is deduplication. That same append-a-SELECT mechanism is exactly what an attacker exploits when a query is built by pasting in unvalidated input."
+        },
+        {
+          "text": "`UNION` stacks rows and `UNION ALL` joins columns side by side.",
+          "correct": false,
+          "explanation": "Both UNION and UNION ALL stack rows vertically — neither one joins columns side by side. Combining columns from two tables is what JOIN does, a completely different operation."
+        },
+        {
+          "text": "They're identical; `ALL` is just an optional keyword with no effect.",
+          "correct": false,
+          "explanation": "`ALL` specifically disables duplicate removal, which changes both the result set and the performance (skipping the dedup work makes UNION ALL faster)."
+        },
+        {
+          "text": "`UNION` requires the same column names in both `SELECT`s; `UNION ALL` does not.",
+          "correct": false,
+          "explanation": "Neither requires matching column names — only a matching column count and compatible types. The result's column names come from the first SELECT either way; only duplicate handling differs."
+        }
+      ]
+    }
+  ]
+}

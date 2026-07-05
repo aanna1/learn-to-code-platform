@@ -1,0 +1,59 @@
+You're going to write two kinds of contracts: an abstract base class (ABC) that enforces a method exists and shares base-class behavior, and a Protocol that declares an interface without requiring inheritance.
+
+## Part 1: Abstract base class
+
+Write an abstract base class called `Storage` with:
+
+- An abstract method `read(self, key: str) -> bytes` that subclasses must implement.
+- An abstract method `write(self, key: str, value: bytes) -> None` that subclasses must implement.
+- A concrete method `exists(self, key: str) -> bool` that calls `self.read(key)` and returns `True` if it succeeds without raising `KeyError`, and `False` otherwise. Do not mark `exists` as abstract — it should work for any subclass automatically.
+
+Then write a concrete subclass `MemoryStorage(Storage)` that uses a plain dict to store bytes values. `read` should raise `KeyError` if the key is missing.
+
+## Part 2: Protocol
+
+Write a `Protocol` called `Serializable` with a single method `to_bytes(self) -> bytes`.
+
+Write a function `save_all(items: list, store: Storage) -> None` that iterates over `items`, calls `.to_bytes()` on each item, and writes the result to `store` using a key like `"item_0"`, `"item_1"`, etc.
+
+Then write a class `Message` with an attribute `text: str` that satisfies `Serializable` without inheriting from it. Its `to_bytes` method should return `self.text.encode()`.
+
+## What to implement
+
+```python
+from abc import ABC, abstractmethod
+from typing import Protocol
+
+
+class Storage(ABC):
+    # your code here
+
+class MemoryStorage(Storage):
+    # your code here
+
+class Serializable(Protocol):
+    # your code here
+
+def save_all(items: list, store: Storage) -> None:
+    # your code here
+
+class Message:
+    # your code here
+```
+
+## Checking your work
+
+```python
+s = MemoryStorage()
+s.write("hello", b"world")
+print(s.read("hello"))      # b'world'
+print(s.exists("hello"))    # True
+print(s.exists("missing"))  # False
+
+msgs = [Message("hello"), Message("world")]
+save_all(msgs, s)
+print(s.read("item_0"))     # b'hello'
+print(s.read("item_1"))     # b'world'
+```
+
+`Storage()` itself should raise `TypeError` — you can't instantiate an abstract class directly.

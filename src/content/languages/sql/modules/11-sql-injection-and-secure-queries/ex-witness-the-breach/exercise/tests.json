@@ -1,0 +1,28 @@
+[
+  {
+    "name": "the injected query dumps every account, admin first",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["id", "username", "role"],
+      "rows": [
+        [1, "admin", "admin"],
+        [2, "jhalpert", "user"],
+        [3, "dwight", "user"]
+      ]
+    }
+  },
+  {
+    "name": "it leaks whatever is in the table -- a newly added CEO account leaks too",
+    "setup": "INSERT INTO users (id, username, password, role) VALUES (4, 'ceo', 'topsecret', 'admin');",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["id", "username", "role"],
+      "rows": [
+        [1, "admin", "admin"],
+        [2, "jhalpert", "user"],
+        [3, "dwight", "user"],
+        [4, "ceo", "admin"]
+      ]
+    }
+  }
+]

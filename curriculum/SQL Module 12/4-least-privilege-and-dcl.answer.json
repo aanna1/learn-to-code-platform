@@ -1,0 +1,6 @@
+{
+  "sublanguage": "DCL (Data Control Language) — they control who is permitted to run operations on database objects, as opposed to DML, which changes the data itself",
+  "least-privilege": "It follows least privilege — the app gets only the two rights it needs, so a successful injection on that account still can't DELETE, DROP, or alter the table",
+  "role-revoke": "Both Jim and Pam immediately lose SELECT on employee, because they held it through the role — revoking from the role revokes for every member at once",
+  "sqlite-no-dcl": "SQLite is a serverless, single-file database with no user accounts, so it has no GRANT/REVOKE at all — access control there is the OS file permissions; the exam's Oracle engine does support DCL"
+}

@@ -1,0 +1,7 @@
+[
+  "For profile_workload: create a cProfile.Profile(), call profiler.enable(), run fn(*args), then profiler.disable().",
+  "To capture the stats as a string, create buf = io.StringIO(), then pass it as the stream argument: pstats.Stats(profiler, stream=buf).sort_stats('cumulative').print_stats(10). Return buf.getvalue().",
+  "For compare: call timeit.timeit(snippet_a, number=number) and timeit.timeit(snippet_b, number=number). Return both values as a tuple.",
+  "For fast_search: convert items to a set with set(items), then check 'target in ...' — set membership is O(1) while list iteration is O(n).",
+  "fast_search only needs one line: return target in set(items)."
+]

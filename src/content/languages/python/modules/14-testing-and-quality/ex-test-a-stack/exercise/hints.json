@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Each test method should create a fresh Stack at the start — don't share one stack across tests.",
+    "For test_push_increases_size: s = Stack(); s.push(42); self.assertEqual(s.size(), 1)",
+    "For test_pop_empty_raises, use assertRaises as a context manager: with self.assertRaises(IndexError): s.pop()",
+    "For test_peek_does_not_remove: push one item, call s.peek(), then check that s.size() is still 1 — peek should look without removing."
+  ]
+}

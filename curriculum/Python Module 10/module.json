@@ -1,0 +1,13 @@
+{
+  "id": "10-libraries-and-modules",
+  "title": "Libraries & Modules",
+  "description": "Import from the standard library, use random, datetime, and json for real tasks, and understand how Python finds and loads code.",
+  "order": 10,
+  "lessons": [
+    { "id": "lecture",         "title": "Libraries & Modules",  "type": "lecture",  "order": 1 },
+    { "id": "ex-magic-8-ball", "title": "Magic 8-Ball",         "type": "exercise", "order": 2 },
+    { "id": "ex-days-until",   "title": "Days Until",           "type": "exercise", "order": 3 },
+    { "id": "ex-json-round-trip","title":"JSON Round-Trip",      "type": "exercise", "order": 4 },
+    { "id": "ex-daily-snapshot","title": "Daily Snapshot",       "type": "exercise", "order": 5 }
+  ]
+}

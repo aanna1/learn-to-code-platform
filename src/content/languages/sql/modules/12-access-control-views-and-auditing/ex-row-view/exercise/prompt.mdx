@@ -1,0 +1,11 @@
+A view filters **rows** just as easily as it hides columns — put a `WHERE` in its definition and it becomes "each manager sees only their own team."
+
+Build `scranton_roster`: a view over `employee` that shows `first_name`, `last_name`, and `branch_id` for the **Scranton branch only** (`branch_id = 2`). The starter has no `WHERE`, so it leaks the whole company. Add the condition, press **Run**, then **Submit**.
+
+<Callout type="note">
+Grant someone `SELECT` on this view and revoke it on `employee`, and they see the five Scranton people and *nothing else* — they can't even tell Corporate, Stamford, or the unassigned Ryan exist. The database enforces the boundary; it isn't a UI trick.
+</Callout>
+
+<Callout type="tip">
+The Scranton branch is `branch_id = 2`. The condition goes *inside* the view: `... FROM employee WHERE branch_id = 2`.
+</Callout>

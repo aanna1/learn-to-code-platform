@@ -1,0 +1,5 @@
+Kelly Kapoor just joined the Scranton branch (`branch_id` 2), employee number 108, with a salary of 45000. The starter already writes an `INSERT` in the safe **column-list** form — but it drops her into the wrong branch. Run it, look at the grid, then fix the one wrong value and **Submit**.
+
+<Callout type="tip">
+Prefer `INSERT INTO employee (columns...) VALUES (...)` over the positional `INSERT INTO employee VALUES (...)`: naming the columns means your statement won't silently break if the table changes, and it lets you omit any column that has a default.
+</Callout>

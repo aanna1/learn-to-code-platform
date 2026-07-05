@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The control has to live in the database, not the UI, and it must not destroy data HR legitimately needs. That rules out both hiding the column in the app and deleting it.",
+    "A view is a boundary because the hidden columns/rows aren't in anything the user is allowed to query — the database enforces it, not politeness.",
+    "CIA: views/access control keep data private (Confidentiality); auditing records who changed what, keeping it correct and accountable (Integrity); backups keep it recoverable and present (Availability)."
+  ]
+}

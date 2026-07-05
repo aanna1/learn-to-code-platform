@@ -1,0 +1,6 @@
+[
+  "Build the dict inside `make_snapshot` by filling in each key. For `\"date\"`, use `date.today().isoformat()` — that method gives you a string like `\"2026-05-30\"` directly.",
+  "For `\"temperature\"`, use `random.randint(-10, 40)` — inclusive on both ends. For `\"humidity\"`, use `random.randint(0, 100)`.",
+  "For `\"condition\"`, use `random.choice(CONDITIONS)` where `CONDITIONS` is the list defined at the top of the file.",
+  "For `snapshot_to_json`, call `make_snapshot()` first, then pass the result to `json.dumps(..., indent=2)` and return that string."
+]

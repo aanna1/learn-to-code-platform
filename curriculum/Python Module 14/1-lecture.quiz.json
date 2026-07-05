@@ -1,0 +1,79 @@
+{
+  "questions": [
+    {
+      "question": "What happens when you run this code?\n\ndef square(n):\n    return n * n\n\nassert square(3) == 9\nassert square(-2) == 4\nprint(\"done\")",
+      "options": [
+        {
+          "text": "It prints \"done\".",
+          "correct": true,
+          "explanation": "Correct. Both assertions are true — square(3) is 9 and square(-2) is 4 — so neither raises AssertionError. The script reaches print(\"done\") and runs it."
+        },
+        {
+          "text": "It raises AssertionError on the second assert.",
+          "correct": false,
+          "explanation": "square(-2) is (-2) * (-2) = 4, which equals 4, so the second assert passes. AssertionError only fires when the condition is false."
+        },
+        {
+          "text": "It raises AssertionError on the first assert.",
+          "correct": false,
+          "explanation": "square(3) is 9, which equals 9, so the first assert passes. Both assertions in this code are correct."
+        },
+        {
+          "text": "Nothing happens — assert statements are always ignored.",
+          "correct": false,
+          "explanation": "assert statements run normally unless you start Python with the -O flag. In regular mode, a failing assert raises AssertionError and stops the program."
+        }
+      ]
+    },
+    {
+      "question": "Which of the following correctly tests that a function raises ValueError when passed a negative number?",
+      "options": [
+        {
+          "text": "self.assertEqual(my_func(-1), ValueError)",
+          "correct": false,
+          "explanation": "assertEqual checks that two values are equal. It does not catch exceptions — if my_func(-1) raises ValueError, this call itself crashes with that error before assertEqual can compare anything."
+        },
+        {
+          "text": "assert my_func(-1) == ValueError",
+          "correct": false,
+          "explanation": "This calls my_func(-1), which would raise ValueError immediately. The assert never runs. Even if it did, comparing a raised exception to the class itself would not work as expected."
+        },
+        {
+          "text": "with self.assertRaises(ValueError):\n    my_func(-1)",
+          "correct": true,
+          "explanation": "Correct. assertRaises used as a context manager catches the expected exception. If my_func(-1) raises ValueError, the test passes. If it raises something else or raises nothing, the test fails."
+        },
+        {
+          "text": "try:\n    my_func(-1)\nexcept ValueError:\n    pass",
+          "correct": false,
+          "explanation": "This swallows the exception but never asserts anything. If my_func(-1) raises no exception at all, the try block exits silently and the test still passes — which is the opposite of what you want."
+        }
+      ]
+    },
+    {
+      "question": "This file has a function and some demo code at the bottom. What does the if __name__ == \"__main__\": guard do?\n\ndef greet(name):\n    return f\"Hello, {name}!\"\n\nif __name__ == \"__main__\":\n    print(greet(\"world\"))",
+      "options": [
+        {
+          "text": "It makes greet() only callable from within the same file.",
+          "correct": false,
+          "explanation": "The guard has nothing to do with function visibility. greet() can still be imported and called from any other file regardless of the guard."
+        },
+        {
+          "text": "It prevents the print() from running when this file is imported by another module.",
+          "correct": true,
+          "explanation": "Correct. When Python imports a file, __name__ is set to the module's name, not \"__main__\", so the block is skipped. When you run the file directly, __name__ is \"__main__\" and the block runs. This lets the file serve as both a runnable script and an importable module."
+        },
+        {
+          "text": "It makes the program run faster by skipping the function definition.",
+          "correct": false,
+          "explanation": "Python always reads the entire file, including function definitions. The guard only controls whether the block of code inside it executes — it has no effect on what gets defined."
+        },
+        {
+          "text": "It checks whether the greet function returned the right value.",
+          "correct": false,
+          "explanation": "The guard checks the value of __name__, a special variable Python sets when loading a file. It has nothing to do with return values."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+# Robust Parser
+
+Real data is messy. A CSV export, a config file, a user-pasted list — none of them are guaranteed to be clean. This exercise puts everything from the module together: catching multiple exception types, using `else` to keep the success path separate, and building up a result while tracking what went wrong.
+
+## Your task
+
+Write a function **`parse_records(lines)`** that takes a list of strings, each representing a record in the format `"name:score"` (e.g. `"Alice:88"`), and returns a dictionary with two keys:
+
+- `"records"` — a list of `{"name": str, "score": int}` dicts for every line that parsed successfully
+- `"errors"` — a list of strings describing each line that failed, in the format `"Line N: <reason>"` (1-indexed)
+
+A line can fail in two ways:
+- **Wrong format** (not exactly one `:`): reason is `"expected 'name:score' format"`
+- **Bad score** (the part after `:` isn't a valid integer): reason is `"score must be an integer"`
+
+Lines that are empty or contain only whitespace should be skipped silently (not added to either list).
+
+Also write **`summary(result)`** that takes the dict returned by `parse_records` and returns a formatted string:
+
+```
+Parsed N records, M errors.
+```
+
+where N is the count of successful records and M is the count of errors.
+
+## Examples
+
+```python
+lines = [
+    "Alice:88",
+    "Bob:not-a-number",
+    "Charlie",
+    "Dana:95",
+    "",
+    "Eve:72:extra",
+]
+
+result = parse_records(lines)
+# result["records"] == [
+#     {"name": "Alice", "score": 88},
+#     {"name": "Dana",  "score": 95},
+# ]
+# result["errors"] == [
+#     "Line 2: score must be an integer",
+#     "Line 3: expected 'name:score' format",
+#     "Line 6: expected 'name:score' format",
+# ]
+
+summary(result)
+# "Parsed 2 records, 3 errors."
+```
+
+## Requirements
+
+- Use `str.split(":")` to split each line, then check `len(parts) != 2` for the format check.
+- Use `try`/`except ValueError` to catch a bad score, with an `else` block to append the successful record.
+- Use `enumerate(lines, 1)` to get 1-indexed line numbers.
+- Skip blank lines with `if not line.strip(): continue` before any other checks.
+- `summary` must use the exact format `"Parsed N records, M errors."` (with the period).

@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "A view is a stored SELECT. Whatever columns that SELECT lists are the only columns the view has -- so to hide salary, simply don't select it.",
+    "Replace SELECT * with an explicit column list: SELECT employee_id, first_name, last_name, branch_id FROM employee.",
+    "Full definition: CREATE VIEW employee_public AS SELECT employee_id, first_name, last_name, branch_id FROM employee;  then SELECT * FROM employee_public; to see the safe window."
+  ]
+}

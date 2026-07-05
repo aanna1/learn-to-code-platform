@@ -1,0 +1,54 @@
+# F-String Formats
+
+Python's f-string format mini-language controls exactly how numbers are displayed — no helper functions, no manual rounding, no string conversion.
+
+## Your task
+
+Implement `format_report(price, population, ratio, status_code, flags)` that returns a formatted string with five lines, one per value.
+
+Given these inputs:
+
+```python
+price = 3.14159
+population = 1234567
+ratio = 0.847
+status_code = 255
+flags = 42
+```
+
+The function should return:
+
+```
+Price:       $3.14
+Population:  1,234,567
+Ratio:       84.7%
+Status code: 0xff
+Flags:       00101010
+```
+
+## Format specs to use
+
+| Value | What you want | Format spec |
+|---|---|---|
+| `price` | Two decimal places with a `$` prefix | `$.2f` |
+| `population` | Comma-separated thousands | `:,` |
+| `ratio` | Percentage with 1 decimal place | `:.1%` |
+| `status_code` | Hex with `0x` prefix | `:#x` |
+| `flags` | Binary padded to 8 digits | `:08b` |
+
+## Requirements
+
+- Return the result as a single string. Use `"\n".join(...)` to combine the five lines.
+- Do not add a trailing newline.
+- All five lines must appear in the order shown.
+- Use f-string format specs — not `round()`, `format()`, `str()`, or helper functions.
+
+## Example output
+
+```
+Price:       $3.14
+Population:  1,234,567
+Ratio:       84.7%
+Status code: 0xff
+Flags:       00101010
+```

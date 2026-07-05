@@ -1,0 +1,44 @@
+# Test a Stack
+
+A good test suite does more than confirm the happy path. It checks the edges, and it verifies that the right exceptions fire when something breaks.
+
+A `Stack` class is provided in the starter code. A stack is a last-in, first-out collection: you push items on top, and pop them off the top.
+
+## Your task
+
+Write a `TestStack` class that inherits from `unittest.TestCase` and contains **at least four test methods**, each testing one specific behavior:
+
+1. `test_push_increases_size` — after pushing one item, `size()` should return 1.
+2. `test_pop_returns_last_pushed` — push two items, pop once, confirm you get the second item back.
+3. `test_pop_empty_raises` — popping from an empty stack should raise `IndexError`.
+4. `test_peek_does_not_remove` — after a `peek()`, the stack size should still be the same as before.
+
+You may add more test methods, but those four must be present and correct.
+
+## The Stack API
+
+```python
+s = Stack()
+s.push(10)          # add 10 to the top
+s.push(20)          # add 20 to the top
+s.pop()             # removes and returns 20
+s.peek()            # returns 20 without removing it
+s.size()            # returns the number of items currently in the stack
+s.is_empty()        # returns True if the stack has no items
+```
+
+## Requirements
+
+- `TestStack` must inherit from `unittest.TestCase`.
+- All four named test methods must be present.
+- Each test method should focus on one behavior, use the arrange/act/assert pattern, and end with at least one `self.assert*` call.
+
+## Example structure
+
+```python
+class TestStack(unittest.TestCase):
+    def test_push_increases_size(self):
+        s = Stack()          # Arrange
+        s.push(42)           # Act
+        self.assertEqual(s.size(), 1)  # Assert
+```

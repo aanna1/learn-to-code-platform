@@ -1,0 +1,9 @@
+{
+  "hints": [
+    "All four comprehension shapes share the same core structure: an expression followed by 'for variable in iterable'. The brackets determine the output type: [] for list, {} for set, {k: v} for dict, () for generator.",
+    "For square_evens, add a filter clause after the iterable: [x ** 2 for x in nums if x % 2 == 0]. The 'if' part keeps only the values you want.",
+    "For word_lengths, a dict comprehension needs a key: value pair before 'for': {w: len(w) for w in words}. The colon separates the key expression from the value expression.",
+    "For unique_squares, use curly braces without a colon: {x ** 2 for x in nums}. A set automatically removes duplicates, so (-2)² and 2² both equal 4 and only one copy is kept.",
+    "For first_n_squares, wrap the expression in parentheses instead of brackets: (x ** 2 for x in range(n)). This creates a generator object that computes each value lazily when iterated."
+  ]
+}

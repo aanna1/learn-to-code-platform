@@ -1,0 +1,31 @@
+{
+  "questions": [
+    {
+      "question": "Which import style is the safest default and clearest to read?",
+      "options": [
+        { "text": "`import math`",                "correct": true,  "explanation": "Right. `import math` keeps everything namespaced under `math.`, so readers know exactly where `math.sqrt` comes from. Use this 90% of the time." },
+        { "text": "`from math import *`",          "correct": false, "explanation": "`from math import *` imports every public name at once. If two modules both define `sqrt`, the second one silently overwrites the first, and you can no longer tell where any name came from." },
+        { "text": "`from math import sqrt, pi`",   "correct": false, "explanation": "This is a valid second choice when you use just one or two names heavily — but it's not the safest default because the short names can collide with your own variables. `import math` is safer." },
+        { "text": "`import math as m`",            "correct": false, "explanation": "Aliasing is fine for conventional abbreviations like `np` or `pd`, but inventing your own saves three characters and confuses every reader. Leave the name alone unless the community already has a convention." }
+      ]
+    },
+    {
+      "question": "What does `random.randint(1, 6)` produce?",
+      "options": [
+        { "text": "An integer from 1 to 6, with 6 included",   "correct": true,  "explanation": "Correct. `randint(a, b)` is inclusive on both ends — it can return 1, 2, 3, 4, 5, or 6. This is the odd one out in Python, where most ranges exclude the upper bound." },
+        { "text": "An integer from 1 to 5, with 6 excluded",   "correct": false, "explanation": "That describes `random.randrange(1, 6)`, which matches `range(1, 6)`. `randint` is the exception — it includes both endpoints. Using them interchangeably causes off-by-one bugs." },
+        { "text": "A float between 1.0 and 6.0",               "correct": false, "explanation": "`randint` always returns an integer. For a float in [0.0, 1.0), use `random.random()`. For a float in a custom range, multiply or shift `random.random()`." },
+        { "text": "An integer from 0 to 6",                    "correct": false, "explanation": "The lower bound is the first argument, not zero. `randint(1, 6)` starts at 1. If you wanted 0 to 6, you'd write `randint(0, 6)` — or more idiomatically, `randrange(7)` for 0 through 6." }
+      ]
+    },
+    {
+      "question": "You run `json.loads(json.dumps({\"coords\": (3, 4)}))` and then check `type(result[\"coords\"])`. What do you get?",
+      "options": [
+        { "text": "`list`",  "correct": true,  "explanation": "Right. JSON has no tuple type — only arrays. A Python tuple serializes to a JSON array `[3, 4]`, and when loaded back, JSON arrays become Python lists. The round trip loses the 'tuple' type." },
+        { "text": "`tuple`", "correct": false, "explanation": "JSON has no tuple type. The tuple is serialized as a JSON array, and on the way back it comes out as a list. If downstream code depends on it being a tuple (for example, using it as a dictionary key), it'll break." },
+        { "text": "`str`",   "correct": false, "explanation": "`(3, 4)` is not a string — it's a sequence. JSON serializes sequences as arrays, not strings. The result after loading is a list, not a string." },
+        { "text": "`TypeError` is raised",  "correct": false, "explanation": "`json.dumps` can serialize tuples — it converts them to JSON arrays. The error you'd get for truly non-serializable types like `set` or `date` is `TypeError: Object of type X is not JSON serializable`." }
+      ]
+    }
+  ]
+}

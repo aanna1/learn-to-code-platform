@@ -1,0 +1,56 @@
+# Name Guard
+
+The `if __name__ == "__main__":` pattern lets a file do two things at once: it can run as a standalone script, and it can be imported by another file without the script code running.
+
+When Python *runs* a file directly, it sets `__name__` to `"__main__"`. When it *imports* a file, it sets `__name__` to the module's name. The guard block only executes in the first case.
+
+This matters for testing: the grader imports your file to call your functions. If your demo code runs on import, it can crash the grader (especially if it calls `input()`). The guard prevents that.
+
+## Your task
+
+Write a module with two temperature-conversion functions and a `main()` function that demonstrates them.
+
+### `celsius_to_fahrenheit(c)`
+
+Returns the Fahrenheit equivalent of `c` degrees Celsius.
+
+Formula: `F = c * 9/5 + 32`
+
+```python
+celsius_to_fahrenheit(0)    # 32.0
+celsius_to_fahrenheit(100)  # 212.0
+celsius_to_fahrenheit(-40)  # -40.0
+```
+
+### `fahrenheit_to_celsius(f)`
+
+Returns the Celsius equivalent of `f` degrees Fahrenheit.
+
+Formula: `C = (f - 32) * 5/9`
+
+```python
+fahrenheit_to_celsius(32)   # 0.0
+fahrenheit_to_celsius(212)  # 100.0
+fahrenheit_to_celsius(-40)  # -40.0
+```
+
+### `main()`
+
+A function that prints a few example conversions. The exact output does not matter, but it must call both `celsius_to_fahrenheit` and `fahrenheit_to_celsius` at least once each.
+
+### The guard
+
+At the bottom of your file, add:
+
+```python
+if __name__ == "__main__":
+    main()
+```
+
+This ensures `main()` only runs when you press Run — not when the grader imports your module.
+
+## Requirements
+
+- Both conversion functions must return a `float`.
+- `main()` must exist and call both functions.
+- The `if __name__ == "__main__":` guard must be present at module level.

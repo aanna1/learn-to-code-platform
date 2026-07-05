@@ -1,0 +1,79 @@
+{
+  "questions": [
+    {
+      "question": "What's the difference between a database and a database management system (DBMS)?",
+      "options": [
+        {
+          "text": "The database is the information itself; the DBMS is the software that creates, manages, and controls access to it.",
+          "correct": true,
+          "explanation": "Correct. The database is the data (the related information). The DBMS is the software layer that creates, organizes, secures, and controls access to that data — and it's the only thing that touches the stored data directly."
+        },
+        {
+          "text": "They're the same thing — just two names for the same software.",
+          "correct": false,
+          "explanation": "Not quite. A DBMS is software that manages a database; the database is the data it manages. A database can even exist on paper or in your head, with no DBMS at all."
+        },
+        {
+          "text": "A database is always non-relational, and a DBMS is always relational.",
+          "correct": false,
+          "explanation": "No — both terms apply to either kind. There are relational and non-relational databases, and DBMSs for each. Relational vs. non-relational is a separate distinction from database vs. DBMS."
+        },
+        {
+          "text": "A database runs the queries; a DBMS just stores the raw files on disk.",
+          "correct": false,
+          "explanation": "It's the other way around. The DBMS is the active software that runs queries and enforces access rules; the database is the information being managed."
+        }
+      ]
+    },
+    {
+      "question": "Which of these makes a database specifically *relational*?",
+      "options": [
+        {
+          "text": "It organizes data into tables with rows and columns, where a unique key identifies each row.",
+          "correct": true,
+          "explanation": "Correct. That table-of-rows-and-columns structure, with a key identifying each row, is exactly what makes a database relational — the same shape as a spreadsheet."
+        },
+        {
+          "text": "It's stored on a computer rather than on paper.",
+          "correct": false,
+          "explanation": "Storage medium has nothing to do with it. A relational database is defined by its table structure, not by where it lives."
+        },
+        {
+          "text": "It uses a username and password to control access.",
+          "correct": false,
+          "explanation": "Access control is important, but it isn't what makes a database relational. Non-relational databases have logins too."
+        },
+        {
+          "text": "It stores its data as JSON documents.",
+          "correct": false,
+          "explanation": "That describes a document (NoSQL) database — the non-relational side. Relational databases store data in fixed tables, not free-form documents."
+        }
+      ]
+    },
+    {
+      "question": "Why are databases such a common target for attackers, compared to, say, a single web page?",
+      "options": [
+        {
+          "text": "A database concentrates an application's most valuable data — user info, payment details, credentials — in one place, so compromising it yields the most value per attack.",
+          "correct": true,
+          "explanation": "Correct. The value is in the concentration: one successful attack on the database can expose data on millions of people at once."
+        },
+        {
+          "text": "Databases are inherently weaker, less secure software than web servers.",
+          "correct": false,
+          "explanation": "The risk comes from where the valuable data lives, not from databases being flimsier software. A well-configured database is not 'weak' — it's just where the prize is."
+        },
+        {
+          "text": "Attackers only ever target large companies like Amazon.",
+          "correct": false,
+          "explanation": "Attackers scan for exploitable mistakes regardless of the target's size. A small project with an unsanitized input is just as likely to be hit."
+        },
+        {
+          "text": "Web pages can't be attacked at all, so the database is the only option.",
+          "correct": false,
+          "explanation": "Web pages absolutely can be attacked — but a single page usually holds little of value. The database is the target because that's where the valuable data concentrates."
+        }
+      ]
+    }
+  ]
+}

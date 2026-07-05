@@ -1,0 +1,9 @@
+Ryan was just hired and hasn't been assigned to a branch yet, so his `branch_id` is `NULL` — SQL's way of saying "unknown." Your job: find every employee with no branch assigned, and return their **`first_name`**.
+
+The catch — and it's one of the most common bugs in all of SQL — is that `WHERE branch_id = NULL` does **not** work. Nothing is ever *equal* to `NULL`, not even another `NULL`, so `= NULL` silently matches zero rows and the grid comes back empty. The starter makes exactly this mistake.
+
+Fix it with `IS NULL`, press **Run**, then **Submit**.
+
+<Callout type="tip">
+To test for a missing value, use `IS NULL` (or `IS NOT NULL` for the opposite) — never `=`. So the clause is `WHERE branch_id IS NULL`.
+</Callout>

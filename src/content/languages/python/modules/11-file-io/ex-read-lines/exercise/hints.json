@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Open the file inside a `with` block: `with open(filepath, \"r\") as f:`. Then `for line in f:` gives you one line at a time.",
+    "Each line from the file ends with `\\n`. Call `line.strip()` to remove it (and any leading spaces). Store the stripped result in a variable before checking it.",
+    "To skip blank lines, check if the stripped line is truthy: `if stripped:` is equivalent to `if stripped != \"\":`. Only append lines that pass this check.",
+    "For `count_lines`, you don't need to rewrite the logic. Just call `read_lines(filepath)` and return the length of what you get back."
+  ]
+}

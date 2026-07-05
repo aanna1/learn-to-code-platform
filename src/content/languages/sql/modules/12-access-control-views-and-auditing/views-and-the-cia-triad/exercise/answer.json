@@ -1,0 +1,10 @@
+{
+  "team-lead": "Create a view that selects only the safe columns, grant SELECT on the view, and revoke access to the base table",
+  "view-boundary": "It exposes only the columns and rows its definition selects, and the database enforces that — a user granted the view but revoked on the base table literally cannot reach the hidden data",
+  "auditing": "A record of who actually DID what, from which account and when — the accountability that makes integrity enforceable, and a legal requirement under HIPAA, PCI-DSS, and SOX",
+  "cia": {
+    "Views and access control": "Confidentiality",
+    "Auditing": "Integrity",
+    "Backup and recovery": "Availability"
+  }
+}

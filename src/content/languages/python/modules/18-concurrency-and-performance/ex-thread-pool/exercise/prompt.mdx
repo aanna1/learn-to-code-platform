@@ -1,0 +1,55 @@
+You have a list of tasks that each take a little time (simulating a network call or disk read). Right now they run one at a time. Your job is to make them run concurrently using a thread pool.
+
+## Part 1: basic pool
+
+Write a function `run_all(tasks: list[int], max_workers: int) -> list[str]` that:
+
+- Accepts a list of integer task IDs and a worker count.
+- Uses `ThreadPoolExecutor(max_workers=max_workers)` to call `slow_task(task_id)` for every ID.
+- Returns the results as a list, preserving the original order.
+
+`slow_task` is already defined for you in the starter — don't change it.
+
+## Part 2: per-task error handling
+
+Write a function `run_with_errors(tasks: list[int], max_workers: int) -> dict[int, str]` that:
+
+- Submits each task with `pool.submit`.
+- Uses `as_completed` to process results as they arrive.
+- If a task raises an exception, stores `"error"` for that task ID instead of crashing.
+- Returns a `dict` mapping each task ID to its result string or `"error"`.
+
+## What to implement
+
+```python
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import time
+
+def slow_task(task_id: int) -> str:
+    time.sleep(0.05)
+    if task_id % 7 == 0 and task_id != 0:
+        raise ValueError(f"task {task_id} is unlucky")
+    return f"done-{task_id}"
+
+
+def run_all(tasks: list[int], max_workers: int) -> list[str]:
+    # your code here
+    pass
+
+
+def run_with_errors(tasks: list[int], max_workers: int) -> dict[int, str]:
+    # your code here
+    pass
+```
+
+## Checking your work
+
+```python
+print(run_all(list(range(5)), max_workers=5))
+# ['done-0', 'done-1', 'done-2', 'done-3', 'done-4']
+
+results = run_with_errors(list(range(10)), max_workers=5)
+print(results[0])   # 'done-0'
+print(results[7])   # 'error'
+print(results[1])   # 'done-1'
+```

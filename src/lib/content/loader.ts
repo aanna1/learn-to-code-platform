@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type {
   Course,
@@ -6,6 +6,7 @@ import type {
   Hints,
   LectureContent,
   LessonRef,
+  ModelingContent,
   ModuleManifest,
   Quiz,
 } from "@/lib/content/types";
@@ -25,12 +26,37 @@ import type {
  *       <lessonId>/                 # lecture lesson
  *         lecture.mdx
  *         quiz.json                 # optional
- *       <lessonId>/exercise/        # exercise lesson
+ *       <lessonId>/exercise/        # exercise lesson (text-runtime languages, e.g. Python/C)
  *         prompt.mdx
  *         starter.py
  *         solution.py
  *         tests.py
  *         hints.json
+ *
+ * SQL (and any result-set language) uses a parallel exercise bundle instead of
+ * the .py trio — detected by the presence of `starter.sql`, so the loader stays
+ * language-agnostic (it branches on files present, never on a language id):
+ *
+ *       <lessonId>/exercise/
+ *         prompt.mdx
+ *         schema.sql                # fixture: CREATE TABLE + INSERT seed rows
+ *         starter.sql               # starter query (fails >= 1 test)
+ *         solution.sql              # reference query (passes all tests)
+ *         tests.json                # { "cases": SqlTestCase[] } — result-set comparison
+ *         hints.json
+ *
+ * The runtime's run()/runTests() take `code` and `tests` as plain strings, so the
+ * loader normalizes the SQL bundle into the shared ExerciseContent shape:
+ *   - `starter`/`solution` = schema.sql prepended to starter.sql/solution.sql, so a
+ *     fresh in-memory DB seeds itself when the learner presses Run (the runtime does
+ *     not seed schema.sql separately on Run — the fixture must reach the DB via the
+ *     editor code).
+ *   - `tests` = JSON.stringify({ schema, cases }) — the SqlTestsPayload the sql.js
+ *     worker parses. Grading re-seeds `schema` on a fresh DB per case, peels that same
+ *     schema prefix back off the editor code to recover the learner's query, then runs
+ *     schema → (optional per-case setup) → query — the order scripts/sql/grade_check.mjs
+ *     uses, so a case's `setup` fixture-variation lands between the schema and the query.
+ *     Fresh DB per case ⇒ cases stay isolated and order-independent.
  */
 
 function contentRoot(languageId: string): string {
@@ -43,6 +69,36 @@ function moduleDir(languageId: string, moduleId: string): string {
 
 function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(path, "utf8")) as T;
+}
+
+/**
+ * Read hints.json, tolerating both authoring shapes: the canonical
+ * `{ "hints": [...] }` object and a bare `[...]` array (several modules were authored
+ * that way). Either yields a `Hints`; anything unexpected yields an empty list rather
+ * than an undefined `hints` that would crash the exercise renderer downstream.
+ */
+function readHints(path: string): Hints {
+  const raw = JSON.parse(readFileSync(path, "utf8")) as unknown;
+  if (Array.isArray(raw)) return { hints: raw as string[] };
+  if (raw && typeof raw === "object" && Array.isArray((raw as { hints?: unknown }).hints)) {
+    return { hints: (raw as { hints: string[] }).hints };
+  }
+  return { hints: [] };
+}
+
+/**
+ * Read quiz.json, tolerating both authoring shapes: the canonical
+ * `{ "questions": [...] }` object and a bare `[...]` array of questions (one module
+ * was authored that way). Either yields a `Quiz`; anything unexpected yields an empty
+ * quiz rather than an undefined `questions` that would crash the lecture renderer.
+ */
+function readQuiz(path: string): Quiz {
+  const raw = JSON.parse(readFileSync(path, "utf8")) as unknown;
+  if (Array.isArray(raw)) return { questions: raw as Quiz["questions"] };
+  if (raw && typeof raw === "object" && Array.isArray((raw as { questions?: unknown }).questions)) {
+    return { questions: (raw as Quiz).questions };
+  }
+  return { questions: [] };
 }
 
 function readText(path: string): string {
@@ -91,7 +147,7 @@ export function getLecture(
 
   let quiz: Quiz | null = null;
   try {
-    quiz = readJson<Quiz>(join(dir, "quiz.json"));
+    quiz = readQuiz(join(dir, "quiz.json"));
   } catch {
     // quiz.json is optional; a lecture without one just has no end-of-lesson quiz.
     quiz = null;
@@ -109,13 +165,77 @@ export function getExercise(
   const meta = requireLessonRef(languageId, moduleId, lessonId, "exercise");
   const dir = join(moduleDir(languageId, moduleId), lessonId, "exercise");
 
+  // SQL-style bundle (schema.sql + starter/solution.sql + tests.json). Detected by
+  // file presence so the loader never branches on the language id.
+  if (existsSync(join(dir, "starter.sql"))) {
+    return readSqlExercise(meta, dir);
+  }
+
   return {
     meta,
     promptMdxSource: readText(join(dir, "prompt.mdx")),
     starter: readText(join(dir, "starter.py")),
     solution: readText(join(dir, "solution.py")),
     tests: readText(join(dir, "tests.py")),
-    hints: readJson<Hints>(join(dir, "hints.json")),
+    hints: readHints(join(dir, "hints.json")),
+  };
+}
+
+/**
+ * Read a SQL exercise bundle and normalize it into the shared ExerciseContent shape.
+ * See the on-disk contract note at the top of this file for how the schema is both
+ * prepended to the editor code (for Run) and passed in the tests payload (for the
+ * grader's schema → setup → query re-seed).
+ */
+function readSqlExercise(meta: LessonRef, dir: string): ExerciseContent {
+  const schema = existsSync(join(dir, "schema.sql"))
+    ? readText(join(dir, "schema.sql")).trimEnd()
+    : "";
+  const withSchema = (body: string): string =>
+    schema ? `${schema}\n\n${body}` : body;
+
+  // tests.json is authored as { "cases": [...] } (or a bare [...] of cases). The
+  // schema is ALSO passed in the tests payload (not only prepended to the editor):
+  // the grader peels the schema prefix off the editor code and re-seeds it per case,
+  // so a case's `setup` can run BETWEEN the schema and the learner's query — the
+  // schema → setup → query order that scripts/sql/grade_check.mjs uses. Run (which
+  // has no cases/setup) still relies on the schema being in the editor code.
+  const rawTests = JSON.parse(readFileSync(join(dir, "tests.json"), "utf8")) as unknown;
+  const cases = Array.isArray(rawTests)
+    ? rawTests
+    : rawTests && typeof rawTests === "object" && Array.isArray((rawTests as { cases?: unknown }).cases)
+      ? (rawTests as { cases: unknown[] }).cases
+      : [];
+
+  return {
+    meta,
+    promptMdxSource: readText(join(dir, "prompt.mdx")),
+    starter: withSchema(readText(join(dir, "starter.sql"))),
+    solution: withSchema(readText(join(dir, "solution.sql"))),
+    tests: JSON.stringify({ schema, cases }),
+    hints: readHints(join(dir, "hints.json")),
+  };
+}
+
+/**
+ * Load a Track-2 "modeling" lesson (structured exercise). Same folder position as
+ * an exercise (`<lessonId>/exercise/`) but with question.json + answer.json instead
+ * of the code trio. The route branches on the lesson `type` ("modeling"), never on
+ * a language id.
+ */
+export function getModeling(
+  languageId: string,
+  moduleId: string,
+  lessonId: string,
+): ModelingContent {
+  const meta = requireLessonRef(languageId, moduleId, lessonId, "modeling");
+  const dir = join(moduleDir(languageId, moduleId), lessonId, "exercise");
+  return {
+    meta,
+    promptMdxSource: readText(join(dir, "prompt.mdx")),
+    question: readJson<unknown>(join(dir, "question.json")),
+    answer: readJson<unknown>(join(dir, "answer.json")),
+    hints: readHints(join(dir, "hints.json")),
   };
 }
 

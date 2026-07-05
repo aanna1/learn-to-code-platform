@@ -1,0 +1,32 @@
+{
+  "id": "checkpoint-b-multi-table-report",
+  "title": "Checkpoint B \u2014 Multi-Table Report",
+  "description": "A query checkpoint that ties Modules 05\u201308 together on one seeded four-table store schema (customer, product, sales_order, order_item). Write a series of join-based reports: a two-table inner join, a three-table join with aggregation, a four-table LEFT JOIN that reports true zeros, and a LEFT JOIN anti-join for never-ordered products. Comes right after Module 08 (Joins).",
+  "order": 10,
+  "lessons": [
+    {
+      "id": "ex-orders-with-customer",
+      "title": "Orders With Customer Names",
+      "type": "exercise",
+      "order": 1
+    },
+    {
+      "id": "ex-revenue-per-order",
+      "title": "Revenue Per Order",
+      "type": "exercise",
+      "order": 2
+    },
+    {
+      "id": "ex-customer-total-spend",
+      "title": "Total Spend Per Customer",
+      "type": "exercise",
+      "order": 3
+    },
+    {
+      "id": "ex-never-ordered-products",
+      "title": "Never-Ordered Products",
+      "type": "exercise",
+      "order": 4
+    }
+  ]
+}

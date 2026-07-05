@@ -1,0 +1,19 @@
+[
+  {
+    "name": "only Kindred has never sold",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["title"],
+      "rows": [["Kindred"]]
+    }
+  },
+  {
+    "name": "generalizes: a newly stocked, never-ordered book joins the never-sold list",
+    "setup": "INSERT INTO book VALUES (8, 'Parable of the Sower', 'SciFi', 16.00, 5);",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["title"],
+      "rows": [["Kindred"], ["Parable of the Sower"]]
+    }
+  }
+]

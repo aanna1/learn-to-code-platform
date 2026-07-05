@@ -1,0 +1,67 @@
+In this exercise you'll build a mixin chain and a combining class, then verify that the MRO works correctly.
+
+## Background
+
+A mixin is a small class that adds one piece of behavior to a method and calls `super()` to pass control to the next class in the MRO. The terminal class does the real work. Each mixin in between wraps it.
+
+The key rule: **every class in a mixin chain must call `super()`**, even when it looks pointless in isolation.
+
+## What to build
+
+### Terminal class: `Record`
+
+Write a class `Record` with an `__init__(self, name: str)` that stores `self.name`. It has one method: `process(self) -> list[str]` that returns `[f"Record:{self.name}"]`. This class does **not** call `super().process()` — it's the end of the chain.
+
+### Mixin: `UpperMixin`
+
+Write a mixin with a `process` method that:
+1. Gets the result from `super().process()` (a list of strings).
+2. Returns a new list where every string is uppercased.
+
+### Mixin: `PrefixMixin`
+
+`PrefixMixin.__init__` takes `prefix: str` as an extra keyword argument and stores it as `self.prefix`. It must call `super().__init__(**kwargs)` to pass remaining arguments along.
+
+Its `process` method:
+1. Gets the result from `super().process()`.
+2. Returns a new list where every string has `self.prefix + ":" + s` prepended — the prefix string is prepended to each item (so `"Record:alice"` becomes `"PREFIX:Record:alice"`).
+
+### Combining class: `ProcessedRecord`
+
+Write `ProcessedRecord(UpperMixin, PrefixMixin, Record)` with an `__init__` that accepts `name` and `prefix` and passes them through correctly using `**kwargs`.
+
+### Helper function: `get_mro_names(cls) -> list[str]`
+
+Write a function that returns the list of class names in the MRO, excluding `object`.
+
+## What to implement
+
+```python
+class Record:
+    ...
+
+class UpperMixin:
+    ...
+
+class PrefixMixin:
+    ...
+
+class ProcessedRecord(UpperMixin, PrefixMixin, Record):
+    ...
+
+def get_mro_names(cls) -> list[str]:
+    ...
+```
+
+## Checking your work
+
+```python
+r = ProcessedRecord(name="alice", prefix="TAG")
+print(r.process())
+# ['TAG:RECORD:ALICE']
+
+print(get_mro_names(ProcessedRecord))
+# ['ProcessedRecord', 'UpperMixin', 'PrefixMixin', 'Record']
+```
+
+The order matters. `UpperMixin` comes before `PrefixMixin` in the MRO, so `UpperMixin.process` runs first and uppercases the output of `PrefixMixin.process`, which prefixed the output of `Record.process`.

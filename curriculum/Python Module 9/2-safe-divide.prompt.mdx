@@ -1,0 +1,32 @@
+# Safe Divide
+
+Division works fine until the denominator is zero. Your job is to handle that case cleanly using `try`/`except` instead of checking `b == 0` upfront.
+
+## Your task
+
+Write two functions.
+
+**`safe_divide(a, b)`** — return `a / b` if it succeeds. If `b` is zero, return the string `"undefined"` instead of crashing.
+
+**`safe_divide_message(a, b)`** — return a formatted string:
+- On success: `"10 / 2 = 5.0"`
+- On zero division: `"10 / 0 is undefined"`
+
+Use `try`/`except` in both functions. Do not check `b == 0` with an `if` statement.
+
+## Examples
+
+```python
+safe_divide(10, 2)     # 5.0
+safe_divide(10, 0)     # "undefined"
+safe_divide(-6, 3)     # -2.0
+
+safe_divide_message(10, 2)   # "10 / 2 = 5.0"
+safe_divide_message(10, 0)   # "10 / 0 is undefined"
+```
+
+## Requirements
+
+- Catch `ZeroDivisionError` specifically — not a bare `except`.
+- `safe_divide` returns a `float` on success and the string `"undefined"` on failure.
+- `safe_divide_message` uses an f-string to build the result string from `a`, `b`, and the return value of `safe_divide`.

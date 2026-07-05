@@ -1,0 +1,430 @@
+## Why this matters
+
+So far you've written every piece of every program by hand. Loops, conditionals, dictionaries, your own functions. That's been the right way to learn. But it's the wrong way to actually work.
+
+Imagine you want to know how many days until your birthday. With what you know now, you'd have to write code that knows which months have 30 days, which have 31, that February has 29 in leap years, that a leap year is divisible by 4 except divisible by 100 unless also divisible by 400. That's maybe sixty lines of code, and there's a good chance you'll get it wrong in some subtle way that doesn't surface until 2100.
+
+Or you could write this:
+
+```python
+from datetime import date
+days = (date(2026, 11, 14) - date.today()).days
+print(days)
+```
+
+Three lines. Correct in every year. Already tested by the millions of Python programs that depend on it. The leap-year logic is in there. You don't have to think about it.
+
+Python ships with a *standard library* of around two hundred modules — dates, math, randomness, files, networking, compression, and more. On top of that, hundreds of thousands of third-party packages exist for the cases the standard library doesn't cover. A working Python programmer doesn't just write code; they know what's already been written so they can write less.
+
+<Callout type="info">
+No installation needed. Every code block on this platform has a **Run** button — press it and your code runs instantly in the browser. You don't need Python on your machine; you don't need a terminal.
+</Callout>
+
+## What you'll be able to do by the end
+
+- Import a module from the standard library and call its functions correctly.
+- Tell the difference between `import x`, `from x import y`, and `from x import *`, and explain why the third is a trap.
+- Use `random`, `datetime`, `json`, `pathlib`, and `sys` for their most common jobs.
+- Explain what `pip` and virtual environments do, and why they matter.
+- Split your own code across multiple `.py` files and import between them.
+- Read a module's documentation well enough to use a function you've never seen before.
+
+## Core concepts
+
+### Module, package, library: the words
+
+Three terms that often get used interchangeably. Worth pinning down before going further.
+
+A **module** is a single `.py` file containing Python code. The file `math.py` (which ships with Python) is the `math` module.
+
+A **package** is a folder of related modules grouped together. The `urllib` package contains modules `urllib.request`, `urllib.parse`, and so on — each a separate file inside a `urllib/` folder.
+
+A **library** is informal English for either of the above. People say "the `requests` library" when they mean a package. They say "the `math` library" when they mean a module. It means "a chunk of code someone else wrote that you import." Don't overthink it.
+
+### `import`: three flavors
+
+The basic version:
+
+<Runnable code={`import math
+print(math.sqrt(16))   # 4.0
+print(math.pi)         # 3.141592653589793`} />
+
+`import math` makes the whole `math` module available under the name `math`. You access anything in it with `math.something`. This is the safest, clearest form — use it 90% of the time.
+
+The second flavor:
+
+<Runnable code={`from math import sqrt, pi
+print(sqrt(16))        # 4.0
+print(pi)              # 3.141592653589793`} />
+
+`from math import sqrt, pi` pulls just those two names directly into your file. You can call `sqrt` without the `math.` prefix. This is fine when you're using one or two names a lot and the short form makes the code more readable. The risk is that `sqrt` could collide with a variable named `sqrt` in your own code — not usually a problem for famous names like `pi`, but worth watching with generic names like `path` or `open`.
+
+The third flavor is the one you should not write:
+
+```python
+from math import *
+print(sqrt(16))
+print(pi)
+```
+
+`from math import *` imports every public name from `math` into your file. Watch what goes wrong:
+
+```python
+from math import *
+from cmath import *      # complex math
+print(sqrt(-1))          # what does this print?
+```
+
+The second import overwrote `sqrt` with the complex-number version. Now `sqrt(-1)` returns `1j` (an imaginary number) instead of raising a `ValueError`. If you didn't know `cmath` had a `sqrt`, you'd have no idea why the answer turned strange. With explicit `math.sqrt` and `cmath.sqrt`, the collision is visible.
+
+Bigger problem: when you read someone else's code that uses `import *`, you can't tell where a name came from. `sqrt` could be defined in this file, imported from `math`, or imported from `cmath`. You'd have to read everything to find out.
+
+Rule of thumb: use `import module`. Sometimes use `from module import specific_name`. Almost never use `from module import *`.
+
+### Aliasing with `as`
+
+You can rename a module or imported name on the way in:
+
+```python
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+```
+
+These three aliases are conventions so deeply baked into the data-science world that you'll see them in every tutorial. `np`, `pd`, and `plt` are universal. For libraries outside those conventions, leave the name alone. `import math as m` saves three characters and confuses every reader.
+
+### Tour: `random`
+
+The `random` module gives you randomness. The two functions you'll use most:
+
+<Runnable code={`import random
+
+print(random.randint(1, 6))           # an integer in [1, 6], inclusive on both ends
+print(random.choice(["yes", "no"]))   # a random element from a list`} />
+
+Notice the inclusive endpoints on `randint`. This is one of the few places in Python where a range is inclusive of the upper bound, and it's a frequent source of off-by-one bugs because every other range in Python is upper-exclusive.
+
+Compare to the sibling function:
+
+<Runnable code={`import random
+print(random.randrange(1, 6))   # integer in [1, 6), exclusive on upper end — never 6`} />
+
+`randrange(1, 6)` produces 1, 2, 3, 4, or 5. Never 6. This matches `range(1, 6)` from Module 5, which also stops at 5. `randint` is the odd one out.
+
+Use `randint` when the spec literally says "a number from 1 to 6, like a die." Use `randrange` when picking an index (to stay consistent with `range()`). Use `random.choice` when you can express the choice as a list.
+
+Other useful functions from `random`:
+
+<Runnable code={`import random
+print(random.random())                       # float in [0.0, 1.0)
+my_list = [1, 2, 3, 4, 5]
+random.shuffle(my_list)
+print(my_list)                               # shuffled in place, returns None
+print(random.sample([1, 2, 3, 4, 5], 3))    # 3 unique items, list unchanged`} />
+
+### Tour: `datetime`
+
+Dates and times come from the `datetime` module. The module's name is also the name of one of the classes inside it, which trips people up the first time. The module also contains `date`, `time`, and `timedelta` classes.
+
+For days-and-no-times work, `date` is enough:
+
+<Runnable code={`from datetime import date
+
+today = date.today()
+print(today)          # 2026-05-30
+print(today.year)     # 2026
+print(today.month)    # 5
+print(today.day)      # 30`} />
+
+Want to know how many days between two dates? Subtract them:
+
+<Runnable code={`from datetime import date
+
+birthday = date(2026, 11, 14)
+today = date.today()
+delta = birthday - today
+print(delta.days)     # integer number of days`} />
+
+Subtracting two dates produces a `timedelta`, which represents a span of time. Its `.days` attribute is the integer number of days. This is the correct approach. The wrong way beginners reach for:
+
+```python
+# DON'T DO THIS
+months_diff = birthday.month - today.month
+days_diff = birthday.day - today.day
+total = months_diff * 30 + days_diff
+```
+
+That assumes every month has 30 days. February exists. Leap years exist. And what if the birthday is next year? `months_diff` goes negative. The `timedelta` version handles every case automatically.
+
+The other catch: `date(2026, 13, 1)` raises `ValueError`. There is no month 13. Python is strict about dates being real.
+
+Without running it, what do you think this prints?
+
+<Runnable code={`from datetime import date
+
+d1 = date(2026, 1, 1)
+d2 = date(2026, 12, 31)
+print((d2 - d1).days)`} />
+
+<Callout type="tip">
+364, not 365. The subtraction counts the days *between* the two dates — Jan 1 to Jan 2 is 1 day, not 2. There are 364 gaps between Jan 1 and Dec 31.
+</Callout>
+
+For dates with times, use `datetime` (the class inside the `datetime` module):
+
+<Runnable code={`from datetime import datetime
+now = datetime.now()
+print(now)    # 2026-05-30 14:32:01.123456`} />
+
+Same arithmetic rules. Subtracting two `datetime` values gives a `timedelta` that includes hours, minutes, and seconds.
+
+### Tour: `json`
+
+JSON ("JavaScript Object Notation") is a text format for structured data. It looks like Python dicts and lists:
+
+```
+{"name": "Ada", "age": 25, "skills": ["python", "math"]}
+```
+
+That's a JSON string. Keys and string values use double quotes, not single quotes. No trailing commas. No `True`/`False` (JSON uses lowercase `true`/`false`). And `None` becomes `null`.
+
+The `json` module converts between Python objects and JSON strings:
+
+<Runnable code={`import json
+
+# Python -> JSON string
+person = {"name": "Ada", "age": 25, "is_student": False}
+text = json.dumps(person)
+print(text)
+# {"name": "Ada", "age": 25, "is_student": false}
+
+# JSON string -> Python
+parsed = json.loads(text)
+print(parsed["name"])    # Ada`} />
+
+`json.dumps` is "dump string" (serialize to a string). `json.loads` is "load string" (parse a string). The cousins without the `s` — `json.dump` and `json.load` — work directly on files; those appear in Module 11.
+
+For human-readable output, pass `indent`:
+
+<Runnable code={`import json
+person = {"name": "Ada", "age": 25, "is_student": False}
+print(json.dumps(person, indent=2))`} />
+
+Now try this one. What do you think happens to the tuple after a round trip?
+
+<Runnable code={`import json
+data = {"name": "checkpoint", "coords": (3, 4)}
+text = json.dumps(data)
+back = json.loads(text)
+print(type(back["coords"]))
+print(back["coords"])`} />
+
+<Callout type="tip">
+`coords` started as a tuple. JSON has no tuple type — only arrays — so it serialized as `[3, 4]`. When loaded back, JSON arrays become Python lists. The round trip lost the "tuple" type. If downstream code assumes `coords` is a tuple and tries to use it as a dict key, it'll break.
+</Callout>
+
+JSON doesn't support every Python type. It can't represent sets, dates, or custom objects. If you try to serialize one, `json.dumps` raises `TypeError: Object of type X is not JSON serializable`. Convert your data to JSON-friendly shapes first — lists, dicts, strings, numbers, booleans, `None`.
+
+### Tour: `pathlib`
+
+For working with file paths, `pathlib` is the modern API:
+
+<Runnable code={`from pathlib import Path
+
+p = Path("data/users.json")
+print(p.parent)    # data
+print(p.name)      # users.json
+print(p.stem)      # users
+print(p.suffix)    # .json`} />
+
+A `Path` object is a path with methods attached. To build paths, use `/`:
+
+<Runnable code={`from pathlib import Path
+
+base = Path("/home/user/projects")
+config = base / "myapp" / "config.json"
+print(config)    # /home/user/projects/myapp/config.json`} />
+
+That `/` is the path-joining operator on `Path` objects. It works on Windows, Mac, and Linux and handles separators correctly on each platform.
+
+Compare to the old approach:
+
+```python
+# Don't do this
+config = "/home/user/projects" + "/" + "myapp" + "/" + "config.json"
+```
+
+`pathlib` is what you reach for in any code written this decade. Reading and writing files with `p.read_text()` and `p.write_text()` pairs naturally with it — you'll use those in Module 11.
+
+### Tour: `sys`
+
+The `sys` module gives you access to the running Python interpreter. The most-used feature in scripts is command-line arguments:
+
+```python
+# script.py
+import sys
+
+print(sys.argv)
+# Run with: python script.py hello world
+# Output: ['script.py', 'hello', 'world']
+```
+
+`sys.argv` is the list of command-line arguments. `argv[0]` is the script name itself. `argv[1]`, `argv[2]`, and so on are the arguments you passed. This only makes sense in a terminal context — the Run button on this platform feeds arguments differently, so `sys.argv` won't appear in exercises. But you'll see it in every real command-line script you encounter.
+
+`sys.exit(code)` ends the program with a given exit code. A non-zero code means "something went wrong." Other programs that launch yours look at the exit code to know whether it succeeded.
+
+### Tour: `math` and `statistics`
+
+`math` has `sqrt`, `pi`, `floor`, `ceil`, `log`, and the trig functions. One quirk worth knowing: `round` is a built-in, not from `math`, and it uses "banker's rounding" (round-half-to-even). So `round(2.5)` is 2, not 3.
+
+<Runnable code={`import math, statistics
+
+scores = [85, 92, 78, 95, 88, 76]
+print(statistics.mean(scores))    # 85.666...
+print(statistics.median(scores))  # 86.5
+print(math.floor(3.7))            # 3
+print(math.ceil(3.2))             # 4`} />
+
+For serious data work, `numpy` and `pandas` are what you'll reach for. `statistics` is fine for small sets.
+
+### Third-party packages: `pip` and virtual environments
+
+The standard library is generous but not exhaustive. To talk to a real web server, you want `requests`. To work with tabular data, you want `pandas`. To run tests, you want `pytest`. These don't ship with Python — you install them.
+
+The tool is `pip`. From a terminal, outside of Python:
+
+```
+pip install requests
+```
+
+That downloads `requests` from the Python Package Index (PyPI) and installs it so you can `import requests` in your scripts.
+
+The problem with installing packages globally is that different projects want different versions. Project A needs `requests` 2.28; Project B needs `requests` 2.31. If you install everything globally, upgrading one breaks the other.
+
+The fix is a **virtual environment**: a self-contained folder of Python and its packages, separate from the system Python. Each project gets its own:
+
+```
+python -m venv venv          # create a venv folder
+source venv/bin/activate     # activate it (Mac/Linux)
+venv\Scripts\activate        # activate it (Windows)
+pip install requests         # installs into the venv, not the system
+deactivate                   # done
+```
+
+After `activate`, your shell uses the venv's Python and pip. You're isolated from the rest of your system. Make a venv at the start of every project and you'll never spend an afternoon untangling version conflicts.
+
+<Callout type="note">
+This platform already has a sandboxed Python environment — you can't run `pip install` here. Standard library modules (`random`, `datetime`, `json`, `pathlib`, `math`, `statistics`) all work as shown. Third-party packages come into play once you're working locally.
+</Callout>
+
+### Writing your own module
+
+Once a script outgrows one file, you split it. Suppose you have:
+
+```
+my_project/
+    main.py
+    dice.py
+```
+
+In `dice.py`:
+
+```python
+# dice.py
+import random
+
+def roll():
+    return random.randint(1, 6)
+
+def roll_many(n):
+    return [roll() for _ in range(n)]
+```
+
+In `main.py`:
+
+```python
+# main.py
+import dice
+
+print(dice.roll())
+print(dice.roll_many(5))
+```
+
+Running `python main.py` from inside `my_project/` finds `dice.py` in the same directory and pulls it in.
+
+A subtlety: when you `import dice`, every top-level statement in `dice.py` runs once. Function definitions get registered. Anything else also executes. If you wrote `print("loading dice")` at the top of `dice.py`, that prints the first time anyone imports it.
+
+The convention for "code that should only run when this file is the main script, not when it's imported":
+
+```python
+# dice.py
+import random
+
+def roll():
+    return random.randint(1, 6)
+
+if __name__ == "__main__":
+    # only runs when you do: python dice.py
+    # does NOT run when another file does: import dice
+    for _ in range(5):
+        print(roll())
+```
+
+`__name__` is a special variable. When a file is run directly, its `__name__` is `"__main__"`. When it's imported, `__name__` is the module name. The `if __name__ == "__main__":` guard lets you both import `dice` cleanly and run it directly. You'll see this pattern in nearly every Python project.
+
+<Callout type="note">
+Exercises on this platform are single-file, so you won't write multi-file imports in exercises. But the `if __name__ == "__main__":` pattern appears in every exercise's starter file — that's the guard that lets the test harness import your code without running your demo output.
+</Callout>
+
+### Reading documentation
+
+Get comfortable with `help` and the official docs early — that's more useful than memorizing signatures.
+
+<Runnable code={`import random
+help(random.randint)`} />
+
+Inclusive on both ends, as we covered.
+
+For a tour of everything a module offers:
+
+<Runnable code={`import random
+print(dir(random))`} />
+
+`dir` returns a list of every name in the module. Most are functions you can `help()` to learn about.
+
+The web docs at `docs.python.org` are the canonical reference. Searching "python random" almost always lands you on the official page.
+
+## Common pitfalls
+
+**`from module import *`.** Collides names, hides where things came from, and makes code hard to follow. Use `import module` or `from module import specific_name`.
+
+**`random.randint(1, 6)` for an index.** It's inclusive on both ends. If you wanted an index into a list of six items, you wanted `random.randrange(6)`, which gives 0 through 5. Mixing them up causes off-by-one bugs.
+
+**String math on dates.** `"2026-11-14"[:4]` for the year is fragile and ignores leap years. Use `datetime.date` and let subtraction do the work.
+
+**Treating `json.dumps` like it can serialize anything.** Tuples become lists. Sets, dates, and custom objects raise `TypeError`. Convert to JSON-friendly shapes first.
+
+**Installing packages globally without a virtual environment.** Sooner or later, two projects need conflicting versions. Make a habit of `python -m venv venv` at the start of every project.
+
+**Forgetting `if __name__ == "__main__":` in a script that gets imported.** Your test or demo code runs every time someone imports the file. The guard is one line; use it.
+
+## How this connects
+
+- **Module 11 (files and CSV)** uses `pathlib` and `json` constantly. The `with open(...)` pattern pairs naturally with the path-handling vocabulary from this module.
+- **Module 12 (the internet)** uses `requests` (third-party) and `urllib` (standard library) to fetch data from the web.
+- **Module 13 (object-oriented programming)** lets you build classes inside modules. The `datetime.date` class you've used is itself a class inside a module — you'll write your own.
+- **Module 14 (testing)** uses `pytest`, the most popular third-party Python library after `requests`. Knowing how to install and import it is the entire setup.
+- **Everything from here on** will be a mix of your own code and library calls. The `if __name__ == "__main__":` split is how every real project is structured.
+
+## Recap
+
+- A module is a `.py` file. A package is a folder of modules. "Library" is informal English for either.
+- `import module` is the safe default. `from module import specific_name` is fine. `from module import *` is a trap.
+- `import x as y` renames on the way in. Use conventional aliases (`np`, `pd`, `plt`); don't invent your own.
+- `random.randint(a, b)` is inclusive on both ends. `random.randrange(a, b)` is exclusive on the upper end, matching `range`.
+- `datetime.date` for calendar dates, `datetime.datetime` for date-plus-time, `timedelta` for spans. Subtraction gives you the right answer; month arithmetic does not.
+- `json.dumps` and `json.loads` convert between Python and JSON. Tuples become lists; sets, dates, and custom objects don't survive.
+- `pathlib.Path` is the modern path API. Use `/` to join paths. `.stem`, `.suffix`, `.parent`, `.name` for inspection.
+- `sys.argv` is the list of command-line arguments. `sys.exit(code)` ends the program with an exit code.
+- `pip install name` installs a third-party package from PyPI — always inside a virtual environment.
+- Splitting code across files uses `import filename` (no `.py`). The `if __name__ == "__main__":` guard separates "imported" from "run directly."

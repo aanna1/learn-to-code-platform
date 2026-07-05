@@ -1,0 +1,24 @@
+{
+  "cardinality": "N:M",
+  "identifying": {
+    "employee.branch_id -> branch": "non-identifying",
+    "assignment.employee_id -> employee": "identifying"
+  },
+  "erd": {
+    "entities": [
+      { "name": "employee", "attributes": [{ "name": "employee_id", "pk": true }] },
+      { "name": "project", "attributes": [{ "name": "project_id", "pk": true }] },
+      {
+        "name": "assignment",
+        "attributes": [
+          { "name": "employee_id", "pk": true },
+          { "name": "project_id", "pk": true }
+        ]
+      }
+    ],
+    "relationships": [
+      { "from": "employee", "to": "assignment", "cardinality": "1:N", "identifying": true },
+      { "from": "project", "to": "assignment", "cardinality": "1:N", "identifying": true }
+    ]
+  }
+}

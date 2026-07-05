@@ -1,0 +1,82 @@
+{
+  "language": "sql",
+  "displayName": "SQL",
+  "tagline": "The language of data. Ask a database precise questions — and learn why the same questions, asked carelessly, are how systems get breached.",
+  "modules": [
+    {
+      "id": "01-databases-and-security",
+      "title": "Databases, RDBMS & Why Attackers Care",
+      "order": 1
+    },
+    {
+      "id": "02-relational-model-and-keys",
+      "title": "The Relational Model & Keys",
+      "order": 2
+    },
+    {
+      "id": "03-entity-relationship-modeling",
+      "title": "Entity-Relationship Modeling",
+      "order": 3
+    },
+    {
+      "id": "04-normalization",
+      "title": "Normalization",
+      "order": 4
+    },
+    {
+      "id": "05-defining-the-schema-ddl",
+      "title": "Defining the Schema (DDL)",
+      "order": 5
+    },
+    {
+      "id": "checkpoint-a-design-and-normalize",
+      "title": "Checkpoint A — Design & Normalize",
+      "order": 6
+    },
+    {
+      "id": "06-select-filtering-sorting",
+      "title": "SELECT, Filtering & Sorting",
+      "order": 7
+    },
+    {
+      "id": "07-functions-and-aggregates",
+      "title": "Functions & Aggregates",
+      "order": 8
+    },
+    {
+      "id": "08-joins",
+      "title": "Joins",
+      "order": 9
+    },
+    {
+      "id": "checkpoint-b-multi-table-report",
+      "title": "Checkpoint B — Multi-Table Report",
+      "order": 10
+    },
+    {
+      "id": "09-subqueries",
+      "title": "Subqueries",
+      "order": 11
+    },
+    {
+      "id": "10-data-manipulation-and-transactions",
+      "title": "Data Manipulation & Transactions",
+      "order": 12
+    },
+    {
+      "id": "11-sql-injection-and-secure-queries",
+      "title": "SQL Injection & Secure Query Practices",
+      "order": 13
+    },
+    {
+      "id": "12-access-control-views-and-auditing",
+      "title": "Access Control, Views & Auditing",
+      "order": 14
+    },
+    {
+      "id": "capstone-design-build-secure",
+      "title": "Capstone — Design, Build & Secure a Small Database",
+      "order": 15
+    }
+  ]
+}

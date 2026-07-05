@@ -1,0 +1,38 @@
+[
+  {
+    "name": "creates the student table",
+    "orderMatters": true,
+    "probe": "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;",
+    "expected": {
+      "columns": ["name"],
+      "rows": [["student"]]
+    }
+  },
+  {
+    "name": "student_id is the primary key",
+    "orderMatters": true,
+    "probe": "SELECT name FROM pragma_table_info('student') WHERE pk > 0 ORDER BY pk;",
+    "expected": {
+      "columns": ["name"],
+      "rows": [["student_id"]]
+    }
+  },
+  {
+    "name": "name is NOT NULL",
+    "orderMatters": true,
+    "probe": "SELECT name FROM pragma_table_info('student') WHERE \"notnull\" = 1 ORDER BY name;",
+    "expected": {
+      "columns": ["name"],
+      "rows": [["name"]]
+    }
+  },
+  {
+    "name": "major defaults to 'undecided'",
+    "orderMatters": true,
+    "probe": "SELECT name, dflt_value FROM pragma_table_info('student') WHERE dflt_value IS NOT NULL ORDER BY name;",
+    "expected": {
+      "columns": ["name", "dflt_value"],
+      "rows": [["major", "'undecided'"]]
+    }
+  }
+]

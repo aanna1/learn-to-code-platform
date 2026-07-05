@@ -1,0 +1,104 @@
+{
+  "questions": [
+    {
+      "question": "Why prefer naming columns (`SELECT first_name, salary ...`) over `SELECT *` in a query an application will run?",
+      "options": [
+        {
+          "text": "It returns only the data you actually need, so sensitive columns you didn't ask for can't leak into responses or logs — and the query won't silently start returning a new column later.",
+          "correct": true,
+          "explanation": "Correct. This is data minimization: you can't leak a column you never selected, and naming columns keeps the query stable when someone later adds a sensitive column to the table."
+        },
+        {
+          "text": "`SELECT *` is invalid SQL and will always raise an error.",
+          "correct": false,
+          "explanation": "SELECT * is perfectly valid — it's just often an unwise habit in production queries. The reason to name columns is data minimization and stability, not a syntax error."
+        },
+        {
+          "text": "Naming columns makes the query run measurably faster in every case.",
+          "correct": false,
+          "explanation": "There can be minor performance differences, but that's not guaranteed and isn't the main point. The real reason is confidentiality and stability."
+        },
+        {
+          "text": "`SELECT *` returns the columns in a random order each time it runs.",
+          "correct": false,
+          "explanation": "SELECT * returns columns in the table's defined order, not a random one. The concern is that it returns every column, including ones you didn't mean to expose."
+        }
+      ]
+    },
+    {
+      "question": "You want every employee whose `branch_id` hasn't been set yet. Why doesn't `WHERE branch_id = NULL` work?",
+      "options": [
+        {
+          "text": "`NULL` means \"unknown,\" and nothing is ever equal to it — not even another `NULL` — so `= NULL` matches zero rows; you must use `IS NULL`.",
+          "correct": true,
+          "explanation": "Correct. Equality against NULL is never true for any value, so = NULL silently returns nothing. IS NULL is the operator that tests for a missing value."
+        },
+        {
+          "text": "It does work; `= NULL` and `IS NULL` are interchangeable.",
+          "correct": false,
+          "explanation": "They are not interchangeable. = NULL returns no rows, while IS NULL returns the rows where the value is actually missing."
+        },
+        {
+          "text": "`= NULL` only works on text columns, not numeric ones.",
+          "correct": false,
+          "explanation": "The column type isn't the issue. Equality against NULL is never true for any type; you always need IS NULL."
+        },
+        {
+          "text": "You have to write `WHERE branch_id == NULL` with a double equals.",
+          "correct": false,
+          "explanation": "SQL uses a single = for comparison, and no form of equals works against NULL. The operator you need is IS NULL."
+        }
+      ]
+    },
+    {
+      "question": "What does `WHERE last_name LIKE 'S%'` match?",
+      "options": [
+        {
+          "text": "Any last name that starts with `S` — `%` stands for any run of characters after it.",
+          "correct": true,
+          "explanation": "Correct. The % wildcard matches any run of characters (including none), so 'S%' is a prefix match: last names beginning with S."
+        },
+        {
+          "text": "Only the last name exactly equal to the letter `S`.",
+          "correct": false,
+          "explanation": "That would be WHERE last_name = 'S'. The % wildcard is what turns it into a prefix match rather than an exact one."
+        },
+        {
+          "text": "Last names that contain `S` anywhere in them.",
+          "correct": false,
+          "explanation": "That would be '%S%', with a wildcard on both sides. 'S%' is anchored to the start of the string."
+        },
+        {
+          "text": "Last names that are exactly one character long.",
+          "correct": false,
+          "explanation": "The single-character wildcard is _, not %. 'S%' matches any length as long as it starts with S."
+        }
+      ]
+    },
+    {
+      "question": "Your query ends `ORDER BY salary DESC LIMIT 3` and runs fine in this course's IDE. Why might it be marked wrong on the CNIT 27200 exam?",
+      "options": [
+        {
+          "text": "The exam is written against Oracle, which has no `LIMIT` — it uses `FETCH FIRST 3 ROWS ONLY` (or `ROWNUM`) instead.",
+          "correct": true,
+          "explanation": "Correct. LIMIT is MySQL/SQLite syntax. Oracle spells the same idea FETCH FIRST 3 ROWS ONLY or filters on ROWNUM, so LIMIT is a wrong-dialect slip on an Oracle exam."
+        },
+        {
+          "text": "`LIMIT` must always come before `ORDER BY`.",
+          "correct": false,
+          "explanation": "The ordering here is correct — LIMIT follows ORDER BY. The issue is purely which dialect the exam expects, not clause order."
+        },
+        {
+          "text": "Oracle spells it `TOP 3`.",
+          "correct": false,
+          "explanation": "TOP 3 is SQL Server's syntax. Oracle uses FETCH FIRST or ROWNUM — three databases, three different answers to the same question."
+        },
+        {
+          "text": "`LIMIT` can't be combined with `ORDER BY` in any database.",
+          "correct": false,
+          "explanation": "LIMIT and ORDER BY are combined constantly — that's exactly how you get 'the top n'. The problem is only that Oracle doesn't use the LIMIT keyword."
+        }
+      ]
+    }
+  ]
+}

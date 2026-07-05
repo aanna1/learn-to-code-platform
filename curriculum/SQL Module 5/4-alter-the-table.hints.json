@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "You need one ALTER TABLE per new column, so add a second statement below the gpa one.",
+    "Model the email line on the gpa line: ALTER TABLE student ADD COLUMN email TEXT;",
+    "Each statement ends in a semicolon, and the column type for email is TEXT."
+  ]
+}

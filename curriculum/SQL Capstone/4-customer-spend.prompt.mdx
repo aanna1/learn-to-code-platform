@@ -1,0 +1,11 @@
+**Stage 5 — Query it.** The schema is built and loaded; now answer the questions Inkwell actually asked. First: **how much has each customer spent?**
+
+Revenue lives in three tables at once — who ordered (`book_order`), what was on the order (`order_line`), and what each book costs (`book`) — so this is a three-join chain feeding an aggregate. The starter joins all three but sums the wrong thing: it counts *books* (`SUM(ol.quantity)`) instead of *money*. Fix it to total `price × quantity`, biggest spender first. Press **Run**, then **Submit**.
+
+<Callout type="note">
+Leo placed no orders, so he's absent — an inner `JOIN` drops customers with no matching orders, which is correct here ("spent" implies at least one purchase). If the shop wanted *every* customer including the zeros, that'd be a `LEFT JOIN` from `customer` with `COALESCE(SUM(...), 0)` — the inner-vs-outer decision from Module 08. You'll use the outer form in the revenue-by-author exercise.
+</Callout>
+
+<Callout type="tip">
+Every non-aggregated column in the `SELECT` must appear in `GROUP BY` — group by `customer_id` plus both name columns so it runs on the exam's Oracle engine too, not just SQLite.
+</Callout>

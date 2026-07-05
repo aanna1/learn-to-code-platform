@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "For celsius_to_fahrenheit, the formula is: return c * 9/5 + 32. For fahrenheit_to_celsius: return (f - 32) * 5/9. Python's / always produces a float.",
+    "Write main() so it calls both functions: print(celsius_to_fahrenheit(0)) and print(fahrenheit_to_celsius(32)) are enough.",
+    "The guard goes at the very bottom of the file, outside any function: if __name__ == \"__main__\": followed by an indented main()",
+    "Check your indentation — the if __name__ == \"__main__\": line must be at column 0 (no indent), and main() inside it must be indented by one level."
+  ]
+}

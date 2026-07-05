@@ -1,0 +1,27 @@
+[
+  {
+    "name": "keeps only the three employees whose id appears in branch.mgr_id",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name", "last_name"],
+      "rows": [
+        ["Jan", "Levinson"],
+        ["Michael", "Scott"],
+        ["Andy", "Bernard"]
+      ]
+    }
+  },
+  {
+    "name": "follows the data when a branch changes managers (not a hardcoded id list)",
+    "setup": "UPDATE branch SET mgr_id = 103 WHERE branch_id = 3;",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["first_name", "last_name"],
+      "rows": [
+        ["Jan", "Levinson"],
+        ["Michael", "Scott"],
+        ["Jim", "Halpert"]
+      ]
+    }
+  }
+]

@@ -1,0 +1,51 @@
+# Magic 8-Ball
+
+A Magic 8-Ball is a fortune-telling toy that answers yes/no questions with one of twenty responses. Your job is to build one using `random.choice`.
+
+## Your task
+
+Write a function `ask(question)` that ignores the question entirely (just like a real Magic 8-Ball) and returns a random response from this list:
+
+```python
+RESPONSES = [
+    "It is certain.",
+    "It is decidedly so.",
+    "Without a doubt.",
+    "Yes, definitely.",
+    "You may rely on it.",
+    "As I see it, yes.",
+    "Most likely.",
+    "Outlook good.",
+    "Yes.",
+    "Signs point to yes.",
+    "Reply hazy, try again.",
+    "Ask again later.",
+    "Better not tell you now.",
+    "Cannot predict now.",
+    "Concentrate and ask again.",
+    "Don't count on it.",
+    "My reply is no.",
+    "My sources say no.",
+    "Outlook not so good.",
+    "Very doubtful.",
+]
+```
+
+Then write a function `positive(question)` that returns `True` if `ask(question)` returns a response from the first ten (the "yes" ones), and `False` otherwise.
+
+## Examples
+
+```python
+response = ask("Will it rain tomorrow?")
+print(response)      # one of the 20 responses — random each run
+
+result = positive("Am I lucky?")
+print(result)        # True or False — random each run
+```
+
+## Requirements
+
+- `RESPONSES` must be defined exactly as shown above.
+- `ask(question)` uses `random.choice` on `RESPONSES`. It returns a string.
+- `positive(question)` calls `ask(question)` and returns `True` if the response is in `RESPONSES[:10]`, `False` otherwise.
+- Both functions must work with any string argument (it's ignored).

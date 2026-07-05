@@ -1,0 +1,9 @@
+{
+  "id": "checkpoint-a-design-and-normalize",
+  "title": "Checkpoint A — Design & Normalize",
+  "description": "A two-part checkpoint that ties Modules 02–05 together: read a messy, redundant spreadsheet, model it as an entity-relationship diagram, then build the normalized 3NF schema as real CREATE TABLE statements with keys and foreign keys. Comes after Module 05 (DDL), which it relies on for Part 2.",
+  "lessons": [
+    { "id": "design-the-erd", "title": "Part 1 — Design the ERD", "type": "modeling", "order": 1 },
+    { "id": "build-the-3nf-schema", "title": "Part 2 — Build the 3NF Schema", "type": "exercise", "order": 2 }
+  ]
+}

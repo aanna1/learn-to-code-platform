@@ -1,0 +1,7 @@
+Which employees are branch managers? The manager IDs live in `branch.mgr_id`; the names live in `employee`. Rather than reading the IDs off by hand, let a subquery return the whole column and test each employee's `employee_id` against it.
+
+Filter the `employee` table with `IN (SELECT ...)`, order by `employee_id`, then press **Run** and **Submit**.
+
+<Callout type="tip">
+`IN` shrugs off `NULL`s in the subquery's result — Buffalo has no manager (`mgr_id` is `NULL`), but that harmlessly matches no one. (Its evil twin `NOT IN` is a different story, which you'll meet in the next exercise.)
+</Callout>

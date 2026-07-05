@@ -1,0 +1,38 @@
+[
+  {
+    "name": "the view exposes the four safe columns and no salary",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["employee_id", "first_name", "last_name", "branch_id"],
+      "rows": [
+        [100, "Jan", "Levinson", 1],
+        [101, "Michael", "Scott", 2],
+        [102, "Dwight", "Schrute", 2],
+        [103, "Jim", "Halpert", 2],
+        [104, "Pam", "Beesly", 2],
+        [105, "Andy", "Bernard", 3],
+        [106, "Stanley", "Hudson", 2],
+        [107, "Ryan", "Howard", null]
+      ]
+    }
+  },
+  {
+    "name": "a newly hired employee appears through the view -- but still without salary",
+    "setup": "INSERT INTO employee (employee_id, first_name, last_name, branch_id, salary) VALUES (108, 'Kelly', 'Kapoor', 2, 47000);",
+    "orderMatters": true,
+    "expected": {
+      "columns": ["employee_id", "first_name", "last_name", "branch_id"],
+      "rows": [
+        [100, "Jan", "Levinson", 1],
+        [101, "Michael", "Scott", 2],
+        [102, "Dwight", "Schrute", 2],
+        [103, "Jim", "Halpert", 2],
+        [104, "Pam", "Beesly", 2],
+        [105, "Andy", "Bernard", 3],
+        [106, "Stanley", "Hudson", 2],
+        [107, "Ryan", "Howard", null],
+        [108, "Kelly", "Kapoor", 2]
+      ]
+    }
+  }
+]

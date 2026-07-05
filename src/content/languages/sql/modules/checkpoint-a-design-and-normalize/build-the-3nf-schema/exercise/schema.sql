@@ -1,0 +1,4 @@
+-- No tables are pre-created for this checkpoint — building them is the exercise.
+-- Write your CREATE TABLE statements in the editor below, then press Run to
+-- create them and Submit to check the schema. (This fixture block is empty on
+-- purpose.)

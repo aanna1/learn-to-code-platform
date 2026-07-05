@@ -1,0 +1,15 @@
+The lecture's most-tested idea was the **identifying** relationship: `assignment` can't be identified without its parents, because its primary key is the **composite** `(employee_id, project_id)` — it takes *both* columns together to pin down one row. This exercise makes that concrete by putting just those two key columns on the grid.
+
+The starter query grabs everything with `*`. That's more than the question asks for — and, as in Module 01, pulling only the columns you actually need is the everyday form of a real security habit (least data).
+
+## Your task
+
+Change the query so the results grid shows **only** `employee_id` and `project_id` — the two columns that together make up the identifying composite key — and nothing else.
+
+Then look down each column on its own: `employee_id` 101 appears twice, and `project_id` 1 appears twice. Neither column is unique by itself — only the *pair* is. That's exactly why the relationship is identifying: strip away either parent and the row has no identity left.
+
+Press **Run** to see the grid, then **Submit** to check it.
+
+<Callout type="tip">
+Instead of `*`, list the two columns you want, separated by a comma: `SELECT employee_id, project_id FROM assignment;`.
+</Callout>

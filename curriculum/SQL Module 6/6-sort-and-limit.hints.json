@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The ORDER BY salary DESC part is already correct — you just need to cap how many rows come back.",
+    "LIMIT n keeps the first n rows after sorting.",
+    "Add LIMIT 3 to the end: SELECT first_name, salary FROM employee ORDER BY salary DESC LIMIT 3;"
+  ]
+}

@@ -1,0 +1,7 @@
+This `employee` table has a `supervisor_id` column — the `employee_id` of that person's boss. There's no second table for supervisors; the relationship you need lives *inside this one table*.
+
+Write a query that lists each employee's name next to their supervisor's name, ordered by `employee_id`. The starter joins the table to itself but with the wrong condition — every row comes out matched to itself. Fix the `ON` clause so `s` plays the role of "the supervisor," not "the same person."
+
+<Callout type="tip">
+A self-join needs two aliases for the one table (`e` and `s` here) so you can refer to "this employee's row" and "the supervisor's row" separately. The match should follow `supervisor_id` on one side to `employee_id` on the other — not `employee_id` to `employee_id`.
+</Callout>

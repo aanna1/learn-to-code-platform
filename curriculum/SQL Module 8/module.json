@@ -1,0 +1,13 @@
+{
+  "id": "08-joins",
+  "title": "Joins",
+  "description": "Combining rows from two or more tables: INNER JOIN, table aliases, equijoins vs. non-equijoins, NATURAL JOIN, the three outer joins (LEFT/RIGHT/FULL), self-joins, and UNION/UNION ALL. The single most heavily tested topic on the CNIT 27200 test-out exam.",
+  "order": 9,
+  "lessons": [
+    { "id": "lecture", "title": "Joins", "type": "lecture", "order": 1 },
+    { "id": "ex-inner-join-employees-and-branches", "title": "Inner Join Employees and Branches", "type": "exercise", "order": 2 },
+    { "id": "ex-left-join-find-the-unassigned", "title": "Left Join: Find the Unassigned", "type": "exercise", "order": 3 },
+    { "id": "ex-self-join-supervisors", "title": "Self-Join: Supervisors", "type": "exercise", "order": 4 },
+    { "id": "ex-union-branch-ids", "title": "UNION: Every Branch ID", "type": "exercise", "order": 5 }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "questions": [
+    {
+      "question": "The user types \"abc\" when your code does `int(input(\"Number: \"))`. Which exception is raised?",
+      "options": [
+        { "text": "ValueError",       "correct": true,  "explanation": "Right. `int()` raises `ValueError` when the string can't be parsed as an integer. This is the exception to catch in an input-validation loop." },
+        { "text": "TypeError",        "correct": false, "explanation": "`TypeError` fires when you use the wrong *type* entirely — like `\"3\" + 5`. Here the type is correct (it's a string going into `int()`), but the value can't be converted." },
+        { "text": "NameError",        "correct": false, "explanation": "`NameError` means you used a variable that was never assigned — for example, trying to print `score` after a failed `try` block left it undefined. That's a separate bug you need to avoid." },
+        { "text": "KeyboardInterrupt","correct": false, "explanation": "`KeyboardInterrupt` is what Python raises when the user presses Ctrl+C. It's not triggered by bad string input, and it's exactly the kind of exception a bare `except:` accidentally swallows." }
+      ]
+    },
+    {
+      "question": "What is wrong with this code?\n\n```python\ntry:\n    result = risky_operation()\nexcept:\n    print(\"Something went wrong.\")\n```",
+      "options": [
+        { "text": "The bare `except:` catches every exception, including KeyboardInterrupt and your own bugs like NameError", "correct": true, "explanation": "Exactly. A bare `except:` is a catch-all — it swallows Ctrl+C, typos in variable names, missing imports, and everything else. Always name a specific exception class." },
+        { "text": "You can't use `print()` inside an `except` block", "correct": false, "explanation": "You can use any statement you like inside an `except` block, including `print()`. The problem here is the unspecified exception type, not the print call." },
+        { "text": "The `try` block should end with `break`", "correct": false, "explanation": "`break` is only needed inside a loop. A `try` block outside a loop doesn't need it — control falls through to the code after the `try`/`except` once the block finishes." },
+        { "text": "Nothing — this is correct Python", "correct": false, "explanation": "It runs, but it's a common mistake. The bare `except:` catches everything, including exceptions you have no intention of handling like `KeyboardInterrupt`. Prefer `except SpecificError:`." }
+      ]
+    },
+    {
+      "question": "You want code that only runs when `try` succeeds, and you want errors during *that* code to propagate unhandled rather than being caught by your `except` clause. Which construct do you use?",
+      "options": [
+        { "text": "`else`",    "correct": true,  "explanation": "The `else` block runs only when `try` completes without raising. Crucially, exceptions inside `else` are *not* caught by the preceding `except` clauses, so bugs there propagate normally." },
+        { "text": "`finally`", "correct": false, "explanation": "`finally` runs *always* — whether or not an exception occurred. It's the right place for cleanup (closing a file, releasing a connection), not for success-only logic." },
+        { "text": "Put it at the end of the `try` block", "correct": false, "explanation": "Code at the end of `try` is still inside the guarded block. If it raises, the `except` clause will catch it, which may be incorrect if the exception is unrelated to what you were guarding." },
+        { "text": "Put it after the `except` block", "correct": false, "explanation": "Code after the `except` block also runs when no exception was raised, but it runs after the `except` handler too. Unlike `else`, it doesn't distinguish between the success path and the error path." }
+      ]
+    }
+  ]
+}

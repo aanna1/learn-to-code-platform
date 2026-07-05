@@ -1,0 +1,26 @@
+{
+  "id": "02-relational-model-and-keys",
+  "title": "The Relational Model & Keys",
+  "description": "Rows and columns, precisely; the primary key that makes every row unique; surrogate vs. natural keys; and the foreign key — the mechanism that actually makes a database relational, including a table that links to itself.",
+  "order": 2,
+  "lessons": [
+    {
+      "id": "lecture",
+      "title": "The Relational Model & Keys",
+      "type": "lecture",
+      "order": 1
+    },
+    {
+      "id": "ex-name-the-primary-key",
+      "title": "Name the Primary Key",
+      "type": "exercise",
+      "order": 2
+    },
+    {
+      "id": "ex-follow-the-foreign-key",
+      "title": "Follow the Foreign Key",
+      "type": "exercise",
+      "order": 3
+    }
+  ]
+}

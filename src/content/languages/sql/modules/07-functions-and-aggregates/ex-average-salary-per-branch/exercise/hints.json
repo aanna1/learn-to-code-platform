@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "GROUP BY splits the rows into buckets that share a value, then computes each aggregate once per bucket instead of once for the whole table.",
+    "Select branch_id (the column you're grouping by) alongside COUNT(*) and AVG(salary), then add GROUP BY branch_id at the end.",
+    "SELECT branch_id, COUNT(*) AS headcount, AVG(salary) AS avg_salary FROM employee GROUP BY branch_id;"
+  ]
+}

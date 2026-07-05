@@ -1,0 +1,79 @@
+{
+  "questions": [
+    {
+      "question": "What does this print?\n\nfrom abc import ABC, abstractmethod\n\nclass Shape(ABC):\n    @abstractmethod\n    def area(self) -> float: ...\n\nclass Circle(Shape):\n    pass\n\ntry:\n    c = Circle()\nexcept Exception as e:\n    print(type(e).__name__)",
+      "options": [
+        {
+          "text": "TypeError",
+          "correct": true,
+          "explanation": "Correct. Python raises TypeError when you try to instantiate an abstract class that hasn't implemented all its abstract methods. The error fires at instantiation time — not when the class is defined, and not when area() is called. That's the key advantage of ABCs over raising NotImplementedError manually."
+        },
+        {
+          "text": "NotImplementedError",
+          "correct": false,
+          "explanation": "NotImplementedError is what you'd raise manually inside a base-class method to signal 'subclasses must implement this.' ABCs don't raise NotImplementedError — they raise TypeError at instantiation time, before any method is ever called. That's the whole point: the error happens earlier."
+        },
+        {
+          "text": "Nothing — Circle() succeeds because it doesn't call area().",
+          "correct": false,
+          "explanation": "ABCs check for missing abstract methods at instantiation, not at call time. Even if you never call area(), creating a Circle() raises TypeError immediately. This is what separates ABCs from the pattern of raising NotImplementedError in the body — which only fires when the method is actually invoked."
+        },
+        {
+          "text": "AttributeError",
+          "correct": false,
+          "explanation": "AttributeError happens when you access an attribute that doesn't exist on an object. That's not what's happening here. Python detects the missing abstract method at the class level before any attribute access, and raises TypeError."
+        }
+      ]
+    },
+    {
+      "question": "Which statement about Protocol is true?\n\nfrom typing import Protocol\n\nclass Drawable(Protocol):\n    def draw(self) -> None: ...\n\nclass Canvas:\n    def draw(self) -> None:\n        print('drawing')\n\ndef render(obj: Drawable) -> None:\n    obj.draw()\n\nrender(Canvas())",
+      "options": [
+        {
+          "text": "This works. Canvas satisfies Drawable without inheriting from it.",
+          "correct": true,
+          "explanation": "Correct. Protocol is structural: a class satisfies the protocol if it has the right methods, regardless of inheritance. Canvas has a draw() method that matches the signature in Drawable, so it works. Canvas doesn't need to know Drawable exists. This is duck typing that a static type checker like mypy can actually verify."
+        },
+        {
+          "text": "This raises TypeError at runtime because Canvas doesn't inherit from Drawable.",
+          "correct": false,
+          "explanation": "Protocols don't enforce inheritance at runtime. At runtime, Python just calls obj.draw() — the Protocol annotation is only used by static type checkers like mypy. The code runs fine regardless of whether Canvas inherits from Drawable."
+        },
+        {
+          "text": "Canvas must explicitly register itself with Drawable using Drawable.register(Canvas).",
+          "correct": false,
+          "explanation": "register() is a method on ABCMeta (abstract base classes), not on Protocol. Protocols are purely structural — no registration step is needed or possible. A class satisfies a Protocol just by having the right methods."
+        },
+        {
+          "text": "This only works if Canvas inherits from Drawable or object.",
+          "correct": false,
+          "explanation": "Everything inherits from object, so that clause is always true and meaningless. The real point is that Canvas doesn't need to inherit from Drawable at all. Protocol is structural, not nominal. The class just needs the right methods."
+        }
+      ]
+    },
+    {
+      "question": "What does this print?\n\nclass A:\n    def greet(self):\n        print('A')\n\nclass B(A):\n    def greet(self):\n        print('B')\n        super().greet()\n\nclass C(A):\n    def greet(self):\n        print('C')\n        super().greet()\n\nclass D(B, C):\n    def greet(self):\n        print('D')\n        super().greet()\n\nD().greet()",
+      "options": [
+        {
+          "text": "D\nB\nC\nA",
+          "correct": true,
+          "explanation": "Correct. Python uses C3 linearization to compute the MRO: D → B → C → A → object. super() in each class walks to the next class in that MRO — not necessarily the immediate parent. So B's super() resolves to C (not A), because C is next in D's MRO. Each class appears exactly once. This is the property that makes the mixin pattern work."
+        },
+        {
+          "text": "D\nB\nA",
+          "correct": false,
+          "explanation": "This is the intuitive answer if you think super() always means 'my direct parent.' But super() is context-dependent: it walks the MRO of the actual instance's class, not the class where super() is written. From B, in the context of a D instance, the next class is C — not A."
+        },
+        {
+          "text": "D\nB\nA\nC\nA",
+          "correct": false,
+          "explanation": "If super() simply called each parent independently, A would appear twice (once from B and once from C). The MRO prevents this. C3 linearization ensures every class appears at most once, in a consistent order. A appears once, after C."
+        },
+        {
+          "text": "D\nC\nB\nA",
+          "correct": false,
+          "explanation": "The MRO follows the order of the base classes in the class definition: D(B, C). B comes before C, so B is visited before C. The MRO is D → B → C → A, not D → C → B → A."
+        }
+      ]
+    }
+  ]
+}

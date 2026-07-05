@@ -1,0 +1,31 @@
+# Days Until
+
+Computers are bad at dates if you let them do string math. Python's `datetime.date` handles the calendar correctly so you don't have to.
+
+## Your task
+
+Write two functions using `from datetime import date`.
+
+**`days_between(year, month, day)`** — return the number of days from today until the given date. The result is a positive integer when the date is in the future, negative when it's in the past, and zero when it's today.
+
+**`is_future(year, month, day)`** — return `True` if the given date is strictly in the future (not today, not in the past), `False` otherwise.
+
+## Examples
+
+```python
+# Assuming today is 2026-05-30
+days_between(2026, 6, 30)   # 31  (one month away)
+days_between(2026, 5, 1)    # -29 (last month)
+days_between(2026, 5, 30)   # 0   (today)
+
+is_future(2026, 6, 30)      # True
+is_future(2026, 5, 1)       # False
+is_future(2026, 5, 30)      # False (today is not "future")
+```
+
+## Requirements
+
+- Use `date.today()` to get today's date inside each function — don't compute it at import time.
+- `days_between` returns an `int` (the `.days` attribute of a `timedelta`).
+- `is_future` returns a `bool`.
+- Do not compute the difference by subtracting year/month/day values separately. Use `date` arithmetic.

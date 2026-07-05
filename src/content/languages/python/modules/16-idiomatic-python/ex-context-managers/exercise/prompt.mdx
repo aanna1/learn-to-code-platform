@@ -1,0 +1,43 @@
+# Context managers
+
+A context manager is any object that works with `with`. It runs setup code on entry and teardown code on exit — even when the body raises an exception. This exercise has two parts.
+
+## Part 1: `timed` — measuring elapsed time
+
+Implement `timed(label)` as a context manager using `@contextmanager`. It should:
+
+- Print nothing on entry.
+- On exit, print `"{label}: {elapsed:.4f}s"` where `elapsed` is the wall-clock duration.
+- Use `time.monotonic()` for the measurement (it never jumps backward).
+
+```python
+with timed("my block"):
+    total = sum(range(1_000_000))
+
+# prints something like: my block: 0.0412s
+```
+
+## Part 2: `managed_list` — a class-based context manager
+
+Implement `managed_list` as a class with `__enter__` and `__exit__`. It should:
+
+- Hold an internal list, `self.items`, initialized to an empty list.
+- On `__enter__`, return `self` (so `as ml` gives access to the object).
+- On `__exit__`, sort `self.items` in place.
+- Always sort on exit, whether or not an exception occurred inside the block.
+
+```python
+with managed_list() as ml:
+    ml.items.append(3)
+    ml.items.append(1)
+    ml.items.append(2)
+
+print(ml.items)   # [1, 2, 3]
+```
+
+## Requirements
+
+- `timed` must use the `@contextmanager` decorator from `contextlib`.
+- `timed` must measure duration with `time.monotonic()`.
+- `managed_list.__exit__` must sort `self.items` even if the `with` body raises an exception.
+- `managed_list.__exit__` must not suppress exceptions (return `None` or `False`).

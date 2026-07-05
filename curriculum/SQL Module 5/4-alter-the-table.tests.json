@@ -1,0 +1,11 @@
+[
+  {
+    "name": "student now has all five columns: email, gpa, major, name, student_id",
+    "orderMatters": true,
+    "probe": "SELECT name FROM pragma_table_info('student') ORDER BY name;",
+    "expected": {
+      "columns": ["name"],
+      "rows": [["email"], ["gpa"], ["major"], ["name"], ["student_id"]]
+    }
+  }
+]

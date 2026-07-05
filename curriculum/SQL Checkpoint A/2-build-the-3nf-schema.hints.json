@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "Build the four tables from your Part 1 ERD: student, department, course, and the associative entity enrollment.",
+    "course needs the foreign key you left out: FOREIGN KEY (dept_id) REFERENCES department(dept_id).",
+    "enrollment's key isn't student_id alone — it's the composite of both columns: PRIMARY KEY (student_id, course_id).",
+    "enrollment also needs two foreign keys: FOREIGN KEY (student_id) REFERENCES student(student_id) and FOREIGN KEY (course_id) REFERENCES course(course_id)."
+  ]
+}

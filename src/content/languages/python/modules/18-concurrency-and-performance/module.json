@@ -1,0 +1,37 @@
+{
+  "id": "18-concurrency-and-performance",
+  "title": "Concurrency & Performance",
+  "description": "The GIL, ThreadPoolExecutor, ProcessPoolExecutor, async/await, and profiling \u2014 how to pick the right concurrency model and measure before optimizing.",
+  "lessons": [
+    {
+      "id": "lecture",
+      "title": "Concurrency & Performance",
+      "type": "lecture",
+      "order": 1
+    },
+    {
+      "id": "ex-thread-pool",
+      "title": "Thread Pool I/O Work",
+      "type": "exercise",
+      "order": 2
+    },
+    {
+      "id": "ex-process-pool",
+      "title": "Process Pool CPU Work",
+      "type": "exercise",
+      "order": 3
+    },
+    {
+      "id": "ex-asyncio",
+      "title": "Async/Await and Gather",
+      "type": "exercise",
+      "order": 4
+    },
+    {
+      "id": "ex-profiling",
+      "title": "Profile and Optimise",
+      "type": "exercise",
+      "order": 5
+    }
+  ]
+}

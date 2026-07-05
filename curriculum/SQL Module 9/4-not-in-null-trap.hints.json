@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "Run the starter as-is: zero rows. That's the famous NOT IN NULL trap, not a mistake in your logic. branch.mgr_id includes a NULL (Buffalo), and any comparison to NULL is UNKNOWN — so NOT IN is never true for anybody.",
+    "The fix is to stop the subquery from ever returning a NULL. Add a WHERE clause inside the parentheses: SELECT mgr_id FROM branch WHERE mgr_id IS NOT NULL.",
+    "Full shape: SELECT first_name FROM employee WHERE employee_id NOT IN (SELECT mgr_id FROM branch WHERE mgr_id IS NOT NULL) ORDER BY employee_id; The rule to burn in: IN shrugs off NULLs, but NOT IN breaks on them."
+  ]
+}

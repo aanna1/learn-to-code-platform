@@ -1,0 +1,39 @@
+# Grade Average
+
+`csv.DictReader` is the right tool any time a CSV has a header row. Each row arrives as a dictionary, so you can reference columns by name instead of counting positions.
+
+## Your task
+
+Write two functions that work with a CSV file that has `name` and `score` columns:
+
+**`load_grades(filepath)`** — reads the CSV with `csv.DictReader` and returns a list of dictionaries, one per student. Each dictionary should have the `name` as a string and `score` as an **integer** (not a string).
+
+**`average_score(filepath)`** — returns the average score across all students as a **float**, rounded to one decimal place. If the file has no students, return `0.0`.
+
+## Requirements
+
+- Use `csv.DictReader` (not `csv.reader` or manual splitting).
+- Cast each `score` to `int` before storing it.
+- `average_score` should round its result to one decimal place with `round(..., 1)`.
+- Return `0.0` (not an error) when the file is empty.
+
+## Example
+
+If `grades.csv` contains:
+
+```
+name,score
+Alice,92
+Bob,77
+Carol,88
+```
+
+Then:
+
+```python
+load_grades("grades.csv")
+# [{"name": "Alice", "score": 92}, {"name": "Bob", "score": 77}, {"name": "Carol", "score": 88}]
+
+average_score("grades.csv")
+# 85.7
+```

@@ -1,0 +1,7 @@
+[
+  "Each test function gets a fresh cart from make_cart() — call it at the top of every test.",
+  "For test_add_item: cart.add('apple', 1.50) then assert cart.total() == 1.50.",
+  "For test_add_multiple_items: add two items, then assert total() equals their sum (e.g. 1.50 + 0.75 == 2.25).",
+  "For test_remove_item: add two items, remove one with cart.remove(), then assert cart.count() == 1.",
+  "For tests that expect an exception: wrap the call in try/except, and add `assert False, 'should have raised'` after the call so the test fails if no exception is thrown."
+]

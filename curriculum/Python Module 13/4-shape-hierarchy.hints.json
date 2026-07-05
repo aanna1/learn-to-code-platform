@@ -1,0 +1,7 @@
+[
+  "`area` and `perimeter` just do the math and return it: `return self.width * self.height` and `return 2 * (self.width + self.height)`.",
+  "`is_square` returns a boolean: `return self.width == self.height`.",
+  "For `Rectangle.__str__`, use an f-string: `f\"Rectangle({self.width} x {self.height})\"`.",
+  "`Square.__init__` only needs one line: `super().__init__(side, side)`. This calls `Rectangle.__init__` and sets both `width` and `height` to `side`.",
+  "For `Square.__str__`, use `f\"Square({self.width})\"` — `self.width` works because `super().__init__` already set it."
+]

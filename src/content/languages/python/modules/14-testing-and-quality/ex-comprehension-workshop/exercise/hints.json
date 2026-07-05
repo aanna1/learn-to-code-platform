@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "All three functions share the same shape: return [<expression> for <item> in <iterable> if <condition>]. The 'if' part is optional — word_lengths doesn't need one.",
+    "For squares_of_evens: filter with 'if n % 2 == 0', then square with 'n ** 2'. Full form: [n ** 2 for n in numbers if n % 2 == 0]",
+    "For word_lengths, you only need the expression part — no filter: [len(w) for w in words]",
+    "For long_words, filter by length: [w for w in words if len(w) >= min_len]. Note it's >= (greater than or equal), not just >."
+  ]
+}

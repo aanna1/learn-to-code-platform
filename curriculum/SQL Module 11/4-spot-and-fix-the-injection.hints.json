@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "The flaw is never in SQL itself — it's in how application code BUILDS the query. Ask what happens when the input stops being a value and becomes part of the code.",
+    "For the bypass, you need a condition that's always true PLUS a way to throw away the AND password check. Only one payload does both. AND-based payloads can't help — a false username AND-ed with anything is still false.",
+    "For the fix, remember the module's core claim: escaping and blocklists are supplements you can get wrong; only sending the query and the data separately (a parameterized query) removes the hole categorically. So exactly one option belongs in the answer set."
+  ]
+}

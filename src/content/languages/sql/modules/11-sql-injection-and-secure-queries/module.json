@@ -1,0 +1,12 @@
+{
+  "id": "11-sql-injection-and-secure-queries",
+  "title": "SQL Injection & Secure Query Practices",
+  "description": "The other side of the keyboard: how an attacker rewrites your query when user input is concatenated into it. Authentication bypass with ' OR '1'='1' --, UNION-based exfiltration through a search box, injected writes and blind injection. Then the one categorical fix — parameterized queries — plus defense in depth: allowlist validation for identifiers, least privilege, and safe error handling.",
+  "lessons": [
+    { "id": "lecture", "title": "SQL Injection & Secure Query Practices", "type": "lecture", "order": 1 },
+    { "id": "ex-witness-the-breach", "title": "Witness the Breach: Bypass a Login", "type": "exercise", "order": 2 },
+    { "id": "ex-union-exfiltration", "title": "UNION Exfiltration: Steal the Credentials", "type": "exercise", "order": 3 },
+    { "id": "spot-and-fix-the-injection", "title": "Spot and Fix the Injection", "type": "modeling", "order": 4 },
+    { "id": "defense-in-depth", "title": "Defense in Depth", "type": "modeling", "order": 5 }
+  ]
+}

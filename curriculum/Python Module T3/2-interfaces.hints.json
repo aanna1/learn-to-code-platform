@@ -1,0 +1,7 @@
+[
+  "For Storage: inherit from ABC and decorate read() and write() with @abstractmethod. The exists() method is a regular method — don't mark it abstract.",
+  "For exists(): wrap self.read(key) in a try/except KeyError. Return True if read succeeds, False if it raises KeyError.",
+  "For MemoryStorage: keep a dict in __init__ as self._data. In read(), return self._data[key] (which raises KeyError automatically if the key is missing). In write(), assign self._data[key] = value.",
+  "For save_all(): use enumerate(items) to get both the index i and the item. Call item.to_bytes() and pass the result to store.write(f'item_{i}', ...).",
+  "For Message.to_bytes(): return self.text.encode() — this gives you a bytes object from a string."
+]

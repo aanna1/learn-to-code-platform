@@ -21,6 +21,38 @@ if (typeof window === 'undefined') {
         }
     });
 
+    // --- Custom addition (not part of stock coi-serviceworker) ---
+    // Cache the large, effectively-immutable browser runtime engines served from
+    // jsDelivr — Pyodide + Monaco (Python), Ruff (linting), and sql.js (the
+    // SQLite-WASM engine behind the SQL course) — so they load from disk after the
+    // first visit instead of being re-fetched on every lesson. Version-pinned CDN
+    // URLs never change under a given URL, so a plain cache-first strategy is safe.
+    // Everything else keeps the stock passthrough + header-rewrite behavior.
+    const RUNTIME_CDN_CACHE = "runtime-cdn-v1";
+    const isRuntimeCdnAsset = (url) => url.startsWith("https://cdn.jsdelivr.net/");
+
+    // The stock coi behavior: re-stamp a response with the COOP/COEP/CORP headers
+    // that let cross-origin assets load under our cross-origin-isolation policy.
+    const withCoiHeaders = (response) => {
+        if (response.status === 0) {
+            return response;
+        }
+        const newHeaders = new Headers(response.headers);
+        newHeaders.set("Cross-Origin-Embedder-Policy",
+            coepCredentialless ? "credentialless" : "require-corp"
+        );
+        if (!coepCredentialless) {
+            newHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
+        }
+        newHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
+
+        return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: newHeaders,
+        });
+    };
+
     self.addEventListener("fetch", function (event) {
         const r = event.request;
         if (r.cache === "only-if-cached" && r.mode !== "same-origin") {
@@ -32,28 +64,34 @@ if (typeof window === 'undefined') {
                 credentials: "omit",
             })
             : r;
+
+        // Cache-first for the runtime engines on jsDelivr (sql.js, Pyodide, Monaco,
+        // Ruff). The cached copy already carries the rewritten COOP/COEP/CORP headers.
+        if (r.method === "GET" && isRuntimeCdnAsset(r.url)) {
+            event.respondWith(
+                caches.open(RUNTIME_CDN_CACHE)
+                    .then((cache) =>
+                        cache.match(request).then((cached) => {
+                            if (cached) {
+                                return cached;
+                            }
+                            return fetch(request).then((response) => {
+                                const rewritten = withCoiHeaders(response);
+                                if (rewritten.status !== 0) {
+                                    cache.put(request, rewritten.clone());
+                                }
+                                return rewritten;
+                            });
+                        })
+                    )
+                    .catch((e) => console.error(e))
+            );
+            return;
+        }
+
         event.respondWith(
             fetch(request)
-                .then((response) => {
-                    if (response.status === 0) {
-                        return response;
-                    }
-
-                    const newHeaders = new Headers(response.headers);
-                    newHeaders.set("Cross-Origin-Embedder-Policy",
-                        coepCredentialless ? "credentialless" : "require-corp"
-                    );
-                    if (!coepCredentialless) {
-                        newHeaders.set("Cross-Origin-Resource-Policy", "cross-origin");
-                    }
-                    newHeaders.set("Cross-Origin-Opener-Policy", "same-origin");
-
-                    return new Response(response.body, {
-                        status: response.status,
-                        statusText: response.statusText,
-                        headers: newHeaders,
-                    });
-                })
+                .then(withCoiHeaders)
                 .catch((e) => console.error(e))
         );
     });

@@ -1,0 +1,8 @@
+{
+  "hints": [
+    "The pattern r\"ip=([\\d.]+).*?status=(\\d+)\" works: [\\d.]+ matches an IP address (digits and dots); .*? lazily skips the path field; \\d+ matches the status code. Two capture groups means findall returns a list of (ip, status) tuples.",
+    "Loop over the tuples from findall: for ip, status in LOG_PATTERN.findall(log_text). Then check if status.startswith('4') to filter for 4xx codes.",
+    "To count occurrences, use counts[ip] = counts.get(ip, 0) + 1. counts.get(ip, 0) returns the current count (or 0 if the IP hasn't been seen yet), and you add 1 to it.",
+    "If 10.0.0.5 is showing up in your results, you're not filtering by status code. Only add an IP to counts when the status starts with '4'."
+  ]
+}

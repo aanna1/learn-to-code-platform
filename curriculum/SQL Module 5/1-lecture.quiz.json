@@ -1,0 +1,104 @@
+{
+  "questions": [
+    {
+      "question": "A column is declared `NOT NULL` with no `DEFAULT`. What happens if you try to insert a row without providing a value for it?",
+      "options": [
+        {
+          "text": "The insert fails — `NOT NULL` with no default means a value is required every time.",
+          "correct": true,
+          "explanation": "Correct. NOT NULL is a standing rule enforced on every insert and update. With no DEFAULT to fall back on, a missing value has nothing valid to become, so the database rejects the whole row."
+        },
+        {
+          "text": "The column is set to an empty string automatically.",
+          "correct": false,
+          "explanation": "NOT NULL doesn't supply a fallback value on its own — that's what DEFAULT is for. An empty string is also not the same as NULL; NOT NULL simply rejects the row."
+        },
+        {
+          "text": "The column is set to `NULL` and a warning is logged.",
+          "correct": false,
+          "explanation": "NOT NULL rejects the insert outright; it doesn't quietly store NULL and warn. Storing NULL is exactly what the constraint exists to prevent."
+        },
+        {
+          "text": "The row is inserted and the column keeps the value from the previous row.",
+          "correct": false,
+          "explanation": "Databases never carry a value forward from another row. With no value and no default, a NOT NULL column has nothing to store, so the insert fails."
+        }
+      ]
+    },
+    {
+      "question": "What does a `FOREIGN KEY ... REFERENCES` constraint actually enforce?",
+      "options": [
+        {
+          "text": "That the column's value matches an existing primary key in the referenced table (or is `NULL`, if allowed) — referential integrity.",
+          "correct": true,
+          "explanation": "Correct. A foreign key guarantees the column can only hold values that already exist as a primary key in the referenced table, so it never points at nothing."
+        },
+        {
+          "text": "That the column's value is unique within its own table.",
+          "correct": false,
+          "explanation": "That's what a UNIQUE constraint does. A foreign key is about matching a value in another table, and many rows can legitimately share the same foreign key value."
+        },
+        {
+          "text": "That the two tables are physically stored next to each other on disk.",
+          "correct": false,
+          "explanation": "Foreign keys are a logical constraint on values, not a storage-layout detail. Where rows physically live is up to the engine, not the constraint."
+        },
+        {
+          "text": "That the referenced table can never be dropped while the constraint exists.",
+          "correct": false,
+          "explanation": "That's a possible side effect of some engines' referential rules, not what the constraint enforces on each row. What it enforces is that the column's value matches a real primary key in the referenced table."
+        }
+      ]
+    },
+    {
+      "question": "You write `student_id INT AUTO_INCREMENT PRIMARY KEY` on the CNIT 27200 test-out exam. What's the problem?",
+      "options": [
+        {
+          "text": "`AUTO_INCREMENT` is MySQL syntax; the exam is handwritten against Oracle, which uses `GENERATED ... AS IDENTITY` or a `SEQUENCE` instead.",
+          "correct": true,
+          "explanation": "Correct. All three dialects auto-assign the next key, but they spell it differently. AUTO_INCREMENT is MySQL's spelling; an Oracle-graded exam expects GENERATED ... AS IDENTITY or a SEQUENCE."
+        },
+        {
+          "text": "Nothing — `AUTO_INCREMENT` is universal ANSI SQL and works everywhere.",
+          "correct": false,
+          "explanation": "It's actually one of the least portable keywords across RDBMSs. MySQL uses AUTO_INCREMENT, SQLite uses AUTOINCREMENT, and Oracle uses neither."
+        },
+        {
+          "text": "`AUTO_INCREMENT` can't be combined with `PRIMARY KEY` in any dialect.",
+          "correct": false,
+          "explanation": "It can, in MySQL — that pairing is extremely common. The issue here is specifically which dialect the exam expects, not whether the two keywords combine."
+        },
+        {
+          "text": "Auto-generated keys aren't allowed on an exam; you must always type the integers yourself.",
+          "correct": false,
+          "explanation": "Auto-generated surrogate keys are a standard, expected technique. The problem is only the dialect keyword, not the idea of letting the database assign the key."
+        }
+      ]
+    },
+    {
+      "question": "Which statement about `DROP TABLE student;` is true?",
+      "options": [
+        {
+          "text": "It removes the table's structure and every row in it — the table no longer exists afterward.",
+          "correct": true,
+          "explanation": "Correct. DROP TABLE is a structural operation: the table and all its data are gone. To empty a table but keep its structure, you'd use a DML delete instead (Module 10)."
+        },
+        {
+          "text": "It empties the table's rows but keeps the column definitions.",
+          "correct": false,
+          "explanation": "That describes clearing data, which is a DML job. DROP TABLE removes the structure itself, not just the rows."
+        },
+        {
+          "text": "It prompts you to confirm before deleting anything.",
+          "correct": false,
+          "explanation": "Raw SQL has no confirmation prompt. DROP TABLE executes immediately, which is exactly why it's worth being careful with."
+        },
+        {
+          "text": "It only works if the table has no foreign keys pointing at it.",
+          "correct": false,
+          "explanation": "While some engines restrict dropping a referenced table, that's not what DROP TABLE means. Its job is to remove the table and all its data entirely."
+        }
+      ]
+    }
+  ]
+}

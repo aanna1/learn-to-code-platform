@@ -1,0 +1,7 @@
+{
+  "hints": [
+    "A ? placeholder is a slot for a VALUE. A column name is part of the query's structure, not a value — so it can't be parameterized, and the safe way to pick from user input is an allowlist of known-good names.",
+    "For the matching: exactly one defense removes the hole (the one that keeps input out of the code path). The others don't stop the attack — they shrink what a successful attack can reach or reveal.",
+    "Least privilege limits what a compromised query can touch; safe error handling stops leaked messages from mapping your schema; allowlist validation is the identifier answer from the first question."
+  ]
+}

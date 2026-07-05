@@ -1,0 +1,27 @@
+{
+  "fds": [
+    "student_id -> student_name, student_email",
+    "course_id -> course_title, dept_id",
+    "dept_id -> dept_name, dept_building",
+    "student_id, course_id -> grade"
+  ],
+  "erd": {
+    "entities": [
+      { "name": "student", "attributes": [{ "name": "student_id", "pk": true }] },
+      { "name": "department", "attributes": [{ "name": "dept_id", "pk": true }] },
+      { "name": "course", "attributes": [{ "name": "course_id", "pk": true }] },
+      {
+        "name": "enrollment",
+        "attributes": [
+          { "name": "student_id", "pk": true },
+          { "name": "course_id", "pk": true }
+        ]
+      }
+    ],
+    "relationships": [
+      { "from": "department", "to": "course", "cardinality": "1:N", "identifying": false },
+      { "from": "student", "to": "enrollment", "cardinality": "1:N", "identifying": true },
+      { "from": "course", "to": "enrollment", "cardinality": "1:N", "identifying": true }
+    ]
+  }
+}

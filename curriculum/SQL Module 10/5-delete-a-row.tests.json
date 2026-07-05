@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Ryan (107) is gone",
+    "probe": "SELECT COUNT(*) AS n FROM employee WHERE employee_id = 107;",
+    "orderMatters": true,
+    "expected": { "columns": ["n"], "rows": [[0]] }
+  },
+  {
+    "name": "the other seven employees are still there",
+    "probe": "SELECT COUNT(*) AS n FROM employee;",
+    "orderMatters": true,
+    "expected": { "columns": ["n"], "rows": [[7]] }
+  }
+]
