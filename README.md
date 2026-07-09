@@ -1,3 +1,7 @@
+#Disclaimer
+
+This entire project is vibe-coded just as a fun experiment and also potentially a resource should I ever want to code any of the languages I include within this website. At some point I'd also like to add a file with all my prompts as well as the specific ai and model I used just so that people can see how the website ended up the way it did.
+
 # Learn to Code
 
 A free, fully static website for teaching programming to complete beginners: in-depth
